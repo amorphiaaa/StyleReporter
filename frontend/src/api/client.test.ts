@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE_URL, createManualImport, getImport } from "./client";
+import { API_BASE_URL, createManualImport, getClient, getImport, listClients } from "./client";
 import type { ManualImportRequest } from "../types";
 
 describe("API client", () => {
@@ -56,5 +56,32 @@ describe("API client", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getImport("missing-import")).rejects.toThrow("Import was not found");
+  });
+
+  it("loads clients and a client detail", async () => {
+    const clients = [
+      {
+        id: "client-1",
+        email_normalized: "client@example.test",
+        display_name: "Synthetic Client",
+        submission_count: 1,
+      },
+    ];
+    const detail = {
+      id: "client-1",
+      email_normalized: "client@example.test",
+      display_name: "Synthetic Client",
+      submissions: [],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(clients), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(detail), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(listClients()).resolves.toEqual(clients);
+    await expect(getClient("client-1")).resolves.toEqual(detail);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, `${API_BASE_URL}/api/v1/clients`);
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/clients/client-1`);
   });
 });

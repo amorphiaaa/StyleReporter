@@ -54,3 +54,30 @@ export type ImportRunResponse = {
   started_at: string;
   completed_at: string | null;
 };
+
+export type ClientListItem = {
+  id: string;
+  email_normalized: string;
+  display_name: string | null;
+  submission_count: number;
+};
+
+export type ClientSubmission = {
+  id: string;
+  source_type: string;
+  spreadsheet_id: string;
+  sheet_name: string;
+  source_row_number: number;
+  source_row_hash: string;
+  questionnaire_version: string | null;
+  submitted_at: string | null;
+  imported_at: string | null;
+  raw_payload: Record<string, unknown>;
+};
+
+export type ClientDetail = {
+  id: string;
+  email_normalized: string;
+  display_name: string | null;
+  submissions: ClientSubmission[];
+};

@@ -14,6 +14,12 @@ class ClientRecord:
 
 
 @dataclass(frozen=True)
+class ClientSummary:
+    client: ClientRecord
+    submission_count: int
+
+
+@dataclass(frozen=True)
 class QuestionnaireSubmission:
     id: str
     client_id: str
@@ -25,6 +31,7 @@ class QuestionnaireSubmission:
     raw_payload: JsonObject
     questionnaire_version: str | None = None
     submitted_at: datetime | None = None
+    imported_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -90,6 +97,12 @@ class ConnectorStatus:
 
 
 class ClientRepository(Protocol):
+    async def list_summaries(self) -> Sequence[ClientSummary]:
+        ...
+
+    async def get_by_id(self, client_id: str) -> ClientRecord | None:
+        ...
+
     async def get_by_normalized_email(self, email: str) -> ClientRecord | None:
         ...
 
@@ -107,6 +120,9 @@ class SubmissionRepository(Protocol):
         ...
 
     async def save(self, submission: QuestionnaireSubmission) -> QuestionnaireSubmission:
+        ...
+
+    async def list_by_client_id(self, client_id: str) -> Sequence[QuestionnaireSubmission]:
         ...
 
 

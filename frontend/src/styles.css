@@ -364,6 +364,157 @@ textarea:focus {
   margin-top: 20px;
 }
 
+.loading-copy {
+  color: #766d66;
+}
+
+.table-card {
+  overflow-x: auto;
+  border: 1px solid #ded8cf;
+  border-radius: 16px;
+  background: #fbfaf7;
+}
+
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.client-table th,
+.client-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e8e0d7;
+  text-align: left;
+}
+
+.client-table th {
+  color: #8a7d73;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.client-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.secondary-cell {
+  color: #766d66;
+}
+
+.action-cell {
+  text-align: right !important;
+}
+
+.text-link,
+.back-link {
+  color: #80654f;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.text-link:hover,
+.back-link:hover {
+  color: #5f4734;
+  text-decoration: underline;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 32px;
+}
+
+.detail-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.detail-heading h2 {
+  overflow-wrap: anywhere;
+}
+
+.profile-email {
+  margin: 12px 0 0;
+  color: #766d66;
+}
+
+.submission-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.submission-card {
+  padding: 26px;
+  border: 1px solid #ded8cf;
+  border-radius: 16px;
+  background: #fbfaf7;
+}
+
+.submission-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.submission-heading h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 500;
+}
+
+.submission-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+  padding: 18px 0;
+  border-top: 1px solid #e8e0d7;
+  border-bottom: 1px solid #e8e0d7;
+}
+
+.submission-meta dt {
+  color: #8a7d73;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.submission-meta dd {
+  margin: 6px 0 0;
+  color: #62574f;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+details summary {
+  color: #80654f;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.raw-payload {
+  max-height: 360px;
+  margin: 16px 0 0;
+  padding: 16px;
+  overflow: auto;
+  border-radius: 10px;
+  background: #f0ece6;
+  color: #564a41;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 700px) {
   .topbar {
     padding: 24px;
@@ -412,5 +563,21 @@ textarea:focus {
   .form-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .detail-heading {
+    display: block;
+  }
+
+  .detail-heading .muted-label {
+    margin-top: 14px;
+  }
+
+  .submission-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .submission-card {
+    padding: 22px;
   }
 }

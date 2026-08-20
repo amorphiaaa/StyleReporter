@@ -13,7 +13,7 @@ preservation, and source-row idempotency without calling external providers.
 Not implemented:
 
 - Google Sheets/Forms API integration
-- full client management UI
+- client editing/deletion UI
 - user authentication
 - scheduled jobs or webhooks
 - OpenAI agent execution or prompts
@@ -24,7 +24,7 @@ Not implemented:
 ## Repository layout
 
 - backend/ - FastAPI application, domain contracts, migration skeleton, tests
-- frontend/ - Vite/React/TypeScript shell with a working manual import screen
+- frontend/ - Vite/React/TypeScript shell with import and client screens
 - infra/ - local Docker Compose support
 - docs/ - architecture, domain notes, ADRs, and handoff instructions
 

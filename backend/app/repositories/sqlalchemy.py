@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Client
@@ -8,6 +8,7 @@ from app.db.models import QuestionnaireSubmission as QuestionnaireSubmissionMode
 from app.domain.contracts import (
     ClientRecord,
     ClientRepository,
+    ClientSummary,
     QuestionnaireSubmission,
     SubmissionRepository,
 )
@@ -16,6 +17,25 @@ from app.domain.contracts import (
 class SqlAlchemyClientRepository(ClientRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def list_summaries(self) -> list[ClientSummary]:
+        result = await self._session.execute(
+            select(Client, func.count(QuestionnaireSubmissionModel.id))
+            .outerjoin(
+                QuestionnaireSubmissionModel,
+                QuestionnaireSubmissionModel.client_id == Client.id,
+            )
+            .group_by(Client.id)
+            .order_by(Client.created_at.desc())
+        )
+        return [
+            ClientSummary(client=_to_client_record(model), submission_count=count)
+            for model, count in result.all()
+        ]
+
+    async def get_by_id(self, client_id: str) -> ClientRecord | None:
+        model = await self._session.get(Client, UUID(client_id))
+        return _to_client_record(model) if model else None
 
     async def get_by_normalized_email(self, email: str) -> ClientRecord | None:
         result = await self._session.execute(
@@ -94,6 +114,14 @@ class SqlAlchemySubmissionRepository(SubmissionRepository):
         await self._session.flush()
         return _to_submission_record(model)
 
+    async def list_by_client_id(self, client_id: str) -> list[QuestionnaireSubmission]:
+        result = await self._session.execute(
+            select(QuestionnaireSubmissionModel)
+            .where(QuestionnaireSubmissionModel.client_id == UUID(client_id))
+            .order_by(QuestionnaireSubmissionModel.source_row_number.asc())
+        )
+        return [_to_submission_record(model) for model in result.scalars().all()]
+
 
 def _to_client_record(model: Client) -> ClientRecord:
     return ClientRecord(
@@ -115,4 +143,5 @@ def _to_submission_record(model: QuestionnaireSubmissionModel) -> QuestionnaireS
         raw_payload=model.raw_payload,
         questionnaire_version=model.questionnaire_version,
         submitted_at=model.submitted_at,
+        imported_at=model.imported_at,
     )

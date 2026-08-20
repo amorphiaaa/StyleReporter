@@ -17,10 +17,9 @@ screen over already-read rows, but not the real Google provider or client UI.
 
 1. Implement the read-only Google Sheets adapter.
 2. Connect it to the existing manual importer transaction boundary.
-3. Add client list/detail endpoints backed by the existing repositories.
-4. Extend the frontend with client list/detail screens.
-5. Add the Agents SDK runtime only after persisted evidence is available.
-6. Implement Canva through the documented connector boundary.
+3. Add client editing and search once the read-only client screens are stable.
+4. Add the Agents SDK runtime only after persisted evidence is available.
+5. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints
 

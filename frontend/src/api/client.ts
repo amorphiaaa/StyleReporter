@@ -1,5 +1,7 @@
 import type {
   HealthResponse,
+  ClientDetail,
+  ClientListItem,
   ImportResponse,
   ImportRunResponse,
   ManualImportRequest,
@@ -38,6 +40,24 @@ export async function getImport(importId: string): Promise<ImportRunResponse> {
   }
 
   return response.json() as Promise<ImportRunResponse>;
+}
+
+export async function listClients(): Promise<ClientListItem[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients`);
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Client list lookup failed"));
+  }
+
+  return response.json() as Promise<ClientListItem[]>;
+}
+
+export async function getClient(clientId: string): Promise<ClientDetail> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}`);
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Client lookup failed"));
+  }
+
+  return response.json() as Promise<ClientDetail>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {

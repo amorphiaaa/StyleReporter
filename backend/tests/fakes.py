@@ -1,4 +1,4 @@
-from app.domain.contracts import ClientRecord, QuestionnaireSubmission
+from app.domain.contracts import ClientRecord, ClientSummary, QuestionnaireSubmission
 
 
 class InMemoryClientRepository:
@@ -7,6 +7,15 @@ class InMemoryClientRepository:
 
     async def get_by_normalized_email(self, email: str) -> ClientRecord | None:
         return self.items.get(email)
+
+    async def list_summaries(self) -> list[ClientSummary]:
+        return [
+            ClientSummary(client=client, submission_count=0)
+            for client in self.items.values()
+        ]
+
+    async def get_by_id(self, client_id: str) -> ClientRecord | None:
+        return next((client for client in self.items.values() if client.id == client_id), None)
 
     async def save(self, client: ClientRecord) -> ClientRecord:
         self.items[client.email_normalized] = client
@@ -33,3 +42,10 @@ class InMemorySubmissionRepository:
         )
         self.items[key] = submission
         return submission
+
+    async def list_by_client_id(self, client_id: str) -> list[QuestionnaireSubmission]:
+        return [
+            submission
+            for submission in self.items.values()
+            if submission.client_id == client_id
+        ]

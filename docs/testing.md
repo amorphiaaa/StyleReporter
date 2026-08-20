@@ -26,6 +26,7 @@ Expected behavior:
 - the TypeScript project type-checks;
 - the API client fallback points to localhost;
 - the manual import screen can submit a synthetic payload and render counters;
+- the clients screen lists persisted profiles and opens a submission detail;
 - the production bundle builds.
 
 ## Compose smoke check

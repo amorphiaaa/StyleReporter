@@ -8,9 +8,10 @@ the importer to PostgreSQL repositories.
 
 ## Components
 
-- React frontend: navigation shell for clients and future import runs.
-- FastAPI backend: health endpoint, placeholder routes, configuration, and
-  domain contracts.
+- React frontend: navigation shell with manual import and client list/detail
+  screens.
+- FastAPI backend: health endpoint, manual import API, client list/detail API,
+  configuration, and domain contracts.
 - PostgreSQL: included in Compose; the initial schema foundation is present,
   with SQLAlchemy repositories and import-run persistence for the manual API.
 - Google Sheets adapter: provider stub plus a deterministic fixture source.
@@ -37,7 +38,8 @@ evidence; it does not diagnose the client.
 - POST /api/v1/imports/manual persists already-read rows and returns import
   counters and row errors.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
-- Client routes remain HTTP 501 placeholders.
+- GET /api/v1/clients returns persisted client summaries.
+- GET /api/v1/clients/{client_id} returns the client and raw submissions.
 - No external credentials are required.
 - The database engine is created at startup, but connections are opened only
   when an API request obtains a session.
