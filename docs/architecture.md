@@ -48,6 +48,8 @@ evidence; it does not diagnose the client.
   for a persisted submission.
 - The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the
   typed agent contract without a model call.
+- The client detail UI exposes both local runtime choices and keeps `stub` as
+  the default.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
 - GET /api/v1/clients/{client_id}/reports returns report-run history ordered
   from newest to oldest.

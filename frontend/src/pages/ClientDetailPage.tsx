@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { createStyleReport, getClient, listStyleReports } from "../api/client";
-import type { ClientDetail, StyleReportResponse } from "../types";
+import type {
+  ClientDetail,
+  StyleReportResponse,
+  StyleReportRuntimeType,
+} from "../types";
 
 type ReportsBySubmission = Record<string, StyleReportResponse[]>;
 
@@ -10,6 +14,7 @@ export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [reports, setReports] = useState<ReportsBySubmission>({});
+  const [selectedRuntime, setSelectedRuntime] = useState<StyleReportRuntimeType>("stub");
   const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,14 +62,16 @@ export function ClientDetailPage() {
         <ClientProfile
           client={client}
           reports={reports}
+          selectedRuntime={selectedRuntime}
           generatingSubmissionId={generatingSubmissionId}
-          onGenerateReport={async (submissionId) => {
+          onRuntimeChange={setSelectedRuntime}
+          onGenerateReport={async (submissionId, runtime) => {
             setError(null);
             setGeneratingSubmissionId(submissionId);
             try {
               const report = await createStyleReport(client.id, {
                 submission_id: submissionId,
-                runtime: "stub",
+                runtime,
               });
               setReports((current) => ({
                 ...current,
@@ -89,13 +96,17 @@ export function ClientDetailPage() {
 function ClientProfile({
   client,
   reports,
+  selectedRuntime,
   generatingSubmissionId,
+  onRuntimeChange,
   onGenerateReport,
 }: {
   client: ClientDetail;
   reports: ReportsBySubmission;
+  selectedRuntime: StyleReportRuntimeType;
   generatingSubmissionId: string | null;
-  onGenerateReport: (submissionId: string) => Promise<void>;
+  onRuntimeChange: (runtime: StyleReportRuntimeType) => void;
+  onGenerateReport: (submissionId: string, runtime: StyleReportRuntimeType) => Promise<void>;
 }) {
   return (
     <>
@@ -141,17 +152,38 @@ function ClientProfile({
               <div>
                 <p className="eyebrow">Methodologist runtime</p>
                 <p className="report-help">
-                  Generate a local deterministic draft from this submission.
+                  {selectedRuntime === "stub"
+                    ? "Generate a local deterministic draft from this submission."
+                    : "Construct the typed Agents SDK agent and skip the model call."}
                 </p>
               </div>
-              <button
-                className="primary-button"
-                type="button"
-                disabled={generatingSubmissionId === submission.id}
-                onClick={() => void onGenerateReport(submission.id)}
-              >
-                {generatingSubmissionId === submission.id ? "Generating..." : "Generate stub report"}
-              </button>
+              <div className="report-controls">
+                <label className="runtime-select">
+                  Runtime
+                  <select
+                    aria-label="Report runtime"
+                    value={selectedRuntime}
+                    onChange={(event) =>
+                      onRuntimeChange(event.target.value as StyleReportRuntimeType)
+                    }
+                  >
+                    <option value="stub">Stub report</option>
+                    <option value="agents_sdk_dry_run">Agents SDK dry-run</option>
+                  </select>
+                </label>
+                <button
+                  className="primary-button"
+                  type="button"
+                  disabled={generatingSubmissionId === submission.id}
+                  onClick={() => void onGenerateReport(submission.id, selectedRuntime)}
+                >
+                  {generatingSubmissionId === submission.id
+                    ? "Generating..."
+                    : selectedRuntime === "stub"
+                      ? "Generate stub report"
+                      : "Run Agents SDK dry-run"}
+                </button>
+              </div>
             </div>
             {reports[submission.id]?.length ? (
               <div className="report-history">
