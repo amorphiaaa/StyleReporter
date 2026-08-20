@@ -17,7 +17,9 @@ real Google or OpenAI providers.
 ## Recommended implementation order
 
 1. Add client editing once the read-only client screens are stable.
-2. Replace `StubStyleReportRuntime` with a tested Agents SDK runtime.
+2. Replace the dry-run `AgentsSdkStyleReportRuntime` path with a tested real
+   Agents SDK runtime after credentials, prompts, output validation, and
+   tracing policy are agreed.
 3. Implement the read-only Google Sheets adapter and connect it to the
    existing importer transaction boundary.
 4. Implement Canva through the documented connector boundary.

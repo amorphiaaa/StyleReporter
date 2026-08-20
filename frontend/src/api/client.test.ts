@@ -139,6 +139,30 @@ describe("API client", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/reports/report-1`);
   });
 
+  it("supports the Agents SDK dry-run runtime", async () => {
+    const report = { status: "completed", runtime_type: "agents_sdk_dry_run" };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(report), { status: 201 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      createStyleReport("client-1", {
+        submission_id: "submission-1",
+        runtime: "agents_sdk_dry_run",
+      }),
+    ).resolves.toEqual(report);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/api/v1/clients/client-1/reports`,
+      expect.objectContaining({
+        body: JSON.stringify({
+          submission_id: "submission-1",
+          runtime: "agents_sdk_dry_run",
+        }),
+      }),
+    );
+  });
+
   it("loads report history for a client", async () => {
     const reports = [
       {

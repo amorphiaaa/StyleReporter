@@ -17,8 +17,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 - Google Sheets adapter: provider stub plus a deterministic fixture source.
 - Questionnaire importer: provider-agnostic service with validation,
   normalization, and source-row idempotency.
-- Style report runtime: deterministic stub now; future Agents SDK workflow
-  behind the same runtime contract.
+- Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
+  real Runner calls remain behind the same runtime contract.
 - Canva connector: future provider boundary for asset workflows.
 
 ## Intended future flow
@@ -46,6 +46,8 @@ evidence; it does not diagnose the client.
 - GET /api/v1/clients/{client_id} returns the client and raw submissions.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
   for a persisted submission.
+- The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the
+  typed agent contract without a model call.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
 - GET /api/v1/clients/{client_id}/reports returns report-run history ordered
   from newest to oldest.

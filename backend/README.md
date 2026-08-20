@@ -19,5 +19,5 @@ not connected yet.
 - Repositories: app/repositories/
 - Report runtime contract: app/domain/contracts.py
 - Stub methodologist runtime: app/agents/style_methodologist.py
-- Future Agents SDK runtime: app/agents/runtime.py
+- Agents SDK adapter with dry-run and future Runner path: app/agents/runtime.py
 - Canva connector: app/agents/canva.py

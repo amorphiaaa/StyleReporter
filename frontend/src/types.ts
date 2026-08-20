@@ -84,7 +84,7 @@ export type ClientDetail = {
 
 export type GenerateStyleReportRequest = {
   submission_id: string;
-  runtime?: "stub";
+  runtime?: "stub" | "agents_sdk_dry_run";
 };
 
 export type StyleReportResponse = {

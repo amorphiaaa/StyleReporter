@@ -4,9 +4,11 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.runtime import AgentsSdkStyleReportRuntime
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.api.dependencies import get_db_session
 from app.api.schemas.reports import GenerateStyleReportRequest, StyleReportResponse
+from app.core.config import get_settings
 from app.domain.contracts import StyleReportRequest, StyleReportRun
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
@@ -56,7 +58,7 @@ async def generate_style_report(
 
     try:
         await repository.save(report_run)
-        generated = await StubStyleReportRuntime().generate(
+        generated = await _build_runtime(payload.runtime).generate(
             StyleReportRequest(
                 client_id=str(client_id),
                 submission_id=str(payload.submission_id),
@@ -103,6 +105,17 @@ async def get_style_report(
             detail=f"Style report run {report_run_id} was not found.",
         )
     return _to_response(report_run)
+
+
+def _build_runtime(runtime_type: str):
+    if runtime_type == "agents_sdk_dry_run":
+        settings = get_settings()
+        return AgentsSdkStyleReportRuntime(
+            model=settings.openai_model,
+            api_key_configured=bool(settings.openai_api_key),
+            dry_run=True,
+        )
+    return StubStyleReportRuntime()
 
 
 @router.get("/clients/{client_id}/reports", response_model=list[StyleReportResponse])

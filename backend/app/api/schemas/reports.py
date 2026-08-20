@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class GenerateStyleReportRequest(BaseModel):
     submission_id: UUID
-    runtime: Literal["stub"] = "stub"
+    runtime: Literal["stub", "agents_sdk_dry_run"] = "stub"
 
 
 class StyleReportResponse(BaseModel):

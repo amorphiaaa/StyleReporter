@@ -16,7 +16,8 @@ Not implemented:
 - client editing/deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- real OpenAI agent execution or prompts (only the local stub runtime exists)
+- OpenAI model calls or production prompts (the Agents SDK dry-run adapter and
+  local stub runtime are available)
 - Canva connector/OAuth/MCP calls
 - methodology-driven style report generation
 - production deployment or CI/CD
@@ -48,7 +49,9 @@ already-read rows until the real Google Sheets adapter is implemented.
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
 `submission_id` to generate a deterministic `stub-v1` response without an
-OpenAI key. Retrieve it later with
+OpenAI key. You can also pass `runtime: "agents_sdk_dry_run"` to verify that
+the typed Agents SDK agent contract is constructed without calling a model.
+Retrieve the run later with
 `GET http://localhost:8000/api/v1/reports/{report_run_id}`.
 
 To stop the stack:
