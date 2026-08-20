@@ -1,8 +1,9 @@
 # Backend scaffold and import prototype
 
-The backend exposes health, a manual import endpoint, and an import-run lookup.
-The endpoint accepts already-read rows and persists them through SQLAlchemy
-repositories; the real Google Sheets provider is not connected yet.
+The backend exposes health, manual import and client endpoints, plus a local
+stub style-report endpoint. Already-read rows and report runs are persisted
+through SQLAlchemy repositories; real Google Sheets and OpenAI providers are
+not connected yet.
 
 ## Commands
 
@@ -16,5 +17,7 @@ repositories; the real Google Sheets provider is not connected yet.
 - Google Sheets adapter: app/integrations/google_sheets.py
 - Questionnaire orchestration: app/services/questionnaire_importer.py
 - Repositories: app/repositories/
-- Agents SDK runtime: app/agents/runtime.py
+- Report runtime contract: app/domain/contracts.py
+- Stub methodologist runtime: app/agents/style_methodologist.py
+- Future Agents SDK runtime: app/agents/runtime.py
 - Canva connector: app/agents/canva.py

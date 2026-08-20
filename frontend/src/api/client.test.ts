@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE_URL, createManualImport, getClient, getImport, listClients } from "./client";
+import {
+  API_BASE_URL,
+  createManualImport,
+  createStyleReport,
+  getClient,
+  getImport,
+  getStyleReport,
+  listClients,
+} from "./client";
 import type { ManualImportRequest } from "../types";
 
 describe("API client", () => {
@@ -83,5 +91,40 @@ describe("API client", () => {
     await expect(getClient("client-1")).resolves.toEqual(detail);
     expect(fetchMock).toHaveBeenNthCalledWith(1, `${API_BASE_URL}/api/v1/clients`);
     expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/clients/client-1`);
+  });
+
+  it("generates and loads a style report", async () => {
+    const report = {
+      id: "report-1",
+      client_id: "client-1",
+      submission_id: "submission-1",
+      status: "completed",
+      runtime_type: "stub",
+      report_version: "stub-v1",
+      report: { title: "Style report draft" },
+      error_message: null,
+      created_at: null,
+      started_at: null,
+      completed_at: null,
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(report), { status: 201 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(report), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      createStyleReport("client-1", { submission_id: "submission-1", runtime: "stub" }),
+    ).resolves.toEqual(report);
+    await expect(getStyleReport("report-1")).resolves.toEqual(report);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      `${API_BASE_URL}/api/v1/clients/client-1/reports`,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ submission_id: "submission-1", runtime: "stub" }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/reports/report-1`);
   });
 });

@@ -38,11 +38,22 @@ scaffold.
 Future manual syncs should create an auditable run record with status, counts,
 timestamps, and row-level errors.
 
+### style_report_runs
+
+Each report run links one client to one questionnaire submission and records
+runtime type, report version, status, timestamps, optional error text, and
+structured JSONB output. Multiple runs for the same submission are allowed so
+future runtimes can be retried or compared without overwriting questionnaire
+evidence.
+
 ## Important boundary
 
 Raw answers are evidence. Style Language categories, competing identities,
 visual mistranslations, hypotheses, and final diagnoses belong to a later
 agent/report domain and must not be inferred during ingestion.
+
+The current `StubStyleReportRuntime` only exposes source field names and an
+explicit placeholder message. It is not a methodology diagnosis.
 
 ## Import prototype rules
 

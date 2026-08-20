@@ -9,6 +9,7 @@ def test_persistence_foundation_registers_expected_tables() -> None:
         "clients",
         "questionnaire_submissions",
         "import_runs",
+        "style_report_runs",
     }
 
 
@@ -43,3 +44,11 @@ def test_import_run_keeps_duplicate_counter() -> None:
     table = Base.metadata.tables["import_runs"]
 
     assert table.c.skipped_duplicates.nullable is False
+
+
+def test_style_report_run_keeps_report_json_and_relationship_keys() -> None:
+    table = Base.metadata.tables["style_report_runs"]
+
+    assert isinstance(table.c.report.type, JSONB)
+    assert table.c.client_id.foreign_keys
+    assert table.c.submission_id.foreign_keys

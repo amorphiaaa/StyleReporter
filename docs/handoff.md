@@ -1,8 +1,9 @@
 # Handoff guide
 
 This repository is ready for the next engineer to continue the first product
-slice. The current commit contains a working manual importer and frontend
-screen over already-read rows, but not the real Google provider or client UI.
+slice. The current commit contains a working manual importer, client
+list/detail screens, and a deterministic local report runtime, but not the
+real Google or OpenAI providers.
 
 ## Read first
 
@@ -15,10 +16,11 @@ screen over already-read rows, but not the real Google provider or client UI.
 
 ## Recommended implementation order
 
-1. Implement the read-only Google Sheets adapter.
-2. Connect it to the existing manual importer transaction boundary.
-3. Add client editing and search once the read-only client screens are stable.
-4. Add the Agents SDK runtime only after persisted evidence is available.
+1. Add report-run list/history to the client detail screen.
+2. Add client editing and search once the read-only client screens are stable.
+3. Replace `StubStyleReportRuntime` with a tested Agents SDK runtime.
+4. Implement the read-only Google Sheets adapter and connect it to the
+   existing importer transaction boundary.
 5. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints

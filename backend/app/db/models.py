@@ -66,6 +66,36 @@ class QuestionnaireSubmission(Base):
     client: Mapped[Client] = relationship(back_populates="submissions")
 
 
+class StyleReportRun(Base):
+    __tablename__ = "style_report_runs"
+    __table_args__ = (
+        Index("ix_style_report_runs_client_id", "client_id"),
+        Index("ix_style_report_runs_submission_id", "submission_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    client_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("clients.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    submission_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("questionnaire_submissions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    runtime_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    report_version: Mapped[str] = mapped_column(String(100), nullable=False)
+    report: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class ImportRun(Base):
     __tablename__ = "import_runs"
 

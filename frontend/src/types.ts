@@ -81,3 +81,22 @@ export type ClientDetail = {
   display_name: string | null;
   submissions: ClientSubmission[];
 };
+
+export type GenerateStyleReportRequest = {
+  submission_id: string;
+  runtime?: "stub";
+};
+
+export type StyleReportResponse = {
+  id: string;
+  client_id: string;
+  submission_id: string;
+  status: string;
+  runtime_type: string;
+  report_version: string;
+  report: Record<string, unknown> | null;
+  error_message: string | null;
+  created_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+};

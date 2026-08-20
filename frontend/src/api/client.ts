@@ -2,9 +2,11 @@ import type {
   HealthResponse,
   ClientDetail,
   ClientListItem,
+  GenerateStyleReportRequest,
   ImportResponse,
   ImportRunResponse,
   ManualImportRequest,
+  StyleReportResponse,
 } from "../types";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -58,6 +60,32 @@ export async function getClient(clientId: string): Promise<ClientDetail> {
   }
 
   return response.json() as Promise<ClientDetail>;
+}
+
+export async function createStyleReport(
+  clientId: string,
+  request: GenerateStyleReportRequest,
+): Promise<StyleReportResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}/reports`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Style report generation failed"));
+  }
+
+  return response.json() as Promise<StyleReportResponse>;
+}
+
+export async function getStyleReport(reportRunId: string): Promise<StyleReportResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/reports/${reportRunId}`);
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Style report lookup failed"));
+  }
+
+  return response.json() as Promise<StyleReportResponse>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {

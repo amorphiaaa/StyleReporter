@@ -3,12 +3,12 @@
 StyleReporter is a scaffold for a future FastAPI + React application that will
 turn client questionnaire data into personalized style reports.
 
-## Current stage: manual import slice
+## Current stage: local report vertical slice
 
-This repository contains the handoff scaffold plus a manual import slice. The
-slice accepts already-read rows, persists clients, submissions, and import run
-metadata in PostgreSQL, and exercises normalization, validation, raw payload
-preservation, and source-row idempotency without calling external providers.
+This repository contains the handoff scaffold, a manual import slice, and a
+local report vertical slice. Already-read rows are persisted in PostgreSQL;
+the client detail screen can launch a deterministic stub report for a saved
+submission. No external provider is called.
 
 Not implemented:
 
@@ -16,9 +16,9 @@ Not implemented:
 - client editing/deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- OpenAI agent execution or prompts
+- real OpenAI agent execution or prompts (only the local stub runtime exists)
 - Canva connector/OAuth/MCP calls
-- style report generation
+- methodology-driven style report generation
 - production deployment or CI/CD
 
 ## Repository layout
@@ -44,6 +44,12 @@ Then open:
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
 already-read rows until the real Google Sheets adapter is implemented.
+
+The local report endpoint is available at
+`POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
+`submission_id` to generate a deterministic `stub-v1` response without an
+OpenAI key. Retrieve it later with
+`GET http://localhost:8000/api/v1/reports/{report_run_id}`.
 
 To stop the stack:
 

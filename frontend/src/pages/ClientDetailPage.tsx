@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { getClient } from "../api/client";
-import type { ClientDetail } from "../types";
+import { createStyleReport, getClient } from "../api/client";
+import type { ClientDetail, StyleReportResponse } from "../types";
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
+  const [reports, setReports] = useState<Record<string, StyleReportResponse>>({});
+  const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,12 +49,47 @@ export function ClientDetailPage() {
       </Link>
       {isLoading ? <p className="loading-copy">Loading client profile…</p> : null}
       {error ? <p className="notice error-notice">{error}</p> : null}
-      {client ? <ClientProfile client={client} /> : null}
+      {client ? (
+        <ClientProfile
+          client={client}
+          reports={reports}
+          generatingSubmissionId={generatingSubmissionId}
+          onGenerateReport={async (submissionId) => {
+            setError(null);
+            setGeneratingSubmissionId(submissionId);
+            try {
+              const report = await createStyleReport(client.id, {
+                submission_id: submissionId,
+                runtime: "stub",
+              });
+              setReports((current) => ({ ...current, [submissionId]: report }));
+            } catch (requestError: unknown) {
+              setError(
+                requestError instanceof Error
+                  ? requestError.message
+                  : "Style report generation failed",
+              );
+            } finally {
+              setGeneratingSubmissionId(null);
+            }
+          }}
+        />
+      ) : null}
     </section>
   );
 }
 
-function ClientProfile({ client }: { client: ClientDetail }) {
+function ClientProfile({
+  client,
+  reports,
+  generatingSubmissionId,
+  onGenerateReport,
+}: {
+  client: ClientDetail;
+  reports: Record<string, StyleReportResponse>;
+  generatingSubmissionId: string | null;
+  onGenerateReport: (submissionId: string) => Promise<void>;
+}) {
   return (
     <>
       <div className="detail-heading">
@@ -93,6 +130,23 @@ function ClientProfile({ client }: { client: ClientDetail }) {
                 <dd>{formatDate(submission.imported_at)}</dd>
               </div>
             </dl>
+            <div className="report-actions">
+              <div>
+                <p className="eyebrow">Methodologist runtime</p>
+                <p className="report-help">
+                  Generate a local deterministic draft from this submission.
+                </p>
+              </div>
+              <button
+                className="primary-button"
+                type="button"
+                disabled={generatingSubmissionId === submission.id}
+                onClick={() => void onGenerateReport(submission.id)}
+              >
+                {generatingSubmissionId === submission.id ? "Generating..." : "Generate stub report"}
+              </button>
+            </div>
+            {reports[submission.id] ? <ReportPreview report={reports[submission.id]} /> : null}
             <details>
               <summary>View raw answers</summary>
               <pre className="raw-payload">{JSON.stringify(submission.raw_payload, null, 2)}</pre>
@@ -101,6 +155,30 @@ function ClientProfile({ client }: { client: ClientDetail }) {
         ))}
       </div>
     </>
+  );
+}
+
+function ReportPreview({ report }: { report: StyleReportResponse }) {
+  const summary = report.report?.summary;
+  return (
+    <div className="report-card">
+      <div className="report-heading">
+        <div>
+          <p className="eyebrow">Generated report</p>
+          <h4>{typeof report.report?.title === "string" ? report.report.title : "Style report"}</h4>
+        </div>
+        <span className="success-chip">
+          {report.runtime_type} · {report.report_version}
+        </span>
+      </div>
+      <p className="report-summary">
+        {typeof summary === "string" ? summary : "Report output is ready."}
+      </p>
+      <details>
+        <summary>View structured report output</summary>
+        <pre className="raw-payload">{JSON.stringify(report.report, null, 2)}</pre>
+      </details>
+    </div>
   );
 }
 
