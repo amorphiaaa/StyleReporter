@@ -3,16 +3,17 @@
 StyleReporter is a scaffold for a future FastAPI + React application that will
 turn client questionnaire data into personalized style reports.
 
-## Current stage: repository scaffolding
+## Current stage: import boundary prototype
 
-This repository intentionally contains structure, contracts, documentation,
-stubs, and synthetic fixtures. It does not implement the product workflow.
+This repository contains the handoff scaffold plus a local, synthetic import
+pipeline. The pipeline exercises normalization, validation, raw payload
+preservation, and source-row idempotency without calling external providers.
 
 Not implemented:
 
 - Google Sheets/Forms integration
 - PostgreSQL repositories or client persistence workflow
-- questionnaire import
+- production questionnaire import and database repositories
 - user authentication
 - scheduled jobs or webhooks
 - OpenAI agent execution or prompts

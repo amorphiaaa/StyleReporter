@@ -21,7 +21,9 @@ class QuestionnaireSubmission:
     source_spreadsheet_id: str
     source_sheet_name: str
     source_row_number: int
+    source_row_hash: str
     raw_payload: JsonObject
+    questionnaire_version: str | None = None
     submitted_at: datetime | None = None
 
 
@@ -42,16 +44,29 @@ class SheetRow:
 class ImportRequest:
     source: SheetReadRequest
     email_header: str
+    display_name_header: str | None = None
+    timestamp_header: str | None = "Timestamp"
+    source_type: str = "google_sheets"
+    questionnaire_version: str | None = None
+
+
+@dataclass(frozen=True)
+class ImportRowError:
+    row_number: int
+    code: str
+    message: str
 
 
 @dataclass(frozen=True)
 class ImportResult:
     import_id: str
+    rows_seen: int
     created_clients: int
     updated_clients: int
     created_submissions: int
     rejected_rows: int
-    errors: Sequence[str]
+    skipped_duplicates: int
+    errors: Sequence[ImportRowError]
 
 
 @dataclass(frozen=True)
@@ -82,6 +97,14 @@ class ClientRepository(Protocol):
 
 
 class SubmissionRepository(Protocol):
+    async def get_by_source_row(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        row_number: int,
+    ) -> QuestionnaireSubmission | None:
+        ...
+
     async def save(self, submission: QuestionnaireSubmission) -> QuestionnaireSubmission:
         ...
 

@@ -1,7 +1,8 @@
-# Backend scaffold
+# Backend scaffold and import prototype
 
-The backend is a FastAPI shell. It exposes health and contract-only placeholder
-routes. Provider integrations and persistence are intentionally not implemented.
+The backend exposes health and contract-only placeholder routes. A local
+synthetic source and provider-agnostic questionnaire importer are available
+for testing; they are not wired to FastAPI or PostgreSQL yet.
 
 ## Commands
 

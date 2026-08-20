@@ -2,9 +2,9 @@
 
 ## Intent
 
-This repository is a handoff-ready scaffold. The first implementation slice
-will be a manual Google Sheets import, but the current repository does not
-perform that import.
+This repository is a handoff-ready scaffold. The first implementation slice is
+a local synthetic import pipeline; the provider adapter and database wiring are
+still separate follow-up work.
 
 ## Components
 
@@ -12,9 +12,10 @@ perform that import.
 - FastAPI backend: health endpoint, placeholder routes, configuration, and
   domain contracts.
 - PostgreSQL: included in Compose; the initial schema foundation is present,
-  while repositories and persistence workflow remain future work.
-- Google Sheets adapter: future read-only source provider.
-- Questionnaire importer: future application service.
+  while repositories and API persistence wiring remain future work.
+- Google Sheets adapter: provider stub plus a deterministic fixture source.
+- Questionnaire importer: provider-agnostic service with validation,
+  normalization, and source-row idempotency.
 - Agents SDK runtime: future style-methodology workflow.
 - Canva connector: future provider boundary for asset workflows.
 
@@ -22,6 +23,9 @@ perform that import.
 
 Google Forms -> linked response Sheet -> GoogleSheetsSource ->
 QuestionnaireImporter -> client/submission repositories -> future agent workflow.
+
+The current tests exercise the same flow with FixtureGoogleSheetsSource and
+in-memory repositories. No Google, database, or AI provider calls are made.
 
 The importer and agent must remain separate. Importing a questionnaire stores
 evidence; it does not diagnose the client.

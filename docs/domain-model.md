@@ -43,3 +43,10 @@ timestamps, and row-level errors.
 Raw answers are evidence. Style Language categories, competing identities,
 visual mistranslations, hypotheses, and final diagnoses belong to a later
 agent/report domain and must not be inferred during ingestion.
+
+## Import prototype rules
+
+The local importer trims and case-folds email values for client identity while
+preserving the original row unchanged in `raw_payload`. Invalid email rows are
+rejected with a row-level error. Source spreadsheet ID, sheet name, and row
+number form the idempotency key for a submission.
