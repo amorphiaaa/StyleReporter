@@ -1,0 +1,42 @@
+[
+  {
+    "row_number": 2,
+    "values": {
+      "Timestamp": "2026-01-15T10:30:00+00:00",
+      "Email": "synthetic.client@example.test",
+      "Name": "Synthetic Client",
+      "What feels hardest in your style right now?": "B",
+      "What would you love your style to help you feel?": "More like myself",
+      "Feels Like Me images": "https://example.test/synthetic/feels-like-me-1.jpg"
+    }
+  },
+  {
+    "row_number": 3,
+    "values": {
+      "Timestamp": "2026-01-16 11:00:00",
+      "Email": " SYNTHETIC.CLIENT@EXAMPLE.TEST ",
+      "Name": "Updated Synthetic Client",
+      "What feels hardest in your style right now?": "A",
+      "What would you love your style to help you feel?": "More confident",
+      "Feels Like Me images": "https://example.test/synthetic/feels-like-me-2.jpg"
+    }
+  },
+  {
+    "row_number": 4,
+    "values": {
+      "Timestamp": "2026-01-17T12:00:00+00:00",
+      "Email": "",
+      "Name": "Missing Email",
+      "What feels hardest in your style right now?": "C"
+    }
+  },
+  {
+    "row_number": 5,
+    "values": {
+      "Timestamp": "not-a-timestamp",
+      "Email": "second.client@example.test",
+      "Name": "Second Client",
+      "What feels hardest in your style right now?": "A"
+    }
+  }
+]

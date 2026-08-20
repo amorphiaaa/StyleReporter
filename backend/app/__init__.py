@@ -1,0 +1,1 @@
+"""StyleReporter backend application package."""
