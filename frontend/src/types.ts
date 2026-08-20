@@ -87,7 +87,7 @@ export type GenerateStyleReportRequest = {
   runtime?: StyleReportRuntimeType;
 };
 
-export type StyleReportRuntimeType = "stub" | "agents_sdk_dry_run";
+export type StyleReportRuntimeType = "stub" | "agents_sdk_dry_run" | "agents_sdk";
 
 export type StyleReportResponse = {
   id: string;

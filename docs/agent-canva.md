@@ -12,8 +12,10 @@ The planned runtime will use the Python Agents SDK:
   https://openai.github.io/openai-agents-python/
 
 The `openai-agents` dependency is present and used by
-`AgentsSdkStyleReportRuntime`. Model calls remain disabled until a later
-iteration explicitly enables the real runtime with credentials and prompts.
+`AgentsSdkStyleReportRuntime`. The real `agents_sdk` route is disabled by
+default; it requires `OPENAI_AGENT_RUNTIME_ENABLED=true` and
+`OPENAI_API_KEY`. Without that configuration the API returns `503`, while
+`agents_sdk_dry_run` remains safe for local contract checks.
 
 ## Separate concepts
 

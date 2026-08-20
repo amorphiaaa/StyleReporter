@@ -9,7 +9,7 @@ from app.agents.style_methodologist import StubStyleReportRuntime
 from app.api.dependencies import get_db_session
 from app.api.schemas.reports import GenerateStyleReportRequest, StyleReportResponse
 from app.core.config import get_settings
-from app.domain.contracts import StyleReportRequest, StyleReportRun
+from app.domain.contracts import StyleReportRequest, StyleReportRun, StyleReportRuntime
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemyStyleReportRunRepository,
@@ -107,13 +107,34 @@ async def get_style_report(
     return _to_response(report_run)
 
 
-def _build_runtime(runtime_type: str):
+def _build_runtime(runtime_type: str) -> StyleReportRuntime:
     if runtime_type == "agents_sdk_dry_run":
         settings = get_settings()
         return AgentsSdkStyleReportRuntime(
             model=settings.openai_model,
             api_key_configured=bool(settings.openai_api_key),
             dry_run=True,
+        )
+    if runtime_type == "agents_sdk":
+        settings = get_settings()
+        if not settings.openai_agent_runtime_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "The real Agents SDK runtime is disabled. Set "
+                    "OPENAI_AGENT_RUNTIME_ENABLED=true after configuring credentials "
+                    "and prompts."
+                ),
+            )
+        if not settings.openai_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The real Agents SDK runtime requires OPENAI_API_KEY.",
+            )
+        return AgentsSdkStyleReportRuntime(
+            model=settings.openai_model,
+            api_key_configured=True,
+            dry_run=False,
         )
     return StubStyleReportRuntime()
 

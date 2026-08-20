@@ -50,7 +50,9 @@ The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
 `submission_id` to generate a deterministic `stub-v1` response without an
 OpenAI key. You can also pass `runtime: "agents_sdk_dry_run"` to verify that
-the typed Agents SDK agent contract is constructed without calling a model.
+the typed Agents SDK agent contract is constructed without calling a model. The
+real `agents_sdk` runtime is disabled by default; requests receive `503` until
+`OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
 Retrieve the run later with
 `GET http://localhost:8000/api/v1/reports/{report_run_id}`.
 

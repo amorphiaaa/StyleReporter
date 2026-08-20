@@ -1,3 +1,5 @@
+import pytest
+
 from app.agents.runtime import AgentsSdkStyleReportRuntime
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.domain.contracts import StyleReportRequest
@@ -39,3 +41,16 @@ async def test_agents_sdk_runtime_dry_run_constructs_agent_without_model_call() 
         "model": "synthetic-model",
         "dry_run": True,
     }
+
+
+async def test_agents_sdk_runtime_requires_key_when_not_dry_run() -> None:
+    runtime = AgentsSdkStyleReportRuntime(dry_run=False)
+
+    with pytest.raises(RuntimeError, match="OPENAI_API_KEY"):
+        await runtime.generate(
+            StyleReportRequest(
+                client_id="client-1",
+                submission_id="submission-1",
+                raw_payload={"Email": "client@example.test"},
+            )
+        )

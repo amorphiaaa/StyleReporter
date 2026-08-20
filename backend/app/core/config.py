@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None
+    openai_agent_runtime_enabled: bool = False
 
     canva_connector_url: str | None = None
     canva_client_id: str | None = Field(default=None, repr=False)

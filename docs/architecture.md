@@ -18,7 +18,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 - Questionnaire importer: provider-agnostic service with validation,
   normalization, and source-row idempotency.
 - Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
-  real Runner calls remain behind the same runtime contract.
+  real Runner calls remain behind the same runtime contract and a disabled-by-
+  default feature flag.
 - Canva connector: future provider boundary for asset workflows.
 
 ## Intended future flow
@@ -48,6 +49,8 @@ evidence; it does not diagnose the client.
   for a persisted submission.
 - The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the
   typed agent contract without a model call.
+- `runtime: "agents_sdk"` is accepted by the API but returns `503` until
+  `OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
 - The client detail UI exposes both local runtime choices and keeps `stub` as
   the default.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
