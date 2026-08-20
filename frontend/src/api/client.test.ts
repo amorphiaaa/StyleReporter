@@ -94,6 +94,16 @@ describe("API client", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/clients/client-1`);
   });
 
+  it("passes a client search query", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("[]", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(listClients("Synthetic Client")).resolves.toEqual([]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/api/v1/clients?search=Synthetic+Client`,
+    );
+  });
+
   it("generates and loads a style report", async () => {
     const report = {
       id: "report-1",

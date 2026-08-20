@@ -121,6 +121,41 @@ a {
   font-size: clamp(34px, 5vw, 52px);
 }
 
+.client-search {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid #ded8cf;
+  border-radius: 12px;
+  background: #fbfaf7;
+}
+
+.client-search label {
+  flex: 1;
+}
+
+.search-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.secondary-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #d0c2b5;
+  border-radius: 8px;
+  background: transparent;
+  color: #80654f;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.secondary-button:hover {
+  background: #f0e8df;
+}
+
 .empty-card {
   padding: 64px 40px;
   border: 1px solid #ded8cf;
@@ -598,6 +633,19 @@ details summary {
 
   .page-heading {
     display: block;
+  }
+
+  .client-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search-actions {
+    justify-content: stretch;
+  }
+
+  .search-actions button {
+    flex: 1;
   }
 
   .muted-label {

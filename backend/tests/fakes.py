@@ -8,10 +8,19 @@ class InMemoryClientRepository:
     async def get_by_normalized_email(self, email: str) -> ClientRecord | None:
         return self.items.get(email)
 
-    async def list_summaries(self) -> list[ClientSummary]:
+    async def list_summaries(self, search: str | None = None) -> list[ClientSummary]:
+        clients = list(self.items.values())
+        if search:
+            normalized_search = search.casefold()
+            clients = [
+                client
+                for client in clients
+                if normalized_search in client.email_normalized.casefold()
+                or normalized_search in (client.display_name or "").casefold()
+            ]
         return [
             ClientSummary(client=client, submission_count=0)
-            for client in self.items.values()
+            for client in clients
         ]
 
     async def get_by_id(self, client_id: str) -> ClientRecord | None:

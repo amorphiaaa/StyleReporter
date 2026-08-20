@@ -16,7 +16,7 @@ real Google or OpenAI providers.
 
 ## Recommended implementation order
 
-1. Add client editing and search once the read-only client screens are stable.
+1. Add client editing once the read-only client screens are stable.
 2. Replace `StubStyleReportRuntime` with a tested Agents SDK runtime.
 3. Implement the read-only Google Sheets adapter and connect it to the
    existing importer transaction boundary.

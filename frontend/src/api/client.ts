@@ -44,8 +44,9 @@ export async function getImport(importId: string): Promise<ImportRunResponse> {
   return response.json() as Promise<ImportRunResponse>;
 }
 
-export async function listClients(): Promise<ClientListItem[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/clients`);
+export async function listClients(search?: string): Promise<ClientListItem[]> {
+  const query = search ? `?${new URLSearchParams({ search }).toString()}` : "";
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients${query}`);
   if (!response.ok) {
     throw new Error(await getErrorMessage(response, "Client list lookup failed"));
   }

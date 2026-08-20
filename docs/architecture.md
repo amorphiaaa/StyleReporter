@@ -41,6 +41,8 @@ evidence; it does not diagnose the client.
   counters and row errors.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
 - GET /api/v1/clients returns persisted client summaries.
+- GET /api/v1/clients?search=... filters summaries by display name or
+  normalized email.
 - GET /api/v1/clients/{client_id} returns the client and raw submissions.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
   for a persisted submission.

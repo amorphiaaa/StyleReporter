@@ -6,12 +6,16 @@ import type { ClientListItem } from "../types";
 
 export function ClientsPage() {
   const [clients, setClients] = useState<ClientListItem[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isCurrent = true;
-    void listClients()
+    setIsLoading(true);
+    setError(null);
+    void listClients(activeSearch)
       .then((items) => {
         if (isCurrent) {
           setClients(items);
@@ -31,7 +35,7 @@ export function ClientsPage() {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [activeSearch]);
 
   return (
     <section className="page">
@@ -40,8 +44,45 @@ export function ClientsPage() {
           <p className="eyebrow">Workspace</p>
           <h2>Clients</h2>
         </div>
-        <span className="muted-label">{clients.length} persisted profiles</span>
+        <span className="muted-label">
+          {clients.length} {activeSearch ? "matching profiles" : "persisted profiles"}
+        </span>
       </div>
+
+      <form
+        className="client-search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setActiveSearch(searchInput.trim());
+        }}
+      >
+        <label>
+          Search clients
+          <input
+            aria-label="Search clients"
+            placeholder="Name or email"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
+        </label>
+        <div className="search-actions">
+          <button className="primary-button" type="submit">
+            Search
+          </button>
+          {activeSearch ? (
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => {
+                setSearchInput("");
+                setActiveSearch("");
+              }}
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+      </form>
 
       {isLoading ? <p className="loading-copy">Loading client records…</p> : null}
       {error ? <p className="notice error-notice">{error}</p> : null}
@@ -51,8 +92,12 @@ export function ClientsPage() {
           <div className="empty-icon" aria-hidden="true">
             ◯
           </div>
-          <h3>No clients yet</h3>
-          <p>Run a manual import to create the first client profile.</p>
+          <h3>{activeSearch ? "No matching clients" : "No clients yet"}</h3>
+          <p>
+            {activeSearch
+              ? "Try a different name or email."
+              : "Run a manual import to create the first client profile."}
+          </p>
         </div>
       ) : null}
 

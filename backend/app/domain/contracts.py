@@ -131,7 +131,7 @@ class ConnectorStatus:
 
 
 class ClientRepository(Protocol):
-    async def list_summaries(self) -> Sequence[ClientSummary]:
+    async def list_summaries(self, search: str | None = None) -> Sequence[ClientSummary]:
         ...
 
     async def get_by_id(self, client_id: str) -> ClientRecord | None:

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
@@ -20,9 +20,11 @@ db_session_dependency = Depends(get_db_session)
 
 @router.get("", response_model=list[ClientListItem])
 async def list_clients(
+    search: str | None = Query(default=None, max_length=255),
     session: AsyncSession = db_session_dependency,
 ) -> list[ClientListItem]:
-    clients = await SqlAlchemyClientRepository(session).list_summaries()
+    search_term = search.strip() if search else None
+    clients = await SqlAlchemyClientRepository(session).list_summaries(search=search_term)
     return [
         ClientListItem(
             id=client.client.id,

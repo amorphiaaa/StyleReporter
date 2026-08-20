@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Client, StyleReportRun
@@ -20,8 +20,8 @@ class SqlAlchemyClientRepository(ClientRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def list_summaries(self) -> list[ClientSummary]:
-        result = await self._session.execute(
+    async def list_summaries(self, search: str | None = None) -> list[ClientSummary]:
+        statement = (
             select(Client, func.count(QuestionnaireSubmissionModel.id))
             .outerjoin(
                 QuestionnaireSubmissionModel,
@@ -30,6 +30,16 @@ class SqlAlchemyClientRepository(ClientRepository):
             .group_by(Client.id)
             .order_by(Client.created_at.desc())
         )
+        if search:
+            pattern = f"%{search}%"
+            statement = statement.where(
+                or_(
+                    Client.email_normalized.ilike(pattern),
+                    Client.display_name.ilike(pattern),
+                )
+            )
+
+        result = await self._session.execute(statement)
         return [
             ClientSummary(client=_to_client_record(model), submission_count=count)
             for model, count in result.all()
