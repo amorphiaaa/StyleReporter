@@ -53,6 +53,8 @@ evidence; it does not diagnose the client.
   email identity and raw submissions remain immutable through this UI.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
   for a persisted submission.
+- Runtime failures are persisted as `failed` report runs with an error message;
+  the generation endpoint returns `502` while report history remains available.
 - The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the
   typed agent contract without a model call.
 - `runtime: "agents_sdk"` is accepted by the API but returns `503` until

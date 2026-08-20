@@ -13,6 +13,7 @@ Expected behavior:
 - synthetic importer tests cover normalization, invalid email, and idempotency;
 - Google Sheets provider tests use injected token/HTTP fakes and never call
   Google or require credentials;
+- report failure tests verify failed runs keep an error message for history;
 - contract tests run without external provider calls.
 
 ## Frontend

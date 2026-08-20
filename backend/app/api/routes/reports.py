@@ -55,9 +55,11 @@ async def generate_style_report(
         started_at=now,
     )
     repository = SqlAlchemyStyleReportRunRepository(session)
+    run_persisted = False
 
     try:
         await repository.save(report_run)
+        run_persisted = True
         generated = await _build_runtime(payload.runtime).generate(
             StyleReportRequest(
                 client_id=str(client_id),
@@ -80,9 +82,24 @@ async def generate_style_report(
         )
         await repository.save(report_run)
         await session.commit()
-    except Exception:
+    except HTTPException:
         await session.rollback()
         raise
+    except Exception as exc:
+        await session.rollback()
+        if not run_persisted:
+            raise
+
+        failed_report_run = _failed_report_run(report_run, exc)
+        await repository.save(failed_report_run)
+        await session.commit()
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                f"Style report generation failed for run {failed_report_run.id}. "
+                "Inspect report history for details."
+            ),
+        ) from exc
 
     persisted = await repository.get_by_id(report_run.id)
     if persisted is None:
@@ -171,3 +188,23 @@ def _to_response(report_run: StyleReportRun) -> StyleReportResponse:
         started_at=report_run.started_at,
         completed_at=report_run.completed_at,
     )
+
+
+def _failed_report_run(report_run: StyleReportRun, error: Exception) -> StyleReportRun:
+    return StyleReportRun(
+        id=report_run.id,
+        client_id=report_run.client_id,
+        submission_id=report_run.submission_id,
+        status="failed",
+        runtime_type=report_run.runtime_type,
+        report_version="failed",
+        error_message=_format_error_message(error),
+        created_at=report_run.created_at,
+        started_at=report_run.started_at,
+        completed_at=datetime.now(UTC),
+    )
+
+
+def _format_error_message(error: Exception) -> str:
+    detail = str(error).strip() or "No additional error details were provided."
+    return f"{type(error).__name__}: {detail}"[:2000]

@@ -220,7 +220,8 @@ a {
 }
 
 .source-chip,
-.success-chip {
+.success-chip,
+.error-chip {
   padding: 6px 9px;
   border-radius: 999px;
   font-size: 11px;
@@ -237,6 +238,11 @@ a {
 .success-chip {
   background: #e4eee5;
   color: #4e7558;
+}
+
+.error-chip {
+  background: #f5e4e1;
+  color: #8a443e;
 }
 
 .form-help,
@@ -549,6 +555,11 @@ textarea:focus {
   background: #fffdf9;
 }
 
+.report-card-failed {
+  border-color: #e5bdb7;
+  background: #fff9f7;
+}
+
 .report-history {
   display: grid;
   gap: 12px;
@@ -572,6 +583,12 @@ textarea:focus {
 .report-summary {
   margin: 16px 0 0;
   color: #62574f;
+  line-height: 1.6;
+}
+
+.report-error {
+  margin: 16px 0 0;
+  color: #8a443e;
   line-height: 1.6;
 }
 

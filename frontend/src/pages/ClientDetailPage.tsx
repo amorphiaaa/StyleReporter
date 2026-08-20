@@ -101,6 +101,12 @@ export function ClientDetailPage() {
                   ? requestError.message
                   : "Style report generation failed",
               );
+              try {
+                const reportRuns = await listStyleReports(client.id);
+                setReports(groupReportsBySubmission(reportRuns));
+              } catch {
+                // Keep the original generation error visible if history refresh also fails.
+              }
             } finally {
               setGeneratingSubmissionId(null);
             }
@@ -281,28 +287,41 @@ function ClientProfile({
 }
 
 function ReportPreview({ report }: { report: StyleReportResponse }) {
+  const isFailed = report.status === "failed";
   const summary = report.report?.summary;
   return (
-    <div className="report-card">
+    <div className={`report-card${isFailed ? " report-card-failed" : ""}`}>
       <div className="report-heading">
         <div>
-          <p className="eyebrow">Generated report</p>
-          <h4>{typeof report.report?.title === "string" ? report.report.title : "Style report"}</h4>
+          <p className="eyebrow">{isFailed ? "Report attempt failed" : "Generated report"}</p>
+          <h4>
+            {isFailed
+              ? "Style report unavailable"
+              : typeof report.report?.title === "string"
+                ? report.report.title
+                : "Style report"}
+          </h4>
         </div>
-        <span className="success-chip">
+        <span className={isFailed ? "error-chip" : "success-chip"}>
           {report.runtime_type} · {report.report_version}
         </span>
       </div>
-      <p className="report-summary">
-        {typeof summary === "string" ? summary : "Report output is ready."}
+      <p className={isFailed ? "report-error" : "report-summary"}>
+        {isFailed
+          ? report.error_message ?? "The runtime failed without additional details."
+          : typeof summary === "string"
+            ? summary
+            : "Report output is ready."}
       </p>
       <p className="report-meta">
         {report.status} · {formatDate(report.completed_at ?? report.created_at)}
       </p>
-      <details>
-        <summary>View structured report output</summary>
-        <pre className="raw-payload">{JSON.stringify(report.report, null, 2)}</pre>
-      </details>
+      {report.report ? (
+        <details>
+          <summary>View structured report output</summary>
+          <pre className="raw-payload">{JSON.stringify(report.report, null, 2)}</pre>
+        </details>
+      ) : null}
     </div>
   );
 }

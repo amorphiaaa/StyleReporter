@@ -57,6 +57,8 @@ OpenAI key. You can also pass `runtime: "agents_sdk_dry_run"` to verify that
 the typed Agents SDK agent contract is constructed without calling a model. The
 real `agents_sdk` runtime is disabled by default; requests receive `503` until
 `OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
+Runtime exceptions are saved as failed report runs and return `502`, so the
+attempt remains visible in report history.
 Retrieve the run later with
 `GET http://localhost:8000/api/v1/reports/{report_run_id}`.
 
