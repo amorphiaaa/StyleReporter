@@ -18,6 +18,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
   deterministic fixture source, behind a disabled-by-default feature flag.
 - Questionnaire importer: provider-agnostic service with validation,
   normalization, and source-row idempotency.
+- Questionnaire contract: versioned normalization for the known synthetic
+  questionnaire; unknown versions remain raw-only.
 - Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
   real Runner calls remain behind the same runtime contract and a disabled-by-
   default feature flag.
@@ -49,6 +51,8 @@ evidence; it does not diagnose the client.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
 - The Imports screen uses the detail endpoint to show source metadata, counters,
   and persisted row-level errors for a selected run.
+- `fixture-v1` rows are normalized into a typed questionnaire context before
+  identity fields are imported; raw answers remain unchanged.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.

@@ -11,6 +11,8 @@ Expected behavior:
 
 - health test passes;
 - synthetic importer tests cover normalization, invalid email, and idempotency;
+- questionnaire contract tests cover typed field mapping, image-link splitting,
+  missing report fields, and unknown-version fallback;
 - import history tests cover summary counters, detailed row errors, and the
   frontend history/detail queries;
 - Google Sheets provider tests use injected token/HTTP fakes and never call

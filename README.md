@@ -11,6 +11,11 @@ the client detail screen can launch a deterministic stub report for a saved
 submission. The Google Sheets provider is present but disabled by default, so
 the local stack still makes no external provider calls.
 
+The known synthetic questionnaire is normalized through a versioned domain
+contract before identity fields are imported. Full source rows remain preserved
+as raw JSONB, and unknown questionnaire versions stay raw-only until their
+mapping is explicitly defined.
+
 Not implemented:
 
 - client deletion UI

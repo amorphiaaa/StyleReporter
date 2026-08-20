@@ -63,6 +63,33 @@ async def test_importer_normalizes_email_and_preserves_raw_payload() -> None:
 
 
 @pytest.mark.asyncio
+async def test_importer_uses_versioned_contract_with_custom_identity_headers() -> None:
+    row = SheetRow(
+        row_number=2,
+        values={
+            "Contact": "synthetic.client@example.test",
+            "Client label": "Synthetic Client",
+            "Visual world": "B",
+        },
+    )
+    importer, clients, _ = build_importer([row])
+    request = ImportRequest(
+        source=SheetReadRequest(
+            spreadsheet_id="synthetic-spreadsheet",
+            sheet_name="Form Responses 1",
+        ),
+        email_header="Contact",
+        display_name_header="Client label",
+        questionnaire_version="fixture-v1",
+    )
+
+    result = await importer.import_rows(request)
+
+    assert result.created_clients == 1
+    assert clients.items["synthetic.client@example.test"].display_name == "Synthetic Client"
+
+
+@pytest.mark.asyncio
 async def test_importer_skips_duplicate_source_rows() -> None:
     row = load_fixture_rows()[0]
     importer, _, submissions = build_importer([row, row])

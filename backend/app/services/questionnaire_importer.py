@@ -17,6 +17,7 @@ from app.domain.normalization import (
     normalize_email,
     parse_submission_timestamp,
 )
+from app.domain.questionnaire import normalize_questionnaire_payload
 
 
 class QuestionnaireImportService(QuestionnaireImporter):
@@ -69,7 +70,13 @@ class QuestionnaireImportService(QuestionnaireImporter):
                 continue
 
             raw_payload = dict(row.values)
-            email = normalize_email(raw_payload.get(request.email_header))
+            questionnaire = normalize_questionnaire_payload(
+                raw_payload,
+                version=request.questionnaire_version,
+                email_header=request.email_header,
+                display_name_header=request.display_name_header,
+            )
+            email = normalize_email(questionnaire.email)
             if email is None:
                 rejected_rows += 1
                 errors.append(
@@ -81,11 +88,7 @@ class QuestionnaireImportService(QuestionnaireImporter):
                 )
                 continue
 
-            display_name = (
-                normalize_display_name(raw_payload.get(request.display_name_header))
-                if request.display_name_header
-                else None
-            )
+            display_name = normalize_display_name(questionnaire.display_name)
             existing_client = await self._clients.get_by_normalized_email(email)
             if existing_client is None:
                 client = await self._clients.save(
