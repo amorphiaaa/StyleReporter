@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 
 class ClientListItem(BaseModel):
@@ -30,3 +30,23 @@ class ClientDetailResponse(BaseModel):
     email_normalized: str
     display_name: str | None
     submissions: list[ClientSubmissionResponse]
+
+
+class UpdateClientRequest(BaseModel):
+    display_name: str | None = Field(..., max_length=255)
+
+    @field_validator("display_name", mode="before")
+    @classmethod
+    def trim_display_name(cls, value: object) -> object:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            normalized = value.strip()
+            return normalized or None
+        return value
+
+
+class ClientUpdateResponse(BaseModel):
+    id: UUID
+    email_normalized: str
+    display_name: str | None

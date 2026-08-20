@@ -49,6 +49,8 @@ evidence; it does not diagnose the client.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.
 - GET /api/v1/clients/{client_id} returns the client and raw submissions.
+- PATCH /api/v1/clients/{client_id} updates only the display name; normalized
+  email identity and raw submissions remain immutable through this UI.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
   for a persisted submission.
 - The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the

@@ -8,7 +8,10 @@ from app.api.schemas.clients import (
     ClientDetailResponse,
     ClientListItem,
     ClientSubmissionResponse,
+    ClientUpdateResponse,
+    UpdateClientRequest,
 )
+from app.domain.contracts import ClientRecord
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemySubmissionRepository,
@@ -69,4 +72,37 @@ async def get_client(
             )
             for submission in submissions
         ],
+    )
+
+
+@router.patch("/{client_id}", response_model=ClientUpdateResponse)
+async def update_client(
+    client_id: UUID,
+    payload: UpdateClientRequest,
+    session: AsyncSession = db_session_dependency,
+) -> ClientUpdateResponse:
+    repository = SqlAlchemyClientRepository(session)
+    client = await repository.get_by_id(str(client_id))
+    if client is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Client {client_id} was not found.",
+        )
+
+    updated_client = ClientRecord(
+        id=client.id,
+        email_normalized=client.email_normalized,
+        display_name=payload.display_name,
+    )
+    try:
+        saved_client = await repository.save(updated_client)
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+
+    return ClientUpdateResponse(
+        id=UUID(saved_client.id),
+        email_normalized=saved_client.email_normalized,
+        display_name=saved_client.display_name,
     )

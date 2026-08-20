@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { createStyleReport, getClient, listStyleReports } from "../api/client";
+import { createStyleReport, getClient, listStyleReports, updateClient } from "../api/client";
 import type {
   ClientDetail,
   StyleReportResponse,
@@ -16,6 +16,7 @@ export function ClientDetailPage() {
   const [reports, setReports] = useState<ReportsBySubmission>({});
   const [selectedRuntime, setSelectedRuntime] = useState<StyleReportRuntimeType>("stub");
   const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
+  const [isSavingClient, setIsSavingClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,7 +65,24 @@ export function ClientDetailPage() {
           reports={reports}
           selectedRuntime={selectedRuntime}
           generatingSubmissionId={generatingSubmissionId}
+          isSavingClient={isSavingClient}
           onRuntimeChange={setSelectedRuntime}
+          onSaveDisplayName={async (displayName) => {
+            setError(null);
+            setIsSavingClient(true);
+            try {
+              const updatedClient = await updateClient(client.id, { display_name: displayName });
+              setClient((current) =>
+                current ? { ...current, display_name: updatedClient.display_name } : current,
+              );
+            } catch (requestError: unknown) {
+              setError(
+                requestError instanceof Error ? requestError.message : "Client update failed",
+              );
+            } finally {
+              setIsSavingClient(false);
+            }
+          }}
           onGenerateReport={async (submissionId, runtime) => {
             setError(null);
             setGeneratingSubmissionId(submissionId);
@@ -98,28 +116,87 @@ function ClientProfile({
   reports,
   selectedRuntime,
   generatingSubmissionId,
+  isSavingClient,
   onRuntimeChange,
+  onSaveDisplayName,
   onGenerateReport,
 }: {
   client: ClientDetail;
   reports: ReportsBySubmission;
   selectedRuntime: StyleReportRuntimeType;
   generatingSubmissionId: string | null;
+  isSavingClient: boolean;
   onRuntimeChange: (runtime: StyleReportRuntimeType) => void;
+  onSaveDisplayName: (displayName: string | null) => Promise<void>;
   onGenerateReport: (submissionId: string, runtime: StyleReportRuntimeType) => Promise<void>;
 }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [displayNameDraft, setDisplayNameDraft] = useState(client.display_name ?? "");
+
+  useEffect(() => {
+    setDisplayNameDraft(client.display_name ?? "");
+    setIsEditingName(false);
+  }, [client.id, client.display_name]);
+
   return (
     <>
       <div className="detail-heading">
         <div>
           <p className="eyebrow">Client profile</p>
-          <h2>{client.display_name ?? "Unnamed client"}</h2>
+          {!isEditingName ? <h2>{client.display_name ?? "Unnamed client"}</h2> : null}
           <p className="profile-email">{client.email_normalized}</p>
+          {isEditingName ? (
+            <form
+              className="profile-editor"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void onSaveDisplayName(displayNameDraft.trim() || null);
+              }}
+            >
+              <label>
+                Display name
+                <input
+                  aria-label="Display name"
+                  maxLength={255}
+                  value={displayNameDraft}
+                  onChange={(event) => setDisplayNameDraft(event.target.value)}
+                  autoFocus
+                />
+              </label>
+              <div className="profile-editor-actions">
+                <button className="primary-button" type="submit" disabled={isSavingClient}>
+                  {isSavingClient ? "Saving..." : "Save name"}
+                </button>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={isSavingClient}
+                  onClick={() => {
+                    setDisplayNameDraft(client.display_name ?? "");
+                    setIsEditingName(false);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : null}
         </div>
-        <span className="muted-label">
-          {client.submissions.length} questionnaire submission
-          {client.submissions.length === 1 ? "" : "s"}
-        </span>
+        <div className="detail-heading-side">
+          <span className="muted-label">
+            {client.submissions.length} questionnaire submission
+            {client.submissions.length === 1 ? "" : "s"}
+          </span>
+          {!isEditingName ? (
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => setIsEditingName(true)}
+            >
+              Edit profile
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="submission-stack">

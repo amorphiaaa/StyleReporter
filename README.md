@@ -13,7 +13,7 @@ the local stack still makes no external provider calls.
 
 Not implemented:
 
-- client editing/deletion UI
+- client deletion UI
 - user authentication
 - scheduled jobs or webhooks
 - OpenAI model calls or production prompts (the Agents SDK dry-run adapter and

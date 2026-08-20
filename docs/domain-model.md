@@ -61,3 +61,7 @@ The local importer trims and case-folds email values for client identity while
 preserving the original row unchanged in `raw_payload`. Invalid email rows are
 rejected with a row-level error. Source spreadsheet ID, sheet name, and row
 number form the idempotency key for a submission.
+
+The client profile editor may update `display_name` only. The normalized email
+is the deduplication identity and raw questionnaire answers are retained as
+source evidence, so neither is editable from the profile UI.

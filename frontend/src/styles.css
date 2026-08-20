@@ -479,9 +479,27 @@ textarea:focus {
   overflow-wrap: anywhere;
 }
 
+.detail-heading-side {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+}
+
 .profile-email {
   margin: 12px 0 0;
   color: #766d66;
+}
+
+.profile-editor {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+  margin-top: 14px;
+}
+
+.profile-editor-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .submission-stack {
@@ -692,6 +710,12 @@ details summary {
   }
 
   .detail-heading .muted-label {
+    margin-top: 14px;
+  }
+
+  .detail-heading-side {
+    align-items: start;
+    flex-direction: column;
     margin-top: 14px;
   }
 

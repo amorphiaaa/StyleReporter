@@ -82,6 +82,16 @@ export type ClientDetail = {
   submissions: ClientSubmission[];
 };
 
+export type UpdateClientRequest = {
+  display_name: string | null;
+};
+
+export type ClientUpdateResponse = {
+  id: string;
+  email_normalized: string;
+  display_name: string | null;
+};
+
 export type GenerateStyleReportRequest = {
   submission_id: string;
   runtime?: StyleReportRuntimeType;

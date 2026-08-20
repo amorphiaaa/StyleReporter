@@ -2,11 +2,13 @@ import type {
   HealthResponse,
   ClientDetail,
   ClientListItem,
+  ClientUpdateResponse,
   GenerateStyleReportRequest,
   ImportResponse,
   ImportRunResponse,
   ManualImportRequest,
   StyleReportResponse,
+  UpdateClientRequest,
 } from "../types";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
@@ -61,6 +63,23 @@ export async function getClient(clientId: string): Promise<ClientDetail> {
   }
 
   return response.json() as Promise<ClientDetail>;
+}
+
+export async function updateClient(
+  clientId: string,
+  request: UpdateClientRequest,
+): Promise<ClientUpdateResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Client update failed"));
+  }
+
+  return response.json() as Promise<ClientUpdateResponse>;
 }
 
 export async function createStyleReport(

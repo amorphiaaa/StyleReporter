@@ -17,7 +17,8 @@ still gated.
 
 ## Recommended implementation order
 
-1. Add client editing once the read-only client screens are stable.
+1. Add client deletion only after retention, audit, and report-history policy
+   are agreed.
 2. Review credentials, prompts, structured output validation, and tracing policy,
    then enable the gated real `AgentsSdkStyleReportRuntime` path with
    `OPENAI_AGENT_RUNTIME_ENABLED=true` and test it against a controlled model
@@ -38,6 +39,6 @@ still gated.
 
 ## Handoff acceptance
 
-The next engineer should be able to explain what is implemented, what returns
-501, where each future integration belongs, and which tests must be added for
-the first product slice.
+The next engineer should be able to explain what is implemented, which gated
+providers return 503 or 502, where each future integration belongs, and which
+tests must be added for the first product slice.

@@ -9,6 +9,7 @@ import {
   getStyleReport,
   listStyleReports,
   listClients,
+  updateClient,
 } from "./client";
 import type { ManualImportRequest } from "../types";
 
@@ -101,6 +102,29 @@ describe("API client", () => {
     await expect(listClients("Synthetic Client")).resolves.toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_BASE_URL}/api/v1/clients?search=Synthetic+Client`,
+    );
+  });
+
+  it("updates a client display name", async () => {
+    const updatedClient = {
+      id: "client-1",
+      email_normalized: "client@example.test",
+      display_name: "Updated Client",
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(updatedClient), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      updateClient("client-1", { display_name: "Updated Client" }),
+    ).resolves.toEqual(updatedClient);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/api/v1/clients/client-1`,
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ display_name: "Updated Client" }),
+      }),
     );
   });
 
