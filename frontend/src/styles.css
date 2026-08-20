@@ -273,13 +273,18 @@ a {
 
 .import-history-item {
   display: grid;
-  grid-template-columns: minmax(180px, 1.2fr) auto minmax(260px, 1fr) auto;
+  grid-template-columns: minmax(180px, 1.2fr) auto minmax(220px, 1fr) auto auto;
   align-items: center;
   gap: 18px;
   padding: 18px;
   border: 1px solid #e5ddd4;
   border-radius: 12px;
   background: #fffdf9;
+}
+
+.import-history-item.is-selected {
+  border-color: #c7a98e;
+  background: #f8f0e8;
 }
 
 .import-history-item h4 {
@@ -334,6 +339,87 @@ a {
   color: #8a7d73;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.import-history-action {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.history-detail {
+  margin-top: 18px;
+  padding: 28px;
+  border: 1px solid #cdb9a5;
+  border-radius: 16px;
+  background: #fffdf9;
+}
+
+.import-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.import-detail-meta > div {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #e5ddd4;
+  border-radius: 10px;
+  background: #fbfaf7;
+}
+
+.import-detail-meta span {
+  color: #8a7d73;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.import-detail-meta strong,
+.import-detail-meta code {
+  overflow-wrap: anywhere;
+  color: #62574f;
+  font-size: 12px;
+}
+
+.import-detail-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.import-error-list {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5ddd4;
+}
+
+.import-error-item {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 10px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee7df;
+  color: #62574f;
+  font-size: 12px;
+}
+
+.import-error-item:last-child {
+  border-bottom: 0;
+}
+
+.import-error-item span {
+  color: #8a443e;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+}
+
+.import-error-item p {
+  margin: 0;
 }
 
 .form-help {
@@ -809,6 +895,25 @@ details summary {
   .import-history-metrics,
   .import-history-date {
     grid-column: 1 / -1;
+  }
+
+  .import-history-action {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .history-detail {
+    padding: 22px;
+  }
+
+  .import-detail-meta,
+  .import-detail-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .import-error-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .form-actions {

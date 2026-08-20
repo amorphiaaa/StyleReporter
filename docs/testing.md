@@ -11,7 +11,8 @@ Expected behavior:
 
 - health test passes;
 - synthetic importer tests cover normalization, invalid email, and idempotency;
-- import history tests cover summary counters and the frontend limit query;
+- import history tests cover summary counters, detailed row errors, and the
+  frontend history/detail queries;
 - Google Sheets provider tests use injected token/HTTP fakes and never call
   Google or require credentials;
 - report failure tests verify failed runs keep an error message for history;
@@ -30,6 +31,8 @@ Expected behavior:
 - the TypeScript project type-checks;
 - the API client fallback points to localhost;
 - the manual import screen can submit a synthetic payload and render counters;
+- the Imports screen lists recent runs and opens persisted metadata and row
+  errors for a selected run;
 - the clients screen lists persisted profiles and opens a submission detail;
 - the client detail loads report history, can launch a stub report, and renders
   structured output;

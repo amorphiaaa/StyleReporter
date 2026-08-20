@@ -193,6 +193,10 @@ async def get_import(
             detail=f"Import run {import_id} was not found.",
         )
 
+    return _to_import_run_response(import_run)
+
+
+def _to_import_run_response(import_run: ImportRun) -> ImportRunResponse:
     return ImportRunResponse(
         import_id=import_run.id,
         source_type=import_run.source_type,

@@ -8,8 +8,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 
 ## Components
 
-- React frontend: navigation shell with manual import and client list/detail
-  screens.
+- React frontend: navigation shell with manual import/history/detail and client
+  list/detail screens.
 - FastAPI backend: health endpoint, manual import API, client list/detail API,
   local style report API, configuration, and domain contracts.
 - PostgreSQL: included in Compose; the initial schema foundation is present,
@@ -47,6 +47,8 @@ evidence; it does not diagnose the client.
 - GET /api/v1/imports?limit=... returns recent import-run summaries for the
   operator UI; GET /api/v1/imports/{import_id} remains the detailed run view.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
+- The Imports screen uses the detail endpoint to show source metadata, counters,
+  and persisted row-level errors for a selected run.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.

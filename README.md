@@ -51,7 +51,9 @@ spreadsheet ID are supplied. Its provider is covered by offline mock tests;
 no Google credentials are committed.
 
 Recent runs are available at `GET http://localhost:8000/api/v1/imports?limit=20`;
-the Imports screen displays their status and counters.
+the Imports screen displays their status and counters. Select a run there to
+load its persisted source metadata and row-level errors from
+`GET http://localhost:8000/api/v1/imports/{import_id}`.
 
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved

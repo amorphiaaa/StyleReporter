@@ -69,6 +69,32 @@ describe("API client", () => {
     await expect(getImport("missing-import")).rejects.toThrow("Import was not found");
   });
 
+  it("loads a detailed import run", async () => {
+    const detail = {
+      import_id: "import-1",
+      source_type: "google_sheets",
+      spreadsheet_id: "synthetic-spreadsheet",
+      sheet_name: "Form Responses 1",
+      status: "completed",
+      rows_seen: 4,
+      created_clients: 2,
+      updated_clients: 1,
+      created_submissions: 3,
+      rejected_rows: 1,
+      skipped_duplicates: 0,
+      row_errors: [{ row_number: 4, code: "invalid_email", message: "Invalid email" }],
+      started_at: "2026-08-20T18:00:00Z",
+      completed_at: "2026-08-20T18:00:01Z",
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(detail), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getImport("import-1")).resolves.toEqual(detail);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/v1/imports/import-1`);
+  });
+
   it("loads recent import history with a limit", async () => {
     const history = [
       {
