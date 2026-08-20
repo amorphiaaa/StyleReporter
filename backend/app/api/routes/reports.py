@@ -105,6 +105,24 @@ async def get_style_report(
     return _to_response(report_run)
 
 
+@router.get("/clients/{client_id}/reports", response_model=list[StyleReportResponse])
+async def list_client_style_reports(
+    client_id: UUID,
+    session: AsyncSession = db_session_dependency,
+) -> list[StyleReportResponse]:
+    client = await SqlAlchemyClientRepository(session).get_by_id(str(client_id))
+    if client is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Client {client_id} was not found.",
+        )
+
+    report_runs = await SqlAlchemyStyleReportRunRepository(session).list_by_client_id(
+        str(client_id)
+    )
+    return [_to_response(report_run) for report_run in report_runs]
+
+
 def _to_response(report_run: StyleReportRun) -> StyleReportResponse:
     return StyleReportResponse(
         id=UUID(report_run.id),

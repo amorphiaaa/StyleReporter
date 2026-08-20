@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { createStyleReport, getClient } from "../api/client";
+import { createStyleReport, getClient, listStyleReports } from "../api/client";
 import type { ClientDetail, StyleReportResponse } from "../types";
+
+type ReportsBySubmission = Record<string, StyleReportResponse[]>;
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
-  const [reports, setReports] = useState<Record<string, StyleReportResponse>>({});
+  const [reports, setReports] = useState<ReportsBySubmission>({});
   const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,11 +21,13 @@ export function ClientDetailPage() {
       return;
     }
 
+    setReports({});
     let isCurrent = true;
-    void getClient(clientId)
-      .then((item) => {
+    void Promise.all([getClient(clientId), listStyleReports(clientId)])
+      .then(([item, reportRuns]) => {
         if (isCurrent) {
           setClient(item);
+          setReports(groupReportsBySubmission(reportRuns));
         }
       })
       .catch((requestError: unknown) => {
@@ -62,7 +66,10 @@ export function ClientDetailPage() {
                 submission_id: submissionId,
                 runtime: "stub",
               });
-              setReports((current) => ({ ...current, [submissionId]: report }));
+              setReports((current) => ({
+                ...current,
+                [submissionId]: [report, ...(current[submissionId] ?? [])],
+              }));
             } catch (requestError: unknown) {
               setError(
                 requestError instanceof Error
@@ -86,7 +93,7 @@ function ClientProfile({
   onGenerateReport,
 }: {
   client: ClientDetail;
-  reports: Record<string, StyleReportResponse>;
+  reports: ReportsBySubmission;
   generatingSubmissionId: string | null;
   onGenerateReport: (submissionId: string) => Promise<void>;
 }) {
@@ -146,7 +153,13 @@ function ClientProfile({
                 {generatingSubmissionId === submission.id ? "Generating..." : "Generate stub report"}
               </button>
             </div>
-            {reports[submission.id] ? <ReportPreview report={reports[submission.id]} /> : null}
+            {reports[submission.id]?.length ? (
+              <div className="report-history">
+                {reports[submission.id].map((report) => (
+                  <ReportPreview key={report.id} report={report} />
+                ))}
+              </div>
+            ) : null}
             <details>
               <summary>View raw answers</summary>
               <pre className="raw-payload">{JSON.stringify(submission.raw_payload, null, 2)}</pre>
@@ -174,12 +187,22 @@ function ReportPreview({ report }: { report: StyleReportResponse }) {
       <p className="report-summary">
         {typeof summary === "string" ? summary : "Report output is ready."}
       </p>
+      <p className="report-meta">
+        {report.status} · {formatDate(report.completed_at ?? report.created_at)}
+      </p>
       <details>
         <summary>View structured report output</summary>
         <pre className="raw-payload">{JSON.stringify(report.report, null, 2)}</pre>
       </details>
     </div>
   );
+}
+
+function groupReportsBySubmission(reports: StyleReportResponse[]): ReportsBySubmission {
+  return reports.reduce<ReportsBySubmission>((grouped, report) => {
+    grouped[report.submission_id] = [...(grouped[report.submission_id] ?? []), report];
+    return grouped;
+  }, {});
 }
 
 function formatDate(value: string | null) {

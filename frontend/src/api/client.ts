@@ -88,6 +88,15 @@ export async function getStyleReport(reportRunId: string): Promise<StyleReportRe
   return response.json() as Promise<StyleReportResponse>;
 }
 
+export async function listStyleReports(clientId: string): Promise<StyleReportResponse[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}/reports`);
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Style report history lookup failed"));
+  }
+
+  return response.json() as Promise<StyleReportResponse[]>;
+}
+
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {
   try {
     const body = (await response.json()) as { detail?: string };

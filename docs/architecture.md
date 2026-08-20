@@ -45,6 +45,8 @@ evidence; it does not diagnose the client.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
   for a persisted submission.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
+- GET /api/v1/clients/{client_id}/reports returns report-run history ordered
+  from newest to oldest.
 - No external credentials are required.
 - The database engine is created at startup, but connections are opened only
   when an API request obtains a session.

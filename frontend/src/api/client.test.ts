@@ -7,6 +7,7 @@ import {
   getClient,
   getImport,
   getStyleReport,
+  listStyleReports,
   listClients,
 } from "./client";
 import type { ManualImportRequest } from "../types";
@@ -126,5 +127,30 @@ describe("API client", () => {
       }),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(2, `${API_BASE_URL}/api/v1/reports/report-1`);
+  });
+
+  it("loads report history for a client", async () => {
+    const reports = [
+      {
+        id: "report-1",
+        client_id: "client-1",
+        submission_id: "submission-1",
+        status: "completed",
+        runtime_type: "stub",
+        report_version: "stub-v1",
+        report: { title: "Style report draft" },
+        error_message: null,
+        created_at: "2026-08-20T18:00:00Z",
+        started_at: "2026-08-20T18:00:00Z",
+        completed_at: "2026-08-20T18:00:01Z",
+      },
+    ];
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(reports), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(listStyleReports("client-1")).resolves.toEqual(reports);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/v1/clients/client-1/reports`);
   });
 });

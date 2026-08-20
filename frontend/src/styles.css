@@ -474,11 +474,16 @@ textarea:focus {
 }
 
 .report-card {
-  margin: 0 0 22px;
   padding: 20px;
   border: 1px solid #d9cdbf;
   border-radius: 12px;
   background: #fffdf9;
+}
+
+.report-history {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
 .report-heading {
@@ -499,6 +504,13 @@ textarea:focus {
   margin: 16px 0 0;
   color: #62574f;
   line-height: 1.6;
+}
+
+.report-meta {
+  margin: 12px 0 0;
+  color: #8a7d73;
+  font-size: 12px;
+  text-transform: capitalize;
 }
 
 .submission-heading {

@@ -27,7 +27,8 @@ Expected behavior:
 - the API client fallback points to localhost;
 - the manual import screen can submit a synthetic payload and render counters;
 - the clients screen lists persisted profiles and opens a submission detail;
-- the client detail can launch a stub report and render structured output;
+- the client detail loads report history, can launch a stub report, and renders
+  structured output;
 - the production bundle builds.
 
 ## Compose smoke check
