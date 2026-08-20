@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import { createStyleReport, getClient, listStyleReports, updateClient } from "../api/client";
 import type {
   ClientDetail,
+  StyleLanguageAction,
+  StyleLanguageAnalysis,
   StyleReportResponse,
   StyleReportRuntimeType,
 } from "../types";
@@ -289,6 +291,7 @@ function ClientProfile({
 function ReportPreview({ report }: { report: StyleReportResponse }) {
   const isFailed = report.status === "failed";
   const summary = report.report?.summary;
+  const analysis = readStyleLanguageAnalysis(report.report);
   return (
     <div className={`report-card${isFailed ? " report-card-failed" : ""}`}>
       <div className="report-heading">
@@ -316,6 +319,7 @@ function ReportPreview({ report }: { report: StyleReportResponse }) {
       <p className="report-meta">
         {report.status} · {formatDate(report.completed_at ?? report.created_at)}
       </p>
+      {analysis ? <StyleLanguageAnalysisView analysis={analysis} /> : null}
       {report.report ? (
         <details>
           <summary>View structured report output</summary>
@@ -324,6 +328,112 @@ function ReportPreview({ report }: { report: StyleReportResponse }) {
       ) : null}
     </div>
   );
+}
+
+function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalysis }) {
+  return (
+    <div className="style-analysis">
+      <div className="analysis-grid">
+        <AnalysisBlock label="Current Style Language" value={analysis.current_style_language} />
+        <AnalysisBlock label="Desired Style Language" value={analysis.desired_style_language} />
+        <AnalysisBlock label="The Disconnect" value={analysis.disconnect} />
+      </div>
+      <div className="action-plan">
+        <div className="analysis-section-heading">
+          <p className="eyebrow">Client-facing next steps</p>
+          <h5>Your Action Plan</h5>
+        </div>
+        <div className="action-plan-list">
+          {analysis.your_action_plan.map((item) => (
+            <article className="action-plan-item" key={`${item.priority}-${item.focus}`}>
+              <span className="action-plan-number">{item.priority}</span>
+              <div>
+                <h6>{item.focus}</h6>
+                <p>{item.action}</p>
+                <small>{item.rationale}</small>
+                <small>
+                  <strong>First step:</strong> {item.first_step}
+                </small>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+      {analysis.limitations.length > 0 ? (
+        <details className="analysis-limitations">
+          <summary>Evidence and limitations</summary>
+          <p className="eyebrow">Evidence</p>
+          {analysis.evidence.map((item) => (
+            <p key={item}>{item}</p>
+          ))}
+          <p className="eyebrow">Limitations</p>
+          {analysis.limitations.map((item) => (
+            <p key={item}>{item}</p>
+          ))}
+        </details>
+      ) : null}
+    </div>
+  );
+}
+
+function AnalysisBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <article className="analysis-block">
+      <p className="eyebrow">{label}</p>
+      <p>{value}</p>
+    </article>
+  );
+}
+
+function readStyleLanguageAnalysis(
+  report: Record<string, unknown> | null,
+): StyleLanguageAnalysis | null {
+  if (!report) {
+    return null;
+  }
+
+  const actionPlan = Array.isArray(report.your_action_plan)
+    ? report.your_action_plan.filter(isStyleLanguageAction)
+    : [];
+  if (
+    typeof report.title !== "string" ||
+    typeof report.current_style_language !== "string" ||
+    typeof report.desired_style_language !== "string" ||
+    typeof report.disconnect !== "string" ||
+    actionPlan.length === 0
+  ) {
+    return null;
+  }
+
+  return {
+    title: report.title,
+    current_style_language: report.current_style_language,
+    desired_style_language: report.desired_style_language,
+    disconnect: report.disconnect,
+    your_action_plan: actionPlan,
+    evidence: readStringList(report.evidence),
+    limitations: readStringList(report.limitations),
+  };
+}
+
+function isStyleLanguageAction(value: unknown): value is StyleLanguageAction {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.priority === "number" &&
+    typeof item.focus === "string" &&
+    typeof item.action === "string" &&
+    typeof item.rationale === "string" &&
+    typeof item.first_step === "string"
+  );
+}
+
+function readStringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 function groupReportsBySubmission(reports: StyleReportResponse[]): ReportsBySubmission {

@@ -65,6 +65,7 @@ async def generate_style_report(
                 client_id=str(client_id),
                 submission_id=str(payload.submission_id),
                 raw_payload=submission.raw_payload,
+                questionnaire_version=submission.questionnaire_version,
             )
         )
         completed_at = datetime.now(UTC)

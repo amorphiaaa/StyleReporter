@@ -1,8 +1,19 @@
 # Agents SDK and Canva boundary
 
 The backend includes an Agents SDK boundary. The current
-`agents_sdk_dry_run` path constructs a typed `Agent` with structured output but
-does not call `Runner.run`, load production prompts, or execute tools.
+`agents_sdk_dry_run` path constructs a typed `Agent` with structured output and
+returns a deterministic preview of the four-section Style Language analysis,
+but does not call `Runner.run` or execute tools.
+
+The real output contract is:
+
+- `current_style_language`;
+- `desired_style_language`;
+- `disconnect`;
+- `your_action_plan` with 3-5 prioritized actions, rationale, and first step.
+
+The prompt is intentionally evidence-bound: missing answers remain unknown,
+image URLs are treated as metadata, and the agent must not invent client facts.
 
 The planned runtime will use the Python Agents SDK:
 

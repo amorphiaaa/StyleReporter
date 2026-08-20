@@ -116,6 +116,24 @@ export type GenerateStyleReportRequest = {
 
 export type StyleReportRuntimeType = "stub" | "agents_sdk_dry_run" | "agents_sdk";
 
+export type StyleLanguageAction = {
+  priority: number;
+  focus: string;
+  action: string;
+  rationale: string;
+  first_step: string;
+};
+
+export type StyleLanguageAnalysis = {
+  title: string;
+  current_style_language: string;
+  desired_style_language: string;
+  disconnect: string;
+  your_action_plan: StyleLanguageAction[];
+  evidence: string[];
+  limitations: string[];
+};
+
 export type StyleReportResponse = {
   id: string;
   client_id: string;

@@ -43,6 +43,32 @@ async def test_agents_sdk_runtime_dry_run_constructs_agent_without_model_call() 
     }
 
 
+async def test_agents_sdk_dry_run_contains_style_language_analysis_sections() -> None:
+    runtime = AgentsSdkStyleReportRuntime(model="synthetic-model")
+
+    result = await runtime.generate(
+        StyleReportRequest(
+            client_id="client-1",
+            submission_id="submission-1",
+            questionnaire_version="fixture-v1",
+            raw_payload={
+                "Email": "client@example.test",
+                "Name": "Synthetic Client",
+                "How would you describe your style today?": "elegant but repetitive",
+                "What would you love your style to help you feel?": "More like myself",
+                "Visual world": "B",
+            },
+        )
+    )
+
+    assert result.content["title"] == "Style Language analysis preview"
+    assert "elegant but repetitive" in result.content["current_style_language"]
+    assert "More like myself" in result.content["desired_style_language"]
+    assert result.content["disconnect"]
+    assert len(result.content["your_action_plan"]) == 3
+    assert "Missing questionnaire field: style_discomfort" in result.content["limitations"]
+
+
 async def test_agents_sdk_runtime_requires_key_when_not_dry_run() -> None:
     runtime = AgentsSdkStyleReportRuntime(dry_run=False)
 

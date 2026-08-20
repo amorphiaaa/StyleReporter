@@ -18,6 +18,8 @@ Expected behavior:
 - Google Sheets provider tests use injected token/HTTP fakes and never call
   Google or require credentials;
 - report failure tests verify failed runs keep an error message for history;
+- Agents SDK tests verify the four-section analysis output and identity-safe
+  questionnaire context;
 - contract tests run without external provider calls.
 
 ## Frontend
@@ -37,7 +39,7 @@ Expected behavior:
   errors for a selected run;
 - the clients screen lists persisted profiles and opens a submission detail;
 - the client detail loads report history, can launch a stub report, and renders
-  structured output;
+  the Style Language analysis sections and structured output;
 - the production bundle builds.
 
 ## Compose smoke check

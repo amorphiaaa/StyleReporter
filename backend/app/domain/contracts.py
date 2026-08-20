@@ -61,6 +61,7 @@ class StyleReportRequest:
     client_id: str
     submission_id: str
     raw_payload: JsonObject
+    questionnaire_version: str | None = None
 
 
 class StyleReportRuntime(Protocol):

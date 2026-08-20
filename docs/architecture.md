@@ -21,8 +21,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 - Questionnaire contract: versioned normalization for the known synthetic
   questionnaire; unknown versions remain raw-only.
 - Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
-  real Runner calls remain behind the same runtime contract and a disabled-by-
-  default feature flag.
+  both expose the four-section Style Language analysis contract. Real Runner
+  calls remain behind the same runtime contract and a disabled-by-default flag.
 - Canva connector: future provider boundary for asset workflows.
 
 ## Intended future flow
@@ -69,6 +69,8 @@ evidence; it does not diagnose the client.
   `OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
 - The client detail UI exposes both local runtime choices and keeps `stub` as
   the default.
+- The analysis UI renders current style language, desired style language, the
+  disconnect, and a prioritized action plan when that structured output exists.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
 - GET /api/v1/clients/{client_id}/reports returns report-run history ordered
   from newest to oldest.

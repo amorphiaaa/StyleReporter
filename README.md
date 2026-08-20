@@ -16,15 +16,21 @@ contract before identity fields are imported. Full source rows remain preserved
 as raw JSONB, and unknown questionnaire versions stay raw-only until their
 mapping is explicitly defined.
 
+The current MVP report target is a single-questionnaire analysis with four
+sections: `CURRENT STYLE LANGUAGE`, `DESIRED STYLE LANGUAGE`, `THE DISCONNECT`,
+and `YOUR ACTION PLAN`. The Agents SDK dry-run produces a deterministic preview
+of that contract without making a model call; the gated real runtime uses the
+same structured output after credentials and methodology review are complete.
+
 Not implemented:
 
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- OpenAI model calls or production prompts (the Agents SDK dry-run adapter and
-  local stub runtime are available)
+- OpenAI model calls and final production prompts (the Agents SDK dry-run
+  adapter and structured analysis contract are available)
 - Canva connector/OAuth/MCP calls
-- methodology-driven style report generation
+- production methodology-driven style report generation
 - production deployment or CI/CD
 
 ## Repository layout
