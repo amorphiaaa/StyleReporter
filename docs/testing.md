@@ -11,6 +11,7 @@ Expected behavior:
 
 - health test passes;
 - synthetic importer tests cover normalization, invalid email, and idempotency;
+- import history tests cover summary counters and the frontend limit query;
 - Google Sheets provider tests use injected token/HTTP fakes and never call
   Google or require credentials;
 - report failure tests verify failed runs keep an error message for history;

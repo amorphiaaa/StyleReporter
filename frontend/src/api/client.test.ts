@@ -8,6 +8,7 @@ import {
   getImport,
   getStyleReport,
   listStyleReports,
+  listImports,
   listClients,
   updateClient,
 } from "./client";
@@ -66,6 +67,34 @@ describe("API client", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getImport("missing-import")).rejects.toThrow("Import was not found");
+  });
+
+  it("loads recent import history with a limit", async () => {
+    const history = [
+      {
+        import_id: "import-1",
+        source_type: "google_sheets",
+        spreadsheet_id: "synthetic-spreadsheet",
+        sheet_name: "Form Responses 1",
+        status: "completed",
+        rows_seen: 4,
+        created_clients: 2,
+        updated_clients: 1,
+        created_submissions: 3,
+        rejected_rows: 1,
+        skipped_duplicates: 0,
+        row_errors_count: 1,
+        started_at: "2026-08-20T18:00:00Z",
+        completed_at: "2026-08-20T18:00:01Z",
+      },
+    ];
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(history), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(listImports(5)).resolves.toEqual(history);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/api/v1/imports?limit=5`);
   });
 
   it("loads clients and a client detail", async () => {

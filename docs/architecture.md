@@ -44,6 +44,8 @@ evidence; it does not diagnose the client.
   counters and row errors.
 - POST /api/v1/imports/google-sheets/sync reads a configured sheet through the
   provider boundary and sends rows through the same importer transaction.
+- GET /api/v1/imports?limit=... returns recent import-run summaries for the
+  operator UI; GET /api/v1/imports/{import_id} remains the detailed run view.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or

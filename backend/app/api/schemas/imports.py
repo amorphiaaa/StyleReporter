@@ -87,3 +87,20 @@ class ImportRunResponse(BaseModel):
     row_errors: list[ImportErrorResponse]
     started_at: datetime
     completed_at: datetime | None
+
+
+class ImportHistoryItem(BaseModel):
+    import_id: UUID
+    source_type: str
+    spreadsheet_id: str
+    sheet_name: str
+    status: str
+    rows_seen: int
+    created_clients: int
+    updated_clients: int
+    created_submissions: int
+    rejected_rows: int
+    skipped_duplicates: int
+    row_errors_count: int
+    started_at: datetime
+    completed_at: datetime | None

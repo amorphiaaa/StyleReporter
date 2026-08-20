@@ -1,7 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
-import { createManualImport } from "../api/client";
-import type { ImportResponse, ImportRow } from "../types";
+import { createManualImport, listImports } from "../api/client";
+import type { ImportHistoryItem, ImportResponse, ImportRow } from "../types";
 
 const DEFAULT_ROWS = JSON.stringify(
   [
@@ -29,6 +29,27 @@ export function ImportPage() {
   const [result, setResult] = useState<ImportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [history, setHistory] = useState<ImportHistoryItem[]>([]);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+
+  async function refreshHistory() {
+    setIsHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      setHistory(await listImports());
+    } catch (requestError) {
+      setHistoryError(
+        requestError instanceof Error ? requestError.message : "Import history lookup failed",
+      );
+    } finally {
+      setIsHistoryLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refreshHistory();
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,6 +75,7 @@ export function ImportPage() {
         rows,
       });
       setResult(importResult);
+      await refreshHistory();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Import failed");
     } finally {
@@ -137,8 +159,80 @@ export function ImportPage() {
 
         <ImportResultCard result={result} />
       </div>
+      <ImportHistory history={history} error={historyError} isLoading={isHistoryLoading} />
     </section>
   );
+}
+
+function ImportHistory({
+  history,
+  error,
+  isLoading,
+}: {
+  history: ImportHistoryItem[];
+  error: string | null;
+  isLoading: boolean;
+}) {
+  return (
+    <section className="history-card">
+      <div className="result-heading">
+        <div>
+          <p className="eyebrow">Operator view</p>
+          <h3>Import history</h3>
+        </div>
+        <span className="muted-label">Latest 20 runs</span>
+      </div>
+      {isLoading ? <p className="loading-copy">Loading import historyâ€¦</p> : null}
+      {error ? <p className="notice error-notice">{error}</p> : null}
+      {!isLoading && !error && history.length === 0 ? (
+        <p className="history-empty">No import runs have been recorded yet.</p>
+      ) : null}
+      {!isLoading && !error && history.length > 0 ? (
+        <div className="import-history-list">
+          {history.map((item) => (
+            <ImportHistoryItemCard key={item.import_id} item={item} />
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function ImportHistoryItemCard({ item }: { item: ImportHistoryItem }) {
+  return (
+    <article className="import-history-item">
+      <div>
+        <p className="eyebrow">{item.source_type}</p>
+        <h4>{item.sheet_name}</h4>
+        <code className="import-history-id">{item.import_id}</code>
+      </div>
+      <span className={importStatusClass(item.status)}>{item.status}</span>
+      <div className="import-history-metrics">
+        <span>{item.rows_seen} rows</span>
+        <span>{item.created_submissions} submissions</span>
+        <span>{item.rejected_rows} rejected</span>
+        <span>{item.row_errors_count} row errors</span>
+      </div>
+      <p className="import-history-date">{formatImportDate(item.completed_at ?? item.started_at)}</p>
+    </article>
+  );
+}
+
+function importStatusClass(status: string) {
+  if (status === "completed") {
+    return "status-chip status-completed";
+  }
+  if (status === "running") {
+    return "status-chip status-running";
+  }
+  return "status-chip status-other";
+}
+
+function formatImportDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function ImportResultCard({ result }: { result: ImportResponse | null }) {

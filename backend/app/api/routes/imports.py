@@ -1,13 +1,15 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
 from app.api.schemas.imports import (
     GoogleSheetsSyncRequest,
     ImportErrorResponse,
+    ImportHistoryItem,
     ImportResponse,
     ImportRunResponse,
     ManualImportRequest,
@@ -30,6 +32,17 @@ from app.services.questionnaire_importer import QuestionnaireImportService
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 db_session_dependency = Depends(get_db_session)
+
+
+@router.get("", response_model=list[ImportHistoryItem])
+async def list_imports(
+    limit: int = Query(default=20, ge=1, le=100),
+    session: AsyncSession = db_session_dependency,
+) -> list[ImportHistoryItem]:
+    result = await session.execute(
+        select(ImportRun).order_by(ImportRun.started_at.desc()).limit(limit)
+    )
+    return [_to_import_history_item(import_run) for import_run in result.scalars().all()]
 
 
 @router.post("/manual", response_model=ImportResponse, status_code=status.HTTP_201_CREATED)
@@ -215,4 +228,23 @@ def _to_import_response(result: ImportResult) -> ImportResponse:
             )
             for error in result.errors
         ],
+    )
+
+
+def _to_import_history_item(import_run: ImportRun) -> ImportHistoryItem:
+    return ImportHistoryItem(
+        import_id=import_run.id,
+        source_type=import_run.source_type,
+        spreadsheet_id=import_run.source_spreadsheet_id,
+        sheet_name=import_run.source_sheet_name,
+        status=import_run.status,
+        rows_seen=import_run.rows_seen,
+        created_clients=import_run.created_clients,
+        updated_clients=import_run.updated_clients,
+        created_submissions=import_run.created_submissions,
+        rejected_rows=import_run.rejected_rows,
+        skipped_duplicates=import_run.skipped_duplicates,
+        row_errors_count=len(import_run.row_errors or []),
+        started_at=import_run.started_at,
+        completed_at=import_run.completed_at,
     )

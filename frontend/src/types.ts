@@ -55,6 +55,23 @@ export type ImportRunResponse = {
   completed_at: string | null;
 };
 
+export type ImportHistoryItem = {
+  import_id: string;
+  source_type: string;
+  spreadsheet_id: string;
+  sheet_name: string;
+  status: string;
+  rows_seen: number;
+  created_clients: number;
+  updated_clients: number;
+  created_submissions: number;
+  rejected_rows: number;
+  skipped_duplicates: number;
+  row_errors_count: number;
+  started_at: string;
+  completed_at: string | null;
+};
+
 export type ClientListItem = {
   id: string;
   email_normalized: string;

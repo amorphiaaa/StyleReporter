@@ -50,6 +50,9 @@ disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
 spreadsheet ID are supplied. Its provider is covered by offline mock tests;
 no Google credentials are committed.
 
+Recent runs are available at `GET http://localhost:8000/api/v1/imports?limit=20`;
+the Imports screen displays their status and counters.
+
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
 `submission_id` to generate a deterministic `stub-v1` response without an

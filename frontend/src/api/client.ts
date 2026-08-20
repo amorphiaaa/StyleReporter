@@ -5,6 +5,7 @@ import type {
   ClientUpdateResponse,
   GenerateStyleReportRequest,
   ImportResponse,
+  ImportHistoryItem,
   ImportRunResponse,
   ManualImportRequest,
   StyleReportResponse,
@@ -44,6 +45,16 @@ export async function getImport(importId: string): Promise<ImportRunResponse> {
   }
 
   return response.json() as Promise<ImportRunResponse>;
+}
+
+export async function listImports(limit = 20): Promise<ImportHistoryItem[]> {
+  const query = new URLSearchParams({ limit: String(limit) });
+  const response = await fetch(`${API_BASE_URL}/api/v1/imports?${query.toString()}`);
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Import history lookup failed"));
+  }
+
+  return response.json() as Promise<ImportHistoryItem[]>;
 }
 
 export async function listClients(search?: string): Promise<ClientListItem[]> {
