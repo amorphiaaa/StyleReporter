@@ -1,0 +1,28 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes import clients, health, imports
+from app.core.config import get_settings
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    application = FastAPI(
+        title="StyleReporter API",
+        version="0.1.0",
+        description="Scaffold API. Product workflows are intentionally not implemented.",
+    )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    application.include_router(health.router)
+    application.include_router(clients.router, prefix="/api/v1")
+    application.include_router(imports.router, prefix="/api/v1")
+    return application
+
+
+app = create_app()

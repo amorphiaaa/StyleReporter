@@ -11,7 +11,7 @@ stubs, and synthetic fixtures. It does not implement the product workflow.
 Not implemented:
 
 - Google Sheets/Forms integration
-- PostgreSQL repositories or client persistence
+- PostgreSQL repositories or client persistence workflow
 - questionnaire import
 - user authentication
 - scheduled jobs or webhooks
