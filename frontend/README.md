@@ -1,7 +1,8 @@
-# Frontend scaffold
+# Frontend scaffold and manual import screen
 
-The frontend is a Vite/React/TypeScript shell with placeholder client and
-import pages. It does not call a working import API.
+The frontend is a Vite/React/TypeScript shell. The Imports page calls the
+manual backend endpoint with synthetic/already-read rows and renders import
+counters and row errors. The Clients page remains a placeholder.
 
 ## Commands
 

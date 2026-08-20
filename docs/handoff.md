@@ -1,8 +1,8 @@
 # Handoff guide
 
 This repository is ready for the next engineer to continue the first product
-slice. The current commit contains a working manual importer over already-read
-rows, but not the real Google provider or frontend workflow.
+slice. The current commit contains a working manual importer and frontend
+screen over already-read rows, but not the real Google provider or client UI.
 
 ## Read first
 
@@ -17,8 +17,8 @@ rows, but not the real Google provider or frontend workflow.
 
 1. Implement the read-only Google Sheets adapter.
 2. Connect it to the existing manual importer transaction boundary.
-3. Connect the frontend API client and import results screen.
-4. Add client list/detail endpoints backed by the existing repositories.
+3. Add client list/detail endpoints backed by the existing repositories.
+4. Extend the frontend with client list/detail screens.
 5. Add the Agents SDK runtime only after persisted evidence is available.
 6. Implement Canva through the documented connector boundary.
 

@@ -8,7 +8,7 @@ export function AppLayout() {
           <p className="eyebrow">Style Language Method</p>
           <h1>StyleReporter</h1>
         </div>
-        <span className="stage-badge">Scaffold</span>
+        <span className="stage-badge">Manual import slice</span>
       </header>
       <div className="workspace">
         <aside className="sidebar">
