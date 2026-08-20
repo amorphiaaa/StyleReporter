@@ -2,8 +2,8 @@
 
 The backend exposes health, manual import and client endpoints, plus a local
 stub style-report endpoint. Already-read rows and report runs are persisted
-through SQLAlchemy repositories; real Google Sheets and OpenAI providers are
-not connected yet.
+through SQLAlchemy repositories. The read-only Google Sheets provider is
+implemented behind a disabled-by-default feature flag; OpenAI remains gated.
 
 ## Commands
 
@@ -14,7 +14,7 @@ not connected yet.
 
 ## Implementation boundaries
 
-- Google Sheets adapter: app/integrations/google_sheets.py
+- Google Sheets adapter and auth/transport boundary: app/integrations/google_sheets.py
 - Questionnaire orchestration: app/services/questionnaire_importer.py
 - Repositories: app/repositories/
 - Report runtime contract: app/domain/contracts.py

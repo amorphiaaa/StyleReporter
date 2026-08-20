@@ -6,13 +6,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
 from app.api.schemas.imports import (
+    GoogleSheetsSyncRequest,
     ImportErrorResponse,
     ImportResponse,
     ImportRunResponse,
     ManualImportRequest,
 )
+from app.core.config import get_settings
 from app.db.models import ImportRun
-from app.domain.contracts import ImportResult
+from app.domain.contracts import GoogleSheetsSource, ImportRequest, ImportResult, SheetReadRequest
+from app.integrations.google_sheets import (
+    GoogleSheetsApiError,
+    GoogleSheetsApiSource,
+    GoogleSheetsAuthenticationError,
+    GoogleSheetsConfigurationError,
+)
 from app.integrations.inline_rows import InlineRowsSource
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
@@ -30,11 +38,87 @@ async def manual_import(
     session: AsyncSession = db_session_dependency,
 ) -> ImportResponse:
     import_id = uuid4()
+    return await _run_import(
+        request=payload.to_domain(import_id),
+        source=InlineRowsSource(payload.rows_to_domain()),
+        session=session,
+    )
+
+
+@router.post(
+    "/google-sheets/sync",
+    response_model=ImportResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def sync_google_sheets(
+    payload: GoogleSheetsSyncRequest | None = None,
+    session: AsyncSession = db_session_dependency,
+) -> ImportResponse:
+    settings = get_settings()
+    if not settings.google_sheets_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Google Sheets sync is disabled. Set GOOGLE_SHEETS_ENABLED=true "
+                "after configuring service-account credentials."
+            ),
+        )
+    if not settings.google_service_account_json:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google Sheets sync requires GOOGLE_SERVICE_ACCOUNT_JSON.",
+        )
+
+    request_payload = payload or GoogleSheetsSyncRequest()
+    spreadsheet_id = request_payload.spreadsheet_id or settings.google_spreadsheet_id
+    if not spreadsheet_id:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google Sheets sync requires GOOGLE_SPREADSHEET_ID.",
+        )
+    sheet_name = request_payload.sheet_name or settings.google_sheet_name
+    try:
+        source = GoogleSheetsApiSource.from_service_account_json(
+            settings.google_service_account_json,
+            timeout_seconds=settings.google_sheets_timeout_seconds,
+        )
+    except GoogleSheetsConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+    import_id = uuid4()
+    return await _run_import(
+        request=ImportRequest(
+            source=SheetReadRequest(
+                spreadsheet_id=spreadsheet_id,
+                sheet_name=sheet_name,
+                cell_range=request_payload.cell_range or settings.google_sheet_range,
+            ),
+            email_header=request_payload.email_header,
+            display_name_header=request_payload.display_name_header,
+            timestamp_header=request_payload.timestamp_header,
+            source_type=request_payload.source_type,
+            questionnaire_version=request_payload.questionnaire_version,
+            import_id=str(import_id),
+        ),
+        source=source,
+        session=session,
+    )
+
+
+async def _run_import(
+    *,
+    request: ImportRequest,
+    source: GoogleSheetsSource,
+    session: AsyncSession,
+) -> ImportResponse:
+    import_id = UUID(request.import_id) if request.import_id else uuid4()
     import_run = ImportRun(
         id=import_id,
-        source_type=payload.source_type,
-        source_spreadsheet_id=payload.spreadsheet_id,
-        source_sheet_name=payload.sheet_name,
+        source_type=request.source_type,
+        source_spreadsheet_id=request.source.spreadsheet_id,
+        source_sheet_name=request.source.sheet_name,
         status="running",
         row_errors=[],
     )
@@ -43,11 +127,11 @@ async def manual_import(
     try:
         await session.flush()
         importer = QuestionnaireImportService(
-            source=InlineRowsSource(payload.rows_to_domain()),
+            source=source,
             clients=SqlAlchemyClientRepository(session),
             submissions=SqlAlchemySubmissionRepository(session),
         )
-        result = await importer.import_rows(payload.to_domain(import_id))
+        result = await importer.import_rows(request)
         import_run.status = "completed"
         import_run.rows_seen = result.rows_seen
         import_run.created_clients = result.created_clients
@@ -65,19 +149,23 @@ async def manual_import(
         ]
         import_run.completed_at = datetime.now(UTC)
         await session.commit()
+    except GoogleSheetsAuthenticationError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+    except GoogleSheetsApiError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Google Sheets API request failed: {exc.detail}",
+        ) from exc
     except Exception:
         await session.rollback()
         raise
 
     return _to_import_response(result)
-
-
-@router.post("/google-sheets/sync")
-async def sync_google_sheets() -> None:
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Google Sheets import is not implemented in the scaffold.",
-    )
 
 
 @router.get("/{import_id}", response_model=ImportRunResponse)

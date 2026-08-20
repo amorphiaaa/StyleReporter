@@ -44,6 +44,17 @@ class ManualImportRequest(BaseModel):
         return [row.to_domain() for row in self.rows]
 
 
+class GoogleSheetsSyncRequest(BaseModel):
+    spreadsheet_id: str | None = Field(default=None, min_length=1, max_length=255)
+    sheet_name: str | None = Field(default=None, min_length=1, max_length=255)
+    cell_range: str | None = Field(default=None, max_length=255)
+    email_header: str = Field(default="Email", min_length=1, max_length=255)
+    display_name_header: str | None = Field(default="Name", max_length=255)
+    timestamp_header: str | None = Field(default="Timestamp", max_length=255)
+    source_type: str = Field(default="google_sheets", min_length=1, max_length=50)
+    questionnaire_version: str | None = Field(default=None, max_length=100)
+
+
 class ImportErrorResponse(BaseModel):
     row_number: int
     code: str

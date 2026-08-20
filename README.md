@@ -8,11 +8,11 @@ turn client questionnaire data into personalized style reports.
 This repository contains the handoff scaffold, a manual import slice, and a
 local report vertical slice. Already-read rows are persisted in PostgreSQL;
 the client detail screen can launch a deterministic stub report for a saved
-submission. No external provider is called.
+submission. The Google Sheets provider is present but disabled by default, so
+the local stack still makes no external provider calls.
 
 Not implemented:
 
-- Google Sheets/Forms API integration
 - client editing/deletion UI
 - user authentication
 - scheduled jobs or webhooks
@@ -44,7 +44,11 @@ Then open:
 
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
-already-read rows until the real Google Sheets adapter is implemented.
+already-read rows. The read-only Google Sheets endpoint is available at
+`POST http://localhost:8000/api/v1/imports/google-sheets/sync`; it remains
+disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
+spreadsheet ID are supplied. Its provider is covered by offline mock tests;
+no Google credentials are committed.
 
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved

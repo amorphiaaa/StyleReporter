@@ -14,7 +14,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
   local style report API, configuration, and domain contracts.
 - PostgreSQL: included in Compose; the initial schema foundation is present,
   with SQLAlchemy repositories and import-run persistence for the manual API.
-- Google Sheets adapter: provider stub plus a deterministic fixture source.
+- Google Sheets adapter: read-only REST provider with service-account auth and
+  deterministic fixture source, behind a disabled-by-default feature flag.
 - Questionnaire importer: provider-agnostic service with validation,
   normalization, and source-row idempotency.
 - Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
@@ -30,7 +31,8 @@ report run persistence.
 
 The unit tests exercise the same flow with FixtureGoogleSheetsSource and
 in-memory repositories. The Compose smoke test exercises the manual endpoint
-against PostgreSQL. No Google or AI provider calls are made.
+against PostgreSQL. The default local stack makes no Google or AI provider
+calls.
 
 The importer and agent must remain separate. Importing a questionnaire stores
 evidence; it does not diagnose the client.
@@ -40,6 +42,8 @@ evidence; it does not diagnose the client.
 - GET /health returns the scaffold status.
 - POST /api/v1/imports/manual persists already-read rows and returns import
   counters and row errors.
+- POST /api/v1/imports/google-sheets/sync reads a configured sheet through the
+  provider boundary and sends rows through the same importer transaction.
 - GET /api/v1/imports/{import_id} returns persisted run metadata.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or

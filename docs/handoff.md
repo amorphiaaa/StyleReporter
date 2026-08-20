@@ -1,9 +1,10 @@
 # Handoff guide
 
 This repository is ready for the next engineer to continue the first product
-slice. The current commit contains a working manual importer, client
-list/detail screens, and a deterministic local report runtime, but not the
-real Google or OpenAI providers.
+slice. The current commit contains a working manual importer, a read-only
+Google Sheets provider behind a disabled-by-default flag, client list/detail
+screens, and a deterministic local report runtime. The real OpenAI provider is
+still gated.
 
 ## Read first
 
@@ -21,8 +22,8 @@ real Google or OpenAI providers.
    then enable the gated real `AgentsSdkStyleReportRuntime` path with
    `OPENAI_AGENT_RUNTIME_ENABLED=true` and test it against a controlled model
    environment.
-3. Implement the read-only Google Sheets adapter and connect it to the
-   existing importer transaction boundary.
+3. Configure and test the Google Sheets provider with a real service account,
+   spreadsheet sharing, and a controlled response sheet.
 4. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints

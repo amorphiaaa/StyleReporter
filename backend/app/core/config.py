@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     google_service_account_json: str | None = None
     google_spreadsheet_id: str | None = None
     google_sheet_name: str = "Form Responses 1"
+    google_sheet_range: str | None = None
+    google_sheets_enabled: bool = False
+    google_sheets_timeout_seconds: float = 10.0
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None

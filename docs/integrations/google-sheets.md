@@ -9,18 +9,21 @@ the spreadsheets.values.get operation:
 
 https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets.values/get
 
-## Planned configuration
+## Configuration
 
 - GOOGLE_SERVICE_ACCOUNT_JSON
 - GOOGLE_SPREADSHEET_ID
 - GOOGLE_SHEET_NAME
+- GOOGLE_SHEET_RANGE (optional A1 range)
+- GOOGLE_SHEETS_ENABLED (false by default)
+- GOOGLE_SHEETS_TIMEOUT_SECONDS
 - an explicit email-column header
 
 The response sheet must be shared with the service-account email. Credentials
 must be injected through secrets or environment configuration and never stored
 in the repository.
 
-## Planned adapter contract
+## Adapter contract
 
 GoogleSheetsSource.read_rows(SheetReadRequest) returns rows mapped by the
 header row. Unknown headers must be preserved. The adapter should be read-only.
@@ -38,8 +41,13 @@ header row. Unknown headers must be preserved. The adapter should be read-only.
 
 ## Local implementation
 
-`FixtureGoogleSheetsSource` provides deterministic `SheetRow` values for local
-tests. `QuestionnaireImportService` consumes the `GoogleSheetsSource`,
+`GoogleSheetsApiSource` reads `spreadsheets.values.get` through a read-only
+transport and maps the first returned row to headers. Its service-account token
+provider and HTTP transport are separate injectable boundaries, so provider
+tests do not need credentials or network access. `FixtureGoogleSheetsSource`
+provides deterministic `SheetRow` values for local tests.
+
+`QuestionnaireImportService` consumes the `GoogleSheetsSource`,
 `ClientRepository`, and `SubmissionRepository` contracts without knowing
 whether they are backed by fixtures, PostgreSQL, or Google APIs.
 
@@ -47,7 +55,8 @@ The current fixture covers a new client, a repeat email, a missing email, and a
 second client. It intentionally includes synthetic `example.test` image URLs
 only.
 
-The real Google Sheets adapter still requires credentials and is not
-implemented. Until it is available, `POST /api/v1/imports/manual` accepts
-already-read rows and sends them through the same importer and PostgreSQL
-repositories.
+`POST /api/v1/imports/google-sheets/sync` uses the same importer and PostgreSQL
+transaction boundary as the manual endpoint. It returns `503` while
+`GOOGLE_SHEETS_ENABLED=false` or credentials/configuration are missing, and
+`502` for an upstream Google Sheets API failure. The endpoint is intentionally
+not scheduled and has no webhook or background worker yet.
