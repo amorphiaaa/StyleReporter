@@ -1,7 +1,8 @@
 # Handoff guide
 
-This repository is ready for the next engineer to implement the first product
-slice. The current commit is scaffolding, not a working importer.
+This repository is ready for the next engineer to continue the first product
+slice. The current commit contains a working manual importer over already-read
+rows, but not the real Google provider or frontend workflow.
 
 ## Read first
 
@@ -14,14 +15,12 @@ slice. The current commit is scaffolding, not a working importer.
 
 ## Recommended implementation order
 
-1. Add SQLAlchemy models and the first Alembic migration.
-2. Add repository implementations and transaction boundaries.
-3. Implement the read-only Google Sheets adapter.
-4. Implement the questionnaire importer with idempotency and row errors.
-5. Replace the 501 routes with typed API schemas.
-6. Connect the frontend API client and import results screen.
-7. Add the Agents SDK runtime only after persisted evidence is available.
-8. Implement Canva through the documented connector boundary.
+1. Implement the read-only Google Sheets adapter.
+2. Connect it to the existing manual importer transaction boundary.
+3. Connect the frontend API client and import results screen.
+4. Add client list/detail endpoints backed by the existing repositories.
+5. Add the Agents SDK runtime only after persisted evidence is available.
+6. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints
 

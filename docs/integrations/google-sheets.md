@@ -48,4 +48,6 @@ second client. It intentionally includes synthetic `example.test` image URLs
 only.
 
 The real Google Sheets adapter still requires credentials and is not
-implemented. The importer is not wired to an API route or PostgreSQL session.
+implemented. Until it is available, `POST /api/v1/imports/manual` accepts
+already-read rows and sends them through the same importer and PostgreSQL
+repositories.

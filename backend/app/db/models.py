@@ -79,6 +79,7 @@ class ImportRun(Base):
     updated_clients: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_submissions: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     rejected_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    skipped_duplicates: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     row_errors: Mapped[list[dict[str, object]] | None] = mapped_column(JSONB, nullable=True)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

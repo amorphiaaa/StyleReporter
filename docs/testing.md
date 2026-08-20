@@ -10,7 +10,7 @@
 Expected behavior:
 
 - health test passes;
-- future import route returns HTTP 501;
+- synthetic importer tests cover normalization, invalid email, and idempotency;
 - contract tests run without external provider calls.
 
 ## Frontend
@@ -33,3 +33,8 @@ Expected behavior:
 
 Verify the API health URL and frontend URL from the root README. Stop with
 docker compose down after the check.
+
+For a backend persistence smoke test, POST synthetic rows to
+`/api/v1/imports/manual`, then retrieve the returned ID from
+`/api/v1/imports/{import_id}`. The endpoint writes only synthetic data during
+local verification.

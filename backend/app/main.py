@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import clients, health, imports
 from app.core.config import get_settings
+from app.db.session import create_session_factory
 
 
 def create_app() -> FastAPI:
@@ -10,8 +11,9 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="StyleReporter API",
         version="0.1.0",
-        description="Scaffold API. Product workflows are intentionally not implemented.",
+        description="StyleReporter API with an internal questionnaire import slice.",
     )
+    application.state.session_factory = create_session_factory()
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,

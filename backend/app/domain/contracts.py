@@ -48,6 +48,7 @@ class ImportRequest:
     timestamp_header: str | None = "Timestamp"
     source_type: str = "google_sheets"
     questionnaire_version: str | None = None
+    import_id: str | None = None
 
 
 @dataclass(frozen=True)

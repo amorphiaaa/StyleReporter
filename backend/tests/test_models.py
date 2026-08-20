@@ -37,3 +37,9 @@ def test_submission_keeps_raw_payload_as_jsonb_and_source_row_is_unique() -> Non
         "source_sheet_name",
         "source_row_number",
     }
+
+
+def test_import_run_keeps_duplicate_counter() -> None:
+    table = Base.metadata.tables["import_runs"]
+
+    assert table.c.skipped_duplicates.nullable is False

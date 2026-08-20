@@ -1,8 +1,8 @@
 # Backend scaffold and import prototype
 
-The backend exposes health and contract-only placeholder routes. A local
-synthetic source and provider-agnostic questionnaire importer are available
-for testing; they are not wired to FastAPI or PostgreSQL yet.
+The backend exposes health, a manual import endpoint, and an import-run lookup.
+The endpoint accepts already-read rows and persists them through SQLAlchemy
+repositories; the real Google Sheets provider is not connected yet.
 
 ## Commands
 
@@ -11,7 +11,7 @@ for testing; they are not wired to FastAPI or PostgreSQL yet.
     uv run pytest
     uv run ruff check .
 
-## Future implementation boundaries
+## Implementation boundaries
 
 - Google Sheets adapter: app/integrations/google_sheets.py
 - Questionnaire orchestration: app/services/questionnaire_importer.py

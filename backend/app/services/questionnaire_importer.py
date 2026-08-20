@@ -130,7 +130,7 @@ class QuestionnaireImportService(QuestionnaireImporter):
             created_submissions += 1
 
         return ImportResult(
-            import_id=str(uuid4()),
+            import_id=request.import_id or str(uuid4()),
             rows_seen=len(rows),
             created_clients=created_clients,
             updated_clients=updated_clients,

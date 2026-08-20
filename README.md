@@ -3,17 +3,17 @@
 StyleReporter is a scaffold for a future FastAPI + React application that will
 turn client questionnaire data into personalized style reports.
 
-## Current stage: import boundary prototype
+## Current stage: manual import slice
 
-This repository contains the handoff scaffold plus a local, synthetic import
-pipeline. The pipeline exercises normalization, validation, raw payload
+This repository contains the handoff scaffold plus a manual import slice. The
+slice accepts already-read rows, persists clients, submissions, and import run
+metadata in PostgreSQL, and exercises normalization, validation, raw payload
 preservation, and source-row idempotency without calling external providers.
 
 Not implemented:
 
-- Google Sheets/Forms integration
-- PostgreSQL repositories or client persistence workflow
-- production questionnaire import and database repositories
+- Google Sheets/Forms API integration
+- frontend import workflow
 - user authentication
 - scheduled jobs or webhooks
 - OpenAI agent execution or prompts
@@ -40,6 +40,10 @@ Then open:
 - API health: http://localhost:8000/health
 - API docs: http://localhost:8000/docs
 - Frontend: http://localhost:5173
+
+The internal manual import endpoint is available at
+`POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
+already-read rows until the real Google Sheets adapter is implemented.
 
 To stop the stack:
 
