@@ -15,6 +15,7 @@ from app.repositories.sqlalchemy import (
     SqlAlchemyStyleReportRunRepository,
     SqlAlchemySubmissionRepository,
 )
+from app.services.asset_workspace import LocalAssetWorkspace
 
 router = APIRouter(tags=["reports"])
 db_session_dependency = Depends(get_db_session)
@@ -60,12 +61,22 @@ async def generate_style_report(
     try:
         await repository.save(report_run)
         run_persisted = True
+        settings = get_settings()
+        asset_paths = (
+            await LocalAssetWorkspace(settings.asset_storage_root).get_verified_image_paths(
+                client_id=str(client_id),
+                submission_id=str(payload.submission_id),
+            )
+            if settings.asset_storage_enabled
+            else ()
+        )
         generated = await _build_runtime(payload.runtime).generate(
             StyleReportRequest(
                 client_id=str(client_id),
                 submission_id=str(payload.submission_id),
                 raw_payload=submission.raw_payload,
                 questionnaire_version=submission.questionnaire_version,
+                asset_paths=asset_paths,
             )
         )
         completed_at = datetime.now(UTC)

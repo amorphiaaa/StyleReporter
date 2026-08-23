@@ -30,6 +30,7 @@ def build_questionnaire_context(request: StyleReportRequest) -> dict[str, Any]:
         "questionnaire_version": normalized.version,
         "normalized_answers": normalized_answers,
         "missing_report_fields": list(normalized.missing_report_fields),
+        "attached_image_paths": list(request.asset_paths),
         "raw_answers": _source_evidence_without_identity(
             request.raw_payload,
             version=request.questionnaire_version,

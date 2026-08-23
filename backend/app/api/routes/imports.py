@@ -17,6 +17,8 @@ from app.api.schemas.imports import (
 from app.core.config import get_settings
 from app.db.models import ImportRun
 from app.domain.contracts import GoogleSheetsSource, ImportRequest, ImportResult, SheetReadRequest
+from app.integrations.asset_downloader import HttpAssetDownloader
+from app.integrations.google_drive import GoogleDriveAssetDownloader
 from app.integrations.google_sheets import (
     GoogleSheetsApiError,
     GoogleSheetsApiSource,
@@ -149,7 +151,10 @@ async def _run_import(
             clients=SqlAlchemyClientRepository(session),
             submissions=SqlAlchemySubmissionRepository(session),
             assets=(
-                LocalAssetWorkspace(settings.asset_storage_root)
+                LocalAssetWorkspace(
+                    settings.asset_storage_root,
+                    downloader=_build_asset_downloader(settings),
+                )
                 if settings.asset_storage_enabled
                 else None
             ),
@@ -189,6 +194,27 @@ async def _run_import(
         raise
 
     return _to_import_response(result)
+
+
+def _build_asset_downloader(settings):
+    if not settings.asset_download_enabled:
+        return None
+
+    fallback = HttpAssetDownloader(
+        timeout_seconds=settings.asset_download_timeout_seconds,
+        max_bytes=settings.asset_download_max_bytes,
+    )
+    if not settings.google_service_account_json:
+        return fallback
+
+    try:
+        return GoogleDriveAssetDownloader.from_service_account_json(
+            settings.google_service_account_json,
+            timeout_seconds=settings.asset_download_timeout_seconds,
+            max_bytes=settings.asset_download_max_bytes,
+        )
+    except GoogleSheetsConfigurationError:
+        return fallback
 
 
 @router.get("/{import_id}", response_model=ImportRunResponse)

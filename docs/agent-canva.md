@@ -13,7 +13,9 @@ The real output contract is:
 - `your_action_plan` with 3-5 prioritized actions, rationale, and first step.
 
 The prompt is intentionally evidence-bound: missing answers remain unknown,
-image URLs are treated as metadata, and the agent must not invent client facts.
+Image URLs without downloaded local attachments are treated as metadata, and
+the agent must not invent client facts. Verified downloaded images may be
+attached to the local Codex CLI runtime for direct visual observations.
 
 The production local runtime uses the Codex CLI worker described in
 `docs/codex-cli-runtime.md`. The Agents SDK dependency is retained only for a

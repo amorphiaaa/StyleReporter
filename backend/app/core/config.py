@@ -23,6 +23,9 @@ class Settings(BaseSettings):
 
     asset_storage_enabled: bool = True
     asset_storage_root: Path = Path("var/assets")
+    asset_download_enabled: bool = False
+    asset_download_timeout_seconds: float = 30.0
+    asset_download_max_bytes: int = 20 * 1024 * 1024
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None

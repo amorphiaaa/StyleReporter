@@ -28,8 +28,6 @@ companion worker.
 
 Not implemented:
 
-- downloading Google Drive/image provider files into the asset workspace
-- attaching local image files to Codex CLI runs for visual analysis
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
@@ -72,6 +70,12 @@ The worker is intentionally host-side because the saved Codex CLI session is
 owned by Windows, not by the backend container. It binds a local development
 endpoint and should not be exposed as a public service. See
 `docs/codex-cli-runtime.md` for the token and troubleshooting options.
+
+To download questionnaire images into the shared client workspace, set
+`ASSET_DOWNLOAD_ENABLED=true` in `.env` and run a sync. The service account
+must have access to the uploaded Drive files. Existing submissions can be
+reprocessed with `{"refresh_existing": true}`. Only successfully downloaded
+images are attached to subsequent local Codex CLI report runs.
 
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or

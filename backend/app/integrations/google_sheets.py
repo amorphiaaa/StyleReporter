@@ -52,9 +52,17 @@ class GoogleSheetsTransport(Protocol):
 class ServiceAccountAccessTokenProvider:
     """Refreshes a read-only service-account token on demand."""
 
-    def __init__(self, service_account_json: str) -> None:
+    def __init__(
+        self,
+        service_account_json: str,
+        *,
+        scopes: Sequence[str] = (GOOGLE_SHEETS_READONLY_SCOPE,),
+    ) -> None:
         try:
-            self._credentials = _load_service_account_credentials(service_account_json)
+            self._credentials = _load_service_account_credentials(
+                service_account_json,
+                scopes=scopes,
+            )
         except (OSError, ValueError, json.JSONDecodeError) as exc:
             raise GoogleSheetsConfigurationError(
                 "GOOGLE_SERVICE_ACCOUNT_JSON must contain service-account JSON "
@@ -213,6 +221,8 @@ class FixtureGoogleSheetsSource(GoogleSheetsSource):
 
 def _load_service_account_credentials(
     service_account_json: str,
+    *,
+    scopes: Sequence[str] = (GOOGLE_SHEETS_READONLY_SCOPE,),
 ) -> service_account.Credentials:
     value = service_account_json.strip()
     if not value:
@@ -221,11 +231,11 @@ def _load_service_account_credentials(
         info = json.loads(value)
         return service_account.Credentials.from_service_account_info(
             info,
-            scopes=[GOOGLE_SHEETS_READONLY_SCOPE],
+            scopes=list(scopes),
         )
     return service_account.Credentials.from_service_account_file(
         str(Path(value)),
-        scopes=[GOOGLE_SHEETS_READONLY_SCOPE],
+        scopes=list(scopes),
     )
 
 

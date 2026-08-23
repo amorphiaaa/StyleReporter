@@ -90,6 +90,7 @@ async def test_agents_sdk_runtime_requires_key_when_not_dry_run() -> None:
 async def test_codex_cli_runtime_validates_worker_output_without_openai_api() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v1/style-reports"
+        assert b"clients/client-1/submission-1/01.jpg" in request.read()
         payload = {
             "title": "Synthetic Codex report",
             "current_style_language": "Current signals are clear.",
@@ -134,6 +135,7 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
             client_id="client-1",
             submission_id="submission-1",
             raw_payload={"Email": "client@example.test"},
+            asset_paths=("clients/client-1/submission-1/01.jpg",),
         )
     )
 

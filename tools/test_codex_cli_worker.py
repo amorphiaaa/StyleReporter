@@ -37,3 +37,42 @@ def test_codex_runner_writes_prompt_as_utf8_bytes(monkeypatch) -> None:
     )
 
     assert result == {"ok": True}
+
+
+def test_codex_runner_attaches_verified_images(monkeypatch, tmp_path) -> None:
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    asset_root = tmp_path / "assets"
+    image_path = asset_root / "clients" / "client-1" / "submission-1" / "01.jpg"
+    image_path.parent.mkdir(parents=True)
+    image_path.write_bytes(b"synthetic-image")
+    captured_command = []
+
+    class Completed:
+        returncode = 0
+        stdout = b""
+        stderr = b""
+
+    def fake_run(command, *, input, **kwargs):
+        captured_command.extend(command)
+        output_path = Path(command[command.index("--output-last-message") + 1])
+        output_path.write_text(json.dumps({"ok": True}), encoding="utf-8")
+        return Completed()
+
+    monkeypatch.setattr("tools.codex_cli_worker.shutil.which", lambda _: "codex")
+    monkeypatch.setattr("tools.codex_cli_worker.subprocess.run", fake_run)
+
+    result = CodexCliRunner(
+        project_dir=project_dir,
+        asset_root=asset_root,
+        timeout_seconds=1,
+    ).run(
+        prompt="prompt",
+        output_schema={"type": "object"},
+        model=None,
+        image_paths=["clients/client-1/submission-1/01.jpg"],
+    )
+
+    assert result == {"ok": True}
+    image_flag_index = captured_command.index("--image")
+    assert Path(captured_command[image_flag_index + 1]) == image_path.resolve()

@@ -46,9 +46,10 @@ source row number, row hash, questionnaire version, and timestamps.
 ### submission_assets
 
 Future image references may be indexed separately with role, URL, filename, and
-provider metadata. The current local asset workspace registers these references
-in a per-client filesystem manifest, but binary download and object storage are
-still not implemented.
+provider metadata. The current local asset workspace stores these references in
+a per-client filesystem manifest and can optionally download supported image
+files through the configured provider adapter. Object storage is still not
+implemented.
 
 ### Local client workspace
 
@@ -64,10 +65,15 @@ When asset storage is enabled, each successful submission creates:
 ```
 
 `questionnaire.json` contains the preserved source row and import metadata.
-`manifest.json` records image role, ordinal, source URL, and a planned local
-path. The image directories are created before provider-specific downloading is
-added. Client and submission IDs, rather than names or emails, are used in
-paths to avoid unsafe path characters and accidental identity collisions.
+`manifest.json` records image role, ordinal, source URL, download status,
+content type, size, checksum, and local path when a download succeeds. Client
+and submission IDs, rather than names or emails, are used in paths to avoid
+unsafe path characters and accidental identity collisions.
+
+Downloads are disabled by default. When enabled, direct HTTP(S) image URLs are
+validated by content type and size, while common Google Drive file links are
+read with the service-account Drive scope. Failed downloads remain visible in
+the manifest and do not reject the questionnaire submission.
 
 ### import_runs
 

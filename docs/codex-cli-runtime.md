@@ -17,7 +17,9 @@ React -> FastAPI/PostgreSQL -> HTTP -> codex_cli_worker.py -> codex exec
 
 The worker uses `--sandbox read-only`, `--ephemeral`, and `--output-schema`.
 It never receives a request to edit the repository. Questionnaire data is sent
-to Codex as the prompt, so treat the worker as a local development service.
+to Codex as the prompt, and verified local image files are attached with
+`codex exec --image` when the submission manifest contains downloaded assets.
+Treat the worker as a local development service.
 
 ## Start locally
 
@@ -40,6 +42,11 @@ first:
 ```powershell
 Invoke-RestMethod http://localhost:8787/health
 ```
+
+The worker resolves relative image paths against `CODEX_CLI_ASSET_ROOT`, which
+defaults to `var/assets` in the repository. This must point to the same host
+folder mounted into the backend container. The backend Compose volume already
+maps `./var/assets` to `/var/lib/stylereporter/assets`.
 
 Then start the regular stack:
 
@@ -81,6 +88,10 @@ persists a failed report run and returns `502`; no questionnaire data is lost.
 
 - This path does not use `OPENAI_API_KEY`.
 - The worker reuses the saved local Codex CLI authentication session.
+- Only manifest entries with `status: "downloaded"` and an existing supported
+  image file are attached to a run.
+- `ASSET_DOWNLOAD_ENABLED` is false by default; enable it before a sync when
+  Google Drive files should be copied into the local workspace.
 - The worker is not a production queue, scheduler, or public API.
 - Generated reports still require methodology review and human approval before
   being delivered to a client.

@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Sequence
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -28,11 +29,25 @@ class WorkerError(RuntimeError):
 
 
 class CodexCliRunner:
-    def __init__(self, *, project_dir: Path, timeout_seconds: float) -> None:
+    def __init__(
+        self,
+        *,
+        project_dir: Path,
+        timeout_seconds: float,
+        asset_root: Path | None = None,
+    ) -> None:
         self.project_dir = project_dir
         self.timeout_seconds = timeout_seconds
+        self.asset_root = (asset_root or project_dir / "var" / "assets").resolve()
 
-    def run(self, *, prompt: str, output_schema: dict[str, Any], model: str | None) -> dict[str, Any]:
+    def run(
+        self,
+        *,
+        prompt: str,
+        output_schema: dict[str, Any],
+        model: str | None,
+        image_paths: Sequence[str] = (),
+    ) -> dict[str, Any]:
         executable = shutil.which(os.getenv("CODEX_CLI_EXECUTABLE", "codex"))
         if not executable:
             raise WorkerError(
@@ -40,6 +55,7 @@ class CodexCliRunner:
             )
         if not self.project_dir.is_dir():
             raise WorkerError(f"Codex CLI project directory does not exist: {self.project_dir}")
+        resolved_image_paths = _resolve_image_paths(image_paths, self.asset_root)
 
         with tempfile.TemporaryDirectory(prefix="stylereporter-codex-") as temp_dir:
             temp_path = Path(temp_dir)
@@ -60,6 +76,8 @@ class CodexCliRunner:
                 "--cd",
                 str(self.project_dir),
             ]
+            for image_path in resolved_image_paths:
+                command.extend(["--image", str(image_path)])
             if model:
                 command.extend(["--model", model])
             command.append("-")
@@ -142,11 +160,15 @@ class WorkerHandler(BaseHTTPRequestHandler):
             runner = CodexCliRunner(
                 project_dir=project_dir,
                 timeout_seconds=float(os.getenv("CODEX_CLI_TIMEOUT_SECONDS", "600")),
+                asset_root=Path(
+                    os.getenv("CODEX_CLI_ASSET_ROOT", str(project_dir / "var" / "assets"))
+                ),
             )
             report = runner.run(
                 prompt=prompt,
                 output_schema=output_schema,
                 model=payload.get("model") if isinstance(payload.get("model"), str) else None,
+                image_paths=_validated_image_paths(payload.get("image_paths")),
             )
             self._send_json(HTTPStatus.OK, {"report": report})
         except (ValueError, WorkerError) as exc:
@@ -184,6 +206,37 @@ class WorkerHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+
+def _validated_image_paths(value: object) -> Sequence[str]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise WorkerError("Request field 'image_paths' must be a list of strings.")
+    return value
+
+
+def _resolve_image_paths(image_paths: Sequence[str], asset_root: Path) -> list[Path]:
+    if len(image_paths) > 20:
+        raise WorkerError("A report may attach at most 20 images.")
+
+    root = asset_root.resolve()
+    resolved: list[Path] = []
+    for image_path in image_paths:
+        candidate_path = Path(image_path)
+        if candidate_path.is_absolute():
+            raise WorkerError("Image paths must be relative to CODEX_CLI_ASSET_ROOT.")
+        candidate = (root / candidate_path).resolve()
+        try:
+            candidate.relative_to(root)
+        except ValueError as exc:
+            raise WorkerError("Image path escapes CODEX_CLI_ASSET_ROOT.") from exc
+        if candidate.suffix.lower() not in {".gif", ".heic", ".jpg", ".png", ".webp"}:
+            raise WorkerError("Image path has an unsupported file extension.")
+        if not candidate.is_file() or candidate.stat().st_size <= 0:
+            raise WorkerError(f"Image file was not found: {image_path}")
+        resolved.append(candidate)
+    return resolved
 
 
 def main() -> None:

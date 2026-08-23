@@ -2,16 +2,19 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import httpx
 import pytest
 
 from app.domain.contracts import (
     ClientRecord,
     ImportRequest,
+    QuestionnaireAsset,
     QuestionnaireSubmission,
     SheetReadRequest,
     SheetRow,
 )
 from app.domain.questionnaire import extract_questionnaire_assets
+from app.integrations.asset_downloader import HttpAssetDownloader
 from app.integrations.google_sheets import FixtureGoogleSheetsSource
 from app.services.asset_workspace import LocalAssetWorkspace
 from app.services.questionnaire_importer import QuestionnaireImportService
@@ -129,3 +132,54 @@ async def test_import_registers_asset_workspace_for_new_submission(tmp_path: Pat
 
     assert result.created_submissions == 1
     assert manifest_path.exists()
+
+
+@pytest.mark.asyncio
+async def test_workspace_downloads_assets_and_exposes_verified_paths(tmp_path: Path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            headers={"content-type": "image/jpeg"},
+            content=b"synthetic-image",
+            request=request,
+        )
+
+    client = ClientRecord(
+        id="client-download",
+        email_normalized="download@example.test",
+    )
+    submission = QuestionnaireSubmission(
+        id="submission-download",
+        client_id=client.id,
+        source_type="manual",
+        source_spreadsheet_id="synthetic",
+        source_sheet_name="Form Responses 1",
+        source_row_number=2,
+        source_row_hash="b" * 64,
+        raw_payload={"Email": client.email_normalized},
+    )
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http_client:
+        workspace = LocalAssetWorkspace(
+            tmp_path,
+            downloader=HttpAssetDownloader(client=http_client),
+        )
+        result = await workspace.register_submission(
+            client=client,
+            submission=submission,
+            assets=(
+                QuestionnaireAsset(
+                    field_key="feels_like_me_images",
+                    ordinal=1,
+                    source_url="https://example.test/looks-like-me",
+                ),
+            )
+        )
+        verified = await workspace.get_verified_image_paths(
+            client_id=client.id,
+            submission_id=submission.id,
+        )
+
+    assert result.downloaded_count == 1
+    assert verified == [
+        f"clients/{client.id}/submissions/{submission.id}/images/feels_like_me_images/01.jpg"
+    ]

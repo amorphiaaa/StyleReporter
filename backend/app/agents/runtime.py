@@ -35,7 +35,10 @@ Rules:
 - Do not diagnose personality, psychology, body, identity, or lifestyle.
 - Do not invent facts, wardrobe items, colors, brands, or image content.
 - Treat missing fields as unknown and mention limitations in the output.
-- Image URLs are metadata only; do not claim to have viewed the images.
+- Image URLs without local attachments are metadata only; do not claim to have
+  viewed those images.
+- When local image attachments are provided, inspect them and distinguish direct
+  visual observations from questionnaire evidence.
 - Keep advice practical, specific, non-shaming, and connected to the evidence.
 """.strip()
 
@@ -207,6 +210,7 @@ class CodexCliStyleReportRuntime(StyleReportRuntime):
             "prompt": _serialize_codex_request(request),
             "model": self.model,
             "output_schema": StyleLanguageAnalysisOutput.model_json_schema(),
+            "image_paths": list(request.asset_paths),
         }
         try:
             async with httpx.AsyncClient(

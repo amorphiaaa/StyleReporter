@@ -1,6 +1,7 @@
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Protocol
 
 JsonObject = Mapping[str, Any]
@@ -44,6 +45,18 @@ class QuestionnaireAsset:
 
 
 @dataclass(frozen=True)
+class AssetDownloadResult:
+    """Provider result for one attempted image download."""
+
+    status: str
+    filename: str | None = None
+    content_type: str | None = None
+    size_bytes: int | None = None
+    sha256: str | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True)
 class AssetWorkspaceResult:
     """The filesystem workspace created for one client submission."""
 
@@ -51,6 +64,7 @@ class AssetWorkspaceResult:
     submission_directory: str
     manifest_relative_path: str
     asset_count: int
+    downloaded_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -81,6 +95,7 @@ class StyleReportRequest:
     submission_id: str
     raw_payload: JsonObject
     questionnaire_version: str | None = None
+    asset_paths: Sequence[str] = ()
 
 
 class StyleReportRuntime(Protocol):
@@ -213,6 +228,24 @@ class AssetWorkspace(Protocol):
         submission: QuestionnaireSubmission,
         assets: Sequence[QuestionnaireAsset],
     ) -> AssetWorkspaceResult:
+        ...
+
+    async def get_verified_image_paths(
+        self,
+        *,
+        client_id: str,
+        submission_id: str,
+    ) -> Sequence[str]:
+        ...
+
+
+class AssetDownloader(Protocol):
+    async def download(
+        self,
+        *,
+        source_url: str,
+        destination_stem: Path,
+    ) -> AssetDownloadResult:
         ...
 
 

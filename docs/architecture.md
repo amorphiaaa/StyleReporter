@@ -21,8 +21,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 - Questionnaire contract: versioned normalization for the known synthetic
   questionnaire; unknown versions remain raw-only.
 - Asset workspace: local per-client folders with preserved questionnaire JSON,
-  image-role directories, and a manifest of source URLs. Downloading provider
-  files is a separate follow-up boundary.
+  image-role directories, and a manifest of source URLs. Optional direct HTTP
+  and Google Drive downloaders populate verified local image files.
 - Style report runtime: deterministic stub, Agents SDK dry-run adapter, and a
   Codex CLI adapter. The real local path sends a structured prompt to the
   host-side companion worker, which invokes `codex exec` with read-only
@@ -59,8 +59,8 @@ evidence; it does not diagnose the client.
   identity fields are imported; raw answers remain unchanged.
 - Successful imports create a local asset workspace under `ASSET_STORAGE_ROOT`
   with `client.json`, `questionnaire.json`, `manifest.json`, and role-based
-  image directories. The manifest is reference-only until a provider downloader
-  is implemented.
+  image directories. With `ASSET_DOWNLOAD_ENABLED=true`, successful downloads
+  are recorded with a checksum and become eligible for local visual analysis.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.
