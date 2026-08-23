@@ -1,34 +1,37 @@
 # StyleReporter
 
-StyleReporter is a scaffold for a future FastAPI + React application that will
-turn client questionnaire data into personalized style reports.
+StyleReporter is a FastAPI + React application that imports client
+questionnaires and can generate a local style report through Codex CLI.
 
 ## Current stage: local report vertical slice
 
-This repository contains the handoff scaffold, a manual import slice, and a
-local report vertical slice. Already-read rows are persisted in PostgreSQL;
-the client detail screen can launch a deterministic stub report for a saved
-submission. The Google Sheets provider is present but disabled by default, so
-the local stack still makes no external provider calls.
+This repository contains the handoff scaffold, a Google Sheets import slice,
+and a local report vertical slice. Already-read rows are persisted in
+PostgreSQL, and each successful submission creates a local client evidence
+workspace under `var/assets` (or `ASSET_STORAGE_ROOT`). The client detail screen
+can launch a deterministic preview or send one saved submission to a host-side
+Codex CLI worker. The worker uses the local Codex CLI session rather than
+`OPENAI_API_KEY`.
 
-The known synthetic questionnaire is normalized through a versioned domain
-contract before identity fields are imported. Full source rows remain preserved
-as raw JSONB, and unknown questionnaire versions stay raw-only until their
-mapping is explicitly defined.
+Questionnaires are normalized through versioned JSON definitions before identity
+fields are imported. Source header aliases and report-required fields live in
+`backend/app/domain/questionnaire_definitions/`, so a form label change does not
+require changing importer code. Full source rows remain preserved as raw JSONB,
+and unknown questionnaire versions stay raw-only until their mapping is
+explicitly defined.
 
 The current MVP report target is a single-questionnaire analysis with four
 sections: `CURRENT STYLE LANGUAGE`, `DESIRED STYLE LANGUAGE`, `THE DISCONNECT`,
-and `YOUR ACTION PLAN`. The Agents SDK dry-run produces a deterministic preview
-of that contract without making a model call; the gated real runtime uses the
-same structured output after credentials and methodology review are complete.
+and `YOUR ACTION PLAN`. The Agents SDK dry-run remains as an offline contract
+preview; the real local runtime uses `codex exec --output-schema` through the
+companion worker.
 
 Not implemented:
 
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- OpenAI model calls and final production prompts (the Agents SDK dry-run
-  adapter and structured analysis contract are available)
+- unattended production scheduling and job retries for Codex CLI runs
 - Canva connector/OAuth/MCP calls
 - production methodology-driven style report generation
 - production deployment or CI/CD
@@ -53,26 +56,85 @@ Then open:
 - API docs: http://localhost:8000/docs
 - Frontend: http://localhost:5173
 
+For the real report runtime, authenticate Codex CLI once and start the local
+worker in a second PowerShell window:
+
+    codex login
+    .\tools\run-codex-cli-worker.ps1
+
+Check the worker before using the `Codex CLI (local)` option:
+
+    Invoke-RestMethod http://localhost:8787/health
+
+The worker is intentionally host-side because the saved Codex CLI session is
+owned by Windows, not by the backend container. It binds a local development
+endpoint and should not be exposed as a public service. See
+`docs/codex-cli-runtime.md` for the token and troubleshooting options.
+
+To download questionnaire images into the shared client workspace, set
+`ASSET_DOWNLOAD_ENABLED=true` in `.env` and run a sync. The service account
+or OAuth user must have access to the uploaded Drive files. Existing submissions can be
+reprocessed with `{"refresh_existing": true}`. Only successfully downloaded
+images are attached to subsequent local Codex CLI report runs.
+
+To make Google Drive the canonical client workspace, also set
+`GOOGLE_DRIVE_STORAGE_ENABLED=true` and provide `GOOGLE_DRIVE_ROOT_FOLDER_ID`.
+For a personal Drive, configure OAuth with `GOOGLE_DRIVE_OAUTH_CLIENT_JSON` and
+`GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN`; the user who authorizes OAuth must have
+access to the root folder. Each imported client then gets one stable folder:
+
+```text
+<configured root>/<client name> [<client id>]/
+  Questionnaire/
+  Good Outfits/
+  Bad Outfits/
+  Inspiration/
+  Final Report/
+```
+
+The five folders are created idempotently on import. `questionnaire.json` is
+uploaded to `Questionnaire`; downloaded images are uploaded according to the
+versioned questionnaire mapping. The local workspace remains a shared cache
+for Codex CLI, and `Final Report` is reserved for the future report exporter.
+Drive publishing is disabled by default and has no effect until the flag is
+explicitly enabled.
+
+### One-time personal Drive OAuth setup
+
+1. In Google Cloud, create an OAuth consent screen and a Desktop OAuth client.
+2. Download the client JSON outside the repository.
+3. Run:
+
+       python tools/google_drive_oauth.py --client-json C:\path\client_secret.json
+
+   Complete the browser consent flow. The script prints a refresh token and a
+   compact client-JSON value for `.env`; keep both secret.
+4. Put those values in `.env`, set `GOOGLE_DRIVE_ROOT_FOLDER_ID`, and restart
+   the backend. The existing service account can continue to read Sheets.
+
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
 already-read rows. The read-only Google Sheets endpoint is available at
 `POST http://localhost:8000/api/v1/imports/google-sheets/sync`; it remains
 disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
-spreadsheet ID are supplied. Its provider is covered by offline mock tests;
-no Google credentials are committed.
+spreadsheet ID are supplied. Set `GOOGLE_QUESTIONNAIRE_VERSION` when a mapped
+questionnaire definition should be applied during sync. Its provider is covered
+by offline mock tests; no Google credentials are committed.
 
 Recent runs are available at `GET http://localhost:8000/api/v1/imports?limit=20`;
 the Imports screen displays their status and counters. Select a run there to
 load its persisted source metadata and row-level errors from
 `GET http://localhost:8000/api/v1/imports/{import_id}`.
 
+When a mapping or source header changes after rows were imported, pass
+`{"refresh_existing": true}` to the Google Sheets sync request to backfill the
+existing source rows without creating duplicate submissions.
+
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
-`submission_id` to generate a deterministic `stub-v1` response without an
-OpenAI key. You can also pass `runtime: "agents_sdk_dry_run"` to verify that
-the typed Agents SDK agent contract is constructed without calling a model. The
-real `agents_sdk` runtime is disabled by default; requests receive `503` until
-`OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
+`submission_id` and `runtime: "codex_cli"` to generate a structured report
+through the host worker without configuring an OpenAI API key. The
+`agents_sdk_dry_run` runtime remains available for offline contract checks.
 Runtime exceptions are saved as failed report runs and return `502`, so the
 attempt remains visible in report history.
 Retrieve the run later with

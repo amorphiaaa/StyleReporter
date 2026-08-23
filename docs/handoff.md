@@ -1,10 +1,11 @@
 # Handoff guide
 
 This repository is ready for the next engineer to continue the first product
-slice. The current commit contains a working manual importer, a read-only
-Google Sheets provider behind a disabled-by-default flag, client list/detail
-screens, and a deterministic local report runtime. The real OpenAI provider is
-still gated.
+slice. The current commit contains a working Google Sheets importer, client
+list/detail screens, structured report persistence, and a local Codex CLI
+runtime behind a host-side worker.
+The optional Google Drive publisher now creates the canonical per-client folder
+tree, while the local workspace remains the Codex CLI cache.
 
 ## Read first
 
@@ -19,13 +20,16 @@ still gated.
 
 1. Add client deletion only after retention, audit, and report-history policy
    are agreed.
-2. Review credentials, prompts, structured output validation, and tracing policy,
-   then enable the gated real `AgentsSdkStyleReportRuntime` path with
-   `OPENAI_AGENT_RUNTIME_ENABLED=true` and test it against a controlled model
-   environment.
-3. Configure and test the Google Sheets provider with a real service account,
-   spreadsheet sharing, and a controlled response sheet.
-4. Implement Canva through the documented connector boundary.
+2. Configure and test the Google Sheets and Drive providers with a real service
+   account, spreadsheet sharing, Drive-file access, and a controlled response
+   sheet. For personal Drive use OAuth; for Shared Drive use a service account
+   with the appropriate shared-drive role. Keep `GOOGLE_DRIVE_STORAGE_ENABLED=false`
+   and `ASSET_DOWNLOAD_ENABLED=false` until access is verified.
+3. Review visual observations and generated reports against controlled
+   questionnaire examples; keep `codex_cli` runs local and human-reviewed.
+4. Add persistence/indexing for `submission_assets` if the UI needs searchable
+   asset history beyond filesystem manifests.
+5. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints
 

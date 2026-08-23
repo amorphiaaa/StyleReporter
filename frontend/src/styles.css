@@ -271,6 +271,11 @@ a {
   margin-top: 22px;
 }
 
+.import-history-entry {
+  display: grid;
+  gap: 12px;
+}
+
 .import-history-item {
   display: grid;
   grid-template-columns: minmax(180px, 1.2fr) auto minmax(220px, 1fr) auto auto;
@@ -349,7 +354,7 @@ a {
 }
 
 .history-detail {
-  margin-top: 18px;
+  margin-top: 0;
   padding: 28px;
   border: 1px solid #cdb9a5;
   border-radius: 16px;

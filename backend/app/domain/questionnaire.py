@@ -1,15 +1,16 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from app.domain.contracts import QuestionnaireAsset
+from app.domain.questionnaire_definitions import (
+    QuestionnaireFieldDefinition,
+    get_questionnaire_definition,
+)
+
 QUESTIONNAIRE_FIXTURE_VERSION = "fixture-v1"
 
 
-@dataclass(frozen=True)
-class QuestionnaireField:
-    key: str
-    headers: tuple[str, ...]
-    report_required: bool = True
-    multiple: bool = False
+QuestionnaireField = QuestionnaireFieldDefinition
 
 
 @dataclass(frozen=True)
@@ -33,44 +34,10 @@ class NormalizedQuestionnaire:
     inspiration_images: tuple[str, ...]
     visual_world: str | None
     missing_report_fields: tuple[str, ...]
+    answers: Mapping[str, str | tuple[str, ...] | None]
 
 
-QUESTIONNAIRE_FIELDS = (
-    QuestionnaireField(
-        key="current_style",
-        headers=("How would you describe your style today?",),
-    ),
-    QuestionnaireField(
-        key="style_goal",
-        headers=("What would you love your style to help you feel?",),
-    ),
-    QuestionnaireField(
-        key="style_self_perception",
-        headers=("Which sentence sounds MOST like you?",),
-    ),
-    QuestionnaireField(
-        key="style_discomfort",
-        headers=("What usually makes an outfit feel wrong to you?",),
-    ),
-    QuestionnaireField(
-        key="feels_like_me_images",
-        headers=("Feels Like Me images",),
-        multiple=True,
-    ),
-    QuestionnaireField(
-        key="not_me_image",
-        headers=("Not Me image",),
-    ),
-    QuestionnaireField(
-        key="inspiration_images",
-        headers=("Inspiration images",),
-        multiple=True,
-    ),
-    QuestionnaireField(
-        key="visual_world",
-        headers=("Visual world",),
-    ),
-)
+QUESTIONNAIRE_FIELDS = get_questionnaire_definition(QUESTIONNAIRE_FIXTURE_VERSION).fields
 
 
 def normalize_questionnaire_payload(
@@ -87,13 +54,23 @@ def normalize_questionnaire_payload(
     can be introduced without a database migration.
     """
 
-    if version != QUESTIONNAIRE_FIXTURE_VERSION:
+    definition = get_questionnaire_definition(version)
+    identity_email_headers = _preferred_headers(
+        email_header,
+        definition.email_headers if definition else (),
+    )
+    identity_display_name_headers = _preferred_headers(
+        display_name_header,
+        definition.display_name_headers if definition else (),
+    )
+    email = _first_text(raw_payload, identity_email_headers)
+    display_name = _first_text(raw_payload, identity_display_name_headers)
+
+    if definition is None:
         return NormalizedQuestionnaire(
             version=version,
-            email=_text(raw_payload.get(email_header)),
-            display_name=(
-                _text(raw_payload.get(display_name_header)) if display_name_header else None
-            ),
+            email=email,
+            display_name=display_name,
             current_style=None,
             style_goal=None,
             style_self_perception=None,
@@ -103,34 +80,69 @@ def normalize_questionnaire_payload(
             inspiration_images=(),
             visual_world=None,
             missing_report_fields=(),
+            answers={},
         )
 
     values = {
         field.key: _field_value(raw_payload, field)
-        for field in QUESTIONNAIRE_FIELDS
+        for field in definition.fields
     }
     missing_report_fields = tuple(
         field.key
-        for field in QUESTIONNAIRE_FIELDS
+        for field in definition.fields
         if field.report_required and not values[field.key]
     )
 
     return NormalizedQuestionnaire(
         version=version,
-        email=_text(raw_payload.get(email_header)),
-        display_name=(
-            _text(raw_payload.get(display_name_header)) if display_name_header else None
-        ),
-        current_style=_as_text_value(values["current_style"]),
-        style_goal=_as_text_value(values["style_goal"]),
-        style_self_perception=_as_text_value(values["style_self_perception"]),
-        style_discomfort=_as_text_value(values["style_discomfort"]),
-        feels_like_me_images=_as_image_values(values["feels_like_me_images"]),
-        not_me_image=_as_text_value(values["not_me_image"]),
-        inspiration_images=_as_image_values(values["inspiration_images"]),
-        visual_world=_as_text_value(values["visual_world"]),
+        email=email,
+        display_name=display_name,
+        current_style=_as_text_value(values.get("current_style")),
+        style_goal=_as_text_value(values.get("style_goal")),
+        style_self_perception=_as_text_value(values.get("style_self_perception")),
+        style_discomfort=_as_text_value(values.get("style_discomfort")),
+        feels_like_me_images=_as_image_values(values.get("feels_like_me_images")),
+        not_me_image=_as_text_value(values.get("not_me_image")),
+        inspiration_images=_as_image_values(values.get("inspiration_images")),
+        visual_world=_as_text_value(values.get("visual_world")),
         missing_report_fields=missing_report_fields,
+        answers=values,
     )
+
+
+def extract_questionnaire_assets(
+    raw_payload: Mapping[str, object],
+    *,
+    version: str | None,
+) -> tuple[QuestionnaireAsset, ...]:
+    """Extract image references from configured image fields.
+
+    The mapping owns the field keys and source headers. This keeps asset roles
+    configurable when a future questionnaire version changes its questions.
+    """
+
+    normalized = normalize_questionnaire_payload(raw_payload, version=version)
+    definition = get_questionnaire_definition(version)
+    if definition is None:
+        return ()
+
+    assets: list[QuestionnaireAsset] = []
+    for field in definition.fields:
+        if field.value_type not in {"image_link", "image_links"}:
+            continue
+        value = normalized.answers.get(field.key)
+        values = value if isinstance(value, tuple) else ((value,) if isinstance(value, str) else ())
+        assets.extend(
+            QuestionnaireAsset(
+                field_key=field.key,
+                ordinal=index,
+                source_url=source_url,
+                drive_folder=field.asset_folder_by_ordinal.get(index, field.asset_folder),
+            )
+            for index, source_url in enumerate(values, start=1)
+            if source_url.strip()
+        )
+    return tuple(assets)
 
 
 def _field_value(
@@ -156,6 +168,20 @@ def _as_text_value(value: str | tuple[str, ...] | None) -> str | None:
 
 def _as_image_values(value: str | tuple[str, ...] | None) -> tuple[str, ...]:
     return value if isinstance(value, tuple) else ()
+
+
+def _preferred_headers(primary: str | None, aliases: tuple[str, ...]) -> tuple[str, ...]:
+    headers = [primary] if primary else []
+    headers.extend(alias for alias in aliases if alias not in headers)
+    return tuple(headers)
+
+
+def _first_text(raw_payload: Mapping[str, object], headers: tuple[str, ...]) -> str | None:
+    for header in headers:
+        value = _text(raw_payload.get(header))
+        if value is not None:
+            return value
+    return None
 
 
 def _text(value: object) -> str | None:

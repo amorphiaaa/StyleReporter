@@ -1,6 +1,7 @@
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Protocol
 
 JsonObject = Mapping[str, Any]
@@ -35,6 +36,49 @@ class QuestionnaireSubmission:
 
 
 @dataclass(frozen=True)
+class QuestionnaireAsset:
+    """An image reference extracted from a questionnaire submission."""
+
+    field_key: str
+    ordinal: int
+    source_url: str
+    drive_folder: str | None = None
+
+
+@dataclass(frozen=True)
+class AssetDownloadResult:
+    """Provider result for one attempted image download."""
+
+    status: str
+    filename: str | None = None
+    content_type: str | None = None
+    size_bytes: int | None = None
+    sha256: str | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class AssetWorkspaceResult:
+    """The filesystem workspace created for one client submission."""
+
+    client_directory: str
+    submission_directory: str
+    manifest_relative_path: str
+    asset_count: int
+    downloaded_count: int = 0
+
+
+@dataclass(frozen=True)
+class AssetPublicationResult:
+    """Result of publishing a local submission workspace to a provider."""
+
+    client_folder_id: str
+    subfolder_ids: Mapping[str, str]
+    uploaded_count: int
+    skipped_count: int
+
+
+@dataclass(frozen=True)
 class StyleReport:
     report_version: str
     runtime_type: str
@@ -62,6 +106,7 @@ class StyleReportRequest:
     submission_id: str
     raw_payload: JsonObject
     questionnaire_version: str | None = None
+    asset_paths: Sequence[str] = ()
 
 
 class StyleReportRuntime(Protocol):
@@ -90,6 +135,7 @@ class ImportRequest:
     timestamp_header: str | None = "Timestamp"
     source_type: str = "google_sheets"
     questionnaire_version: str | None = None
+    refresh_existing: bool = False
     import_id: str | None = None
 
 
@@ -182,6 +228,46 @@ class GoogleSheetsSource(Protocol):
 
 class QuestionnaireImporter(Protocol):
     async def import_rows(self, request: ImportRequest) -> ImportResult:
+        ...
+
+
+class AssetWorkspace(Protocol):
+    async def register_submission(
+        self,
+        *,
+        client: ClientRecord,
+        submission: QuestionnaireSubmission,
+        assets: Sequence[QuestionnaireAsset],
+    ) -> AssetWorkspaceResult:
+        ...
+
+    async def get_verified_image_paths(
+        self,
+        *,
+        client_id: str,
+        submission_id: str,
+    ) -> Sequence[str]:
+        ...
+
+
+class AssetPublisher(Protocol):
+    async def publish_submission(
+        self,
+        *,
+        client: ClientRecord,
+        submission: QuestionnaireSubmission,
+        workspace: AssetWorkspaceResult,
+    ) -> AssetPublicationResult:
+        ...
+
+
+class AssetDownloader(Protocol):
+    async def download(
+        self,
+        *,
+        source_url: str,
+        destination_stem: Path,
+    ) -> AssetDownloadResult:
         ...
 
 

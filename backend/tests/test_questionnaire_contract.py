@@ -47,6 +47,21 @@ def test_fixture_questionnaire_reports_missing_fields_without_rejecting_raw_data
     assert "visual_world" not in normalized.missing_report_fields
 
 
+def test_fixture_questionnaire_uses_configured_identity_aliases_and_extra_fields() -> None:
+    normalized = normalize_questionnaire_payload(
+        {
+            "Your email": "realistic.client@example.test",
+            "Your name": "Realistic Client",
+            "What feels hardest in your style right now?": "Getting dressed quickly",
+        },
+        version=QUESTIONNAIRE_FIXTURE_VERSION,
+    )
+
+    assert normalized.email == "realistic.client@example.test"
+    assert normalized.display_name == "Realistic Client"
+    assert normalized.answers["style_challenge"] == "Getting dressed quickly"
+
+
 def test_unknown_questionnaire_version_falls_back_to_identity_fields() -> None:
     normalized = normalize_questionnaire_payload(
         {

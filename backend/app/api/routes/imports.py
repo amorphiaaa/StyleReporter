@@ -17,6 +17,13 @@ from app.api.schemas.imports import (
 from app.core.config import get_settings
 from app.db.models import ImportRun
 from app.domain.contracts import GoogleSheetsSource, ImportRequest, ImportResult, SheetReadRequest
+from app.integrations.asset_downloader import HttpAssetDownloader
+from app.integrations.google_drive import GoogleDriveAssetDownloader
+from app.integrations.google_drive_storage import (
+    GoogleDriveStorageConfigurationError,
+    GoogleDriveStorageError,
+    GoogleDriveWorkspacePublisher,
+)
 from app.integrations.google_sheets import (
     GoogleSheetsApiError,
     GoogleSheetsApiSource,
@@ -28,6 +35,7 @@ from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemySubmissionRepository,
 )
+from app.services.asset_workspace import LocalAssetWorkspace
 from app.services.questionnaire_importer import QuestionnaireImportService
 
 router = APIRouter(prefix="/imports", tags=["imports"])
@@ -112,7 +120,10 @@ async def sync_google_sheets(
             display_name_header=request_payload.display_name_header,
             timestamp_header=request_payload.timestamp_header,
             source_type=request_payload.source_type,
-            questionnaire_version=request_payload.questionnaire_version,
+            questionnaire_version=(
+                request_payload.questionnaire_version or settings.google_questionnaire_version
+            ),
+            refresh_existing=request_payload.refresh_existing or settings.google_refresh_existing,
             import_id=str(import_id),
         ),
         source=source,
@@ -126,6 +137,7 @@ async def _run_import(
     source: GoogleSheetsSource,
     session: AsyncSession,
 ) -> ImportResponse:
+    settings = get_settings()
     import_id = UUID(request.import_id) if request.import_id else uuid4()
     import_run = ImportRun(
         id=import_id,
@@ -143,6 +155,15 @@ async def _run_import(
             source=source,
             clients=SqlAlchemyClientRepository(session),
             submissions=SqlAlchemySubmissionRepository(session),
+            assets=(
+                LocalAssetWorkspace(
+                    settings.asset_storage_root,
+                    downloader=_build_asset_downloader(settings),
+                )
+                if settings.asset_storage_enabled
+                else None
+            ),
+            publisher=_build_asset_publisher(settings),
         )
         result = await importer.import_rows(request)
         import_run.status = "completed"
@@ -174,11 +195,101 @@ async def _run_import(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Google Sheets API request failed: {exc.detail}",
         ) from exc
+    except GoogleDriveStorageConfigurationError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+    except GoogleDriveStorageError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        ) from exc
     except Exception:
         await session.rollback()
         raise
 
     return _to_import_response(result)
+
+
+def _build_asset_downloader(settings):
+    if not settings.asset_download_enabled:
+        return None
+
+    fallback = HttpAssetDownloader(
+        timeout_seconds=settings.asset_download_timeout_seconds,
+        max_bytes=settings.asset_download_max_bytes,
+    )
+    oauth_values = (
+        settings.google_drive_oauth_client_json,
+        settings.google_drive_oauth_refresh_token,
+    )
+    if any(oauth_values) and not all(oauth_values):
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive downloads require both GOOGLE_DRIVE_OAUTH_CLIENT_JSON "
+            "and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
+        )
+    if all(oauth_values):
+        return GoogleDriveAssetDownloader.from_oauth(
+            settings.google_drive_oauth_client_json,
+            settings.google_drive_oauth_refresh_token,
+            timeout_seconds=settings.asset_download_timeout_seconds,
+            max_bytes=settings.asset_download_max_bytes,
+        )
+    if not settings.google_service_account_json:
+        return fallback
+
+    try:
+        return GoogleDriveAssetDownloader.from_service_account_json(
+            settings.google_service_account_json,
+            timeout_seconds=settings.asset_download_timeout_seconds,
+            max_bytes=settings.asset_download_max_bytes,
+        )
+    except GoogleSheetsConfigurationError:
+        return fallback
+
+
+def _build_asset_publisher(settings):
+    if not settings.google_drive_storage_enabled:
+        return None
+    if not settings.asset_storage_enabled:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires ASSET_STORAGE_ENABLED=true."
+        )
+    if not settings.google_drive_root_folder_id:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires GOOGLE_DRIVE_ROOT_FOLDER_ID."
+        )
+    oauth_values = (
+        settings.google_drive_oauth_client_json,
+        settings.google_drive_oauth_refresh_token,
+    )
+    if any(oauth_values) and not all(oauth_values):
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires both GOOGLE_DRIVE_OAUTH_CLIENT_JSON "
+            "and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
+        )
+    if all(oauth_values):
+        return GoogleDriveWorkspacePublisher.from_oauth(
+            settings.google_drive_oauth_client_json,
+            settings.google_drive_oauth_refresh_token,
+            root_folder_id=settings.google_drive_root_folder_id,
+            local_root=settings.asset_storage_root,
+            timeout_seconds=settings.google_drive_timeout_seconds,
+        )
+    if not settings.google_service_account_json:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires OAuth credentials. Set "
+            "GOOGLE_DRIVE_OAUTH_CLIENT_JSON and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
+        )
+    return GoogleDriveWorkspacePublisher.from_service_account_json(
+        settings.google_service_account_json,
+        root_folder_id=settings.google_drive_root_folder_id,
+        local_root=settings.asset_storage_root,
+        timeout_seconds=settings.google_drive_timeout_seconds,
+    )
 
 
 @router.get("/{import_id}", response_model=ImportRunResponse)

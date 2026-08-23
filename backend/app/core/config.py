@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,12 +16,31 @@ class Settings(BaseSettings):
     google_spreadsheet_id: str | None = None
     google_sheet_name: str = "Form Responses 1"
     google_sheet_range: str | None = None
+    google_questionnaire_version: str | None = None
+    google_refresh_existing: bool = False
     google_sheets_enabled: bool = False
     google_sheets_timeout_seconds: float = 10.0
+
+    asset_storage_enabled: bool = True
+    asset_storage_root: Path = Path("var/assets")
+    asset_download_enabled: bool = False
+    asset_download_timeout_seconds: float = 30.0
+    asset_download_max_bytes: int = 20 * 1024 * 1024
+    google_drive_storage_enabled: bool = False
+    google_drive_root_folder_id: str | None = None
+    google_drive_timeout_seconds: float = 30.0
+    google_drive_oauth_client_json: str | None = Field(default=None, repr=False)
+    google_drive_oauth_refresh_token: str | None = Field(default=None, repr=False)
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None
     openai_agent_runtime_enabled: bool = False
+
+    codex_cli_enabled: bool = False
+    codex_cli_runner_url: str | None = None
+    codex_cli_runner_token: str | None = Field(default=None, repr=False)
+    codex_cli_model: str | None = None
+    codex_cli_timeout_seconds: float = 600.0
 
     canva_connector_url: str | None = None
     canva_client_id: str | None = Field(default=None, repr=False)

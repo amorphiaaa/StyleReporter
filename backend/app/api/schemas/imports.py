@@ -23,6 +23,7 @@ class ManualImportRequest(BaseModel):
     timestamp_header: str | None = Field(default="Timestamp", max_length=255)
     source_type: str = Field(default="google_sheets", min_length=1, max_length=50)
     questionnaire_version: str | None = Field(default=None, max_length=100)
+    refresh_existing: bool = False
     rows: list[ImportRowPayload] = Field(min_length=1)
 
     def to_domain(self, import_id: UUID) -> ImportRequest:
@@ -37,6 +38,7 @@ class ManualImportRequest(BaseModel):
             timestamp_header=self.timestamp_header,
             source_type=self.source_type,
             questionnaire_version=self.questionnaire_version,
+            refresh_existing=self.refresh_existing,
             import_id=str(import_id),
         )
 
@@ -53,6 +55,7 @@ class GoogleSheetsSyncRequest(BaseModel):
     timestamp_header: str | None = Field(default="Timestamp", max_length=255)
     source_type: str = Field(default="google_sheets", min_length=1, max_length=50)
     questionnaire_version: str | None = Field(default=None, max_length=100)
+    refresh_existing: bool = False
 
 
 class ImportErrorResponse(BaseModel):

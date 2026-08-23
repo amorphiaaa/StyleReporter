@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.runtime import AgentsSdkStyleReportRuntime
+from app.agents.runtime import AgentsSdkStyleReportRuntime, CodexCliStyleReportRuntime
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.api.dependencies import get_db_session
 from app.api.schemas.reports import GenerateStyleReportRequest, StyleReportResponse
@@ -15,6 +15,7 @@ from app.repositories.sqlalchemy import (
     SqlAlchemyStyleReportRunRepository,
     SqlAlchemySubmissionRepository,
 )
+from app.services.asset_workspace import LocalAssetWorkspace
 
 router = APIRouter(tags=["reports"])
 db_session_dependency = Depends(get_db_session)
@@ -60,12 +61,22 @@ async def generate_style_report(
     try:
         await repository.save(report_run)
         run_persisted = True
+        settings = get_settings()
+        asset_paths = (
+            await LocalAssetWorkspace(settings.asset_storage_root).get_verified_image_paths(
+                client_id=str(client_id),
+                submission_id=str(payload.submission_id),
+            )
+            if settings.asset_storage_enabled
+            else ()
+        )
         generated = await _build_runtime(payload.runtime).generate(
             StyleReportRequest(
                 client_id=str(client_id),
                 submission_id=str(payload.submission_id),
                 raw_payload=submission.raw_payload,
                 questionnaire_version=submission.questionnaire_version,
+                asset_paths=asset_paths,
             )
         )
         completed_at = datetime.now(UTC)
@@ -153,6 +164,30 @@ def _build_runtime(runtime_type: str) -> StyleReportRuntime:
             model=settings.openai_model,
             api_key_configured=True,
             dry_run=False,
+        )
+    if runtime_type == "codex_cli":
+        settings = get_settings()
+        if not settings.codex_cli_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "The Codex CLI runtime is disabled. Set CODEX_CLI_ENABLED=true "
+                    "and start the local Codex CLI worker."
+                ),
+            )
+        if not settings.codex_cli_runner_url:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "The Codex CLI runtime has no worker URL. Set "
+                    "CODEX_CLI_RUNNER_URL in the backend environment."
+                ),
+            )
+        return CodexCliStyleReportRuntime(
+            runner_url=settings.codex_cli_runner_url,
+            runner_token=settings.codex_cli_runner_token,
+            model=settings.codex_cli_model,
+            timeout_seconds=settings.codex_cli_timeout_seconds,
         )
     return StubStyleReportRuntime()
 

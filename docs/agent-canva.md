@@ -1,4 +1,4 @@
-# Agents SDK and Canva boundary
+# Codex CLI, Agents SDK contract, and Canva boundary
 
 The backend includes an Agents SDK boundary. The current
 `agents_sdk_dry_run` path constructs a typed `Agent` with structured output and
@@ -13,9 +13,16 @@ The real output contract is:
 - `your_action_plan` with 3-5 prioritized actions, rationale, and first step.
 
 The prompt is intentionally evidence-bound: missing answers remain unknown,
-image URLs are treated as metadata, and the agent must not invent client facts.
+Image URLs without downloaded local attachments are treated as metadata, and
+the agent must not invent client facts. Verified downloaded images may be
+attached to the local Codex CLI runtime for direct visual observations.
 
-The planned runtime will use the Python Agents SDK:
+The production local runtime uses the Codex CLI worker described in
+`docs/codex-cli-runtime.md`. The Agents SDK dependency is retained only for a
+typed, no-network contract preview; it is not used to make the report model
+call.
+
+The earlier Agents SDK references remain useful for the contract shape:
 
 - Official OpenAI Agents documentation:
   https://developers.openai.com/api/docs/guides/agents
@@ -23,10 +30,9 @@ The planned runtime will use the Python Agents SDK:
   https://openai.github.io/openai-agents-python/
 
 The `openai-agents` dependency is present and used by
-`AgentsSdkStyleReportRuntime`. The real `agents_sdk` route is disabled by
-default; it requires `OPENAI_AGENT_RUNTIME_ENABLED=true` and
-`OPENAI_API_KEY`. Without that configuration the API returns `503`, while
-`agents_sdk_dry_run` remains safe for local contract checks.
+`AgentsSdkStyleReportRuntime` only in `agents_sdk_dry_run`. The `codex_cli`
+route delegates the actual model call to the locally authenticated CLI worker,
+so it does not require `OPENAI_API_KEY`.
 
 ## Separate concepts
 
@@ -34,8 +40,8 @@ default; it requires `OPENAI_AGENT_RUNTIME_ENABLED=true` and
 - CanvaConnector: transport/auth boundary for a future Canva OAuth or MCP
   integration.
 - AgentRuntime: orchestration boundary that may register the skill later.
-- AgentsSdkStyleReportRuntime: current SDK adapter with an explicit dry-run
-  switch and future `Runner.run` path.
+- AgentsSdkStyleReportRuntime: typed no-network contract preview.
+- CodexCliStyleReportRuntime: HTTP client for the host-side Codex CLI worker.
 
 The scaffold connector reports configured=false and performs no network
 request. Canva credentials, OAuth flow, MCP endpoint, asset copying, and
