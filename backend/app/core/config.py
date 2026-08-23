@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
     google_refresh_existing: bool = False
     google_sheets_enabled: bool = False
     google_sheets_timeout_seconds: float = 10.0
+
+    asset_storage_enabled: bool = True
+    asset_storage_root: Path = Path("var/assets")
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None

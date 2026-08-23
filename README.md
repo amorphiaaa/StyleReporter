@@ -7,9 +7,11 @@ questionnaires and can generate a local style report through Codex CLI.
 
 This repository contains the handoff scaffold, a Google Sheets import slice,
 and a local report vertical slice. Already-read rows are persisted in
-PostgreSQL. The client detail screen can launch a deterministic preview or
-send one saved submission to a host-side Codex CLI worker. The worker uses the
-local Codex CLI session rather than `OPENAI_API_KEY`.
+PostgreSQL, and each successful submission creates a local client evidence
+workspace under `var/assets` (or `ASSET_STORAGE_ROOT`). The client detail screen
+can launch a deterministic preview or send one saved submission to a host-side
+Codex CLI worker. The worker uses the local Codex CLI session rather than
+`OPENAI_API_KEY`.
 
 Questionnaires are normalized through versioned JSON definitions before identity
 fields are imported. Source header aliases and report-required fields live in
@@ -26,6 +28,8 @@ companion worker.
 
 Not implemented:
 
+- downloading Google Drive/image provider files into the asset workspace
+- attaching local image files to Codex CLI runs for visual analysis
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks

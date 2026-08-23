@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.domain.contracts import (
+    AssetWorkspace,
     ClientRecord,
     ClientRepository,
     GoogleSheetsSource,
@@ -18,7 +19,10 @@ from app.domain.normalization import (
     normalize_email,
     parse_submission_timestamp,
 )
-from app.domain.questionnaire import normalize_questionnaire_payload
+from app.domain.questionnaire import (
+    extract_questionnaire_assets,
+    normalize_questionnaire_payload,
+)
 
 
 class QuestionnaireImportService(QuestionnaireImporter):
@@ -29,10 +33,12 @@ class QuestionnaireImportService(QuestionnaireImporter):
         source: GoogleSheetsSource,
         clients: ClientRepository,
         submissions: SubmissionRepository,
+        assets: AssetWorkspace | None = None,
     ) -> None:
         self._source = source
         self._clients = clients
         self._submissions = submissions
+        self._assets = assets
 
     async def import_rows(self, request: ImportRequest) -> ImportResult:
         rows = await self._source.read_rows(request.source)
@@ -123,7 +129,7 @@ class QuestionnaireImportService(QuestionnaireImporter):
                 if request.timestamp_header
                 else None
             )
-            await self._submissions.save(
+            saved_submission = await self._submissions.save(
                 QuestionnaireSubmission(
                     id=str(uuid4()),
                     client_id=client.id,
@@ -137,6 +143,15 @@ class QuestionnaireImportService(QuestionnaireImporter):
                     submitted_at=timestamp,
                 )
             )
+            if self._assets is not None:
+                await self._assets.register_submission(
+                    client=client,
+                    submission=saved_submission,
+                    assets=extract_questionnaire_assets(
+                        raw_payload,
+                        version=request.questionnaire_version,
+                    ),
+                )
             created_submissions += 1
 
         return ImportResult(
@@ -185,7 +200,7 @@ class QuestionnaireImportService(QuestionnaireImporter):
             if request.timestamp_header
             else None
         )
-        await self._submissions.save(
+        saved_submission = await self._submissions.save(
             QuestionnaireSubmission(
                 id=existing_submission.id,
                 client_id=existing_submission.client_id,
@@ -200,6 +215,18 @@ class QuestionnaireImportService(QuestionnaireImporter):
                 imported_at=existing_submission.imported_at,
             )
         )
+        if self._assets is not None:
+            await self._assets.register_submission(
+                client=client or ClientRecord(
+                    id=existing_submission.client_id,
+                    email_normalized=email,
+                ),
+                submission=saved_submission,
+                assets=extract_questionnaire_assets(
+                    row.values,
+                    version=request.questionnaire_version,
+                ),
+            )
         return updated_clients
 
 

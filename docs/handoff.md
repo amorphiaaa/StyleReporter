@@ -20,9 +20,14 @@ runtime behind a host-side worker.
    are agreed.
 2. Review the methodology prompt and generated reports against controlled
    questionnaire examples; keep `codex_cli` runs local and human-reviewed.
-3. Configure and test the Google Sheets provider with a real service account,
+3. Implement the image provider downloader behind the asset workspace contract;
+   Google Drive files should be downloaded by file ID with explicit access and
+   recorded status, checksum, and content type.
+4. Extend the Codex CLI worker to resolve the shared asset root and pass only
+   verified local image files through `codex exec --image`.
+5. Configure and test the Google Sheets provider with a real service account,
    spreadsheet sharing, and a controlled response sheet.
-4. Implement Canva through the documented connector boundary.
+6. Implement Canva through the documented connector boundary.
 
 ## Non-negotiable constraints
 

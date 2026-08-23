@@ -35,6 +35,25 @@ class QuestionnaireSubmission:
 
 
 @dataclass(frozen=True)
+class QuestionnaireAsset:
+    """An image reference extracted from a questionnaire submission."""
+
+    field_key: str
+    ordinal: int
+    source_url: str
+
+
+@dataclass(frozen=True)
+class AssetWorkspaceResult:
+    """The filesystem workspace created for one client submission."""
+
+    client_directory: str
+    submission_directory: str
+    manifest_relative_path: str
+    asset_count: int
+
+
+@dataclass(frozen=True)
 class StyleReport:
     report_version: str
     runtime_type: str
@@ -183,6 +202,17 @@ class GoogleSheetsSource(Protocol):
 
 class QuestionnaireImporter(Protocol):
     async def import_rows(self, request: ImportRequest) -> ImportResult:
+        ...
+
+
+class AssetWorkspace(Protocol):
+    async def register_submission(
+        self,
+        *,
+        client: ClientRecord,
+        submission: QuestionnaireSubmission,
+        assets: Sequence[QuestionnaireAsset],
+    ) -> AssetWorkspaceResult:
         ...
 
 

@@ -46,8 +46,28 @@ source row number, row hash, questionnaire version, and timestamps.
 ### submission_assets
 
 Future image references may be indexed separately with role, URL, filename, and
-provider metadata. No binary download or object storage is part of the
-scaffold.
+provider metadata. The current local asset workspace registers these references
+in a per-client filesystem manifest, but binary download and object storage are
+still not implemented.
+
+### Local client workspace
+
+When asset storage is enabled, each successful submission creates:
+
+```text
+<ASSET_STORAGE_ROOT>/clients/<client_id>/
+  client.json
+  submissions/<submission_id>/
+    questionnaire.json
+    manifest.json
+    images/<questionnaire_field_key>/
+```
+
+`questionnaire.json` contains the preserved source row and import metadata.
+`manifest.json` records image role, ordinal, source URL, and a planned local
+path. The image directories are created before provider-specific downloading is
+added. Client and submission IDs, rather than names or emails, are used in
+paths to avoid unsafe path characters and accidental identity collisions.
 
 ### import_runs
 

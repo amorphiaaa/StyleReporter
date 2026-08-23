@@ -28,6 +28,7 @@ from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemySubmissionRepository,
 )
+from app.services.asset_workspace import LocalAssetWorkspace
 from app.services.questionnaire_importer import QuestionnaireImportService
 
 router = APIRouter(prefix="/imports", tags=["imports"])
@@ -129,6 +130,7 @@ async def _run_import(
     source: GoogleSheetsSource,
     session: AsyncSession,
 ) -> ImportResponse:
+    settings = get_settings()
     import_id = UUID(request.import_id) if request.import_id else uuid4()
     import_run = ImportRun(
         id=import_id,
@@ -146,6 +148,11 @@ async def _run_import(
             source=source,
             clients=SqlAlchemyClientRepository(session),
             submissions=SqlAlchemySubmissionRepository(session),
+            assets=(
+                LocalAssetWorkspace(settings.asset_storage_root)
+                if settings.asset_storage_enabled
+                else None
+            ),
         )
         result = await importer.import_rows(request)
         import_run.status = "completed"

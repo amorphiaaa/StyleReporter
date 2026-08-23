@@ -20,6 +20,9 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
   normalization, and source-row idempotency.
 - Questionnaire contract: versioned normalization for the known synthetic
   questionnaire; unknown versions remain raw-only.
+- Asset workspace: local per-client folders with preserved questionnaire JSON,
+  image-role directories, and a manifest of source URLs. Downloading provider
+  files is a separate follow-up boundary.
 - Style report runtime: deterministic stub, Agents SDK dry-run adapter, and a
   Codex CLI adapter. The real local path sends a structured prompt to the
   host-side companion worker, which invokes `codex exec` with read-only
@@ -29,8 +32,8 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 ## Intended future flow
 
 Google Forms -> linked response Sheet -> GoogleSheetsSource ->
-QuestionnaireImporter -> client/submission repositories -> StyleReportRuntime ->
-report run persistence.
+QuestionnaireImporter -> client/submission repositories + asset workspace ->
+StyleReportRuntime -> report run persistence.
 
 The unit tests exercise the same flow with FixtureGoogleSheetsSource and
 in-memory repositories. The Compose smoke test exercises the manual endpoint
@@ -54,6 +57,10 @@ evidence; it does not diagnose the client.
   and persisted row-level errors for a selected run.
 - `fixture-v1` rows are normalized into a typed questionnaire context before
   identity fields are imported; raw answers remain unchanged.
+- Successful imports create a local asset workspace under `ASSET_STORAGE_ROOT`
+  with `client.json`, `questionnaire.json`, `manifest.json`, and role-based
+  image directories. The manifest is reference-only until a provider downloader
+  is implemented.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.

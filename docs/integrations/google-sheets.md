@@ -62,6 +62,12 @@ versioned questionnaire definitions in
 `backend/app/domain/questionnaire_definitions/` resolve source headers into
 stable internal keys and keep unknown columns in the raw payload.
 
+When `ASSET_STORAGE_ENABLED=true`, the same import also creates a local
+per-client workspace. Image-valued fields are discovered from the versioned
+definition and written to `manifest.json` with their role, ordinal, and source
+URL. The importer does not download Google Drive files yet; that provider
+boundary is intentionally separate from row persistence.
+
 The current fixture covers a new client, a repeat email, a missing email, and a
 second client. It intentionally includes synthetic `example.test` image URLs
 only.

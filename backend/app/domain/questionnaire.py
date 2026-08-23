@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from app.domain.contracts import QuestionnaireAsset
 from app.domain.questionnaire_definitions import (
     QuestionnaireFieldDefinition,
     get_questionnaire_definition,
@@ -107,6 +108,36 @@ def normalize_questionnaire_payload(
         missing_report_fields=missing_report_fields,
         answers=values,
     )
+
+
+def extract_questionnaire_assets(
+    raw_payload: Mapping[str, object],
+    *,
+    version: str | None,
+) -> tuple[QuestionnaireAsset, ...]:
+    """Extract image references from configured image fields.
+
+    The mapping owns the field keys and source headers. This keeps asset roles
+    configurable when a future questionnaire version changes its questions.
+    """
+
+    normalized = normalize_questionnaire_payload(raw_payload, version=version)
+    definition = get_questionnaire_definition(version)
+    if definition is None:
+        return ()
+
+    assets: list[QuestionnaireAsset] = []
+    for field in definition.fields:
+        if field.value_type not in {"image_link", "image_links"}:
+            continue
+        value = normalized.answers.get(field.key)
+        values = value if isinstance(value, tuple) else ((value,) if isinstance(value, str) else ())
+        assets.extend(
+            QuestionnaireAsset(field_key=field.key, ordinal=index, source_url=source_url)
+            for index, source_url in enumerate(values, start=1)
+            if source_url.strip()
+        )
+    return tuple(assets)
 
 
 def _field_value(
