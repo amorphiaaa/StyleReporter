@@ -25,11 +25,23 @@ class ClientSubmissionResponse(BaseModel):
     raw_payload: dict[str, Any]
 
 
+class ClientAssetResponse(BaseModel):
+    submission_id: UUID
+    field_key: str
+    ordinal: int
+    folder_key: str
+    folder_label: str
+    filename: str
+    content_type: str
+    url: str
+
+
 class ClientDetailResponse(BaseModel):
     id: UUID
     email_normalized: str
     display_name: str | None
     submissions: list[ClientSubmissionResponse]
+    assets: list[ClientAssetResponse] = Field(default_factory=list)
 
 
 class UpdateClientRequest(BaseModel):

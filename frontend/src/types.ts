@@ -97,6 +97,18 @@ export type ClientDetail = {
   email_normalized: string;
   display_name: string | null;
   submissions: ClientSubmission[];
+  assets: ClientAsset[];
+};
+
+export type ClientAsset = {
+  submission_id: string;
+  field_key: string;
+  ordinal: number;
+  folder_key: string;
+  folder_label: string;
+  filename: string;
+  content_type: string;
+  url: string;
 };
 
 export type UpdateClientRequest = {

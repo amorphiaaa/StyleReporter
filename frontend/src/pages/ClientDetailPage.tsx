@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { createStyleReport, getClient, listStyleReports, updateClient } from "../api/client";
+import {
+  API_BASE_URL,
+  createStyleReport,
+  getClient,
+  listStyleReports,
+  updateClient,
+} from "../api/client";
 import type {
+  ClientAsset,
   ClientDetail,
   StyleLanguageAction,
   StyleLanguageAnalysis,
@@ -11,6 +18,13 @@ import type {
 } from "../types";
 
 type ReportsBySubmission = Record<string, StyleReportResponse[]>;
+const PHOTO_FOLDER_ORDER = [
+  "questionnaire",
+  "good_outfits",
+  "bad_outfits",
+  "inspiration",
+  "final_report",
+];
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -207,6 +221,8 @@ function ClientProfile({
         </div>
       </div>
 
+      <ClientPhotoGallery assets={client.assets ?? []} />
+
       <div className="submission-stack">
         {client.submissions.map((submission) => (
           <article className="submission-card" key={submission.id}>
@@ -291,6 +307,112 @@ function ClientProfile({
       </div>
     </>
   );
+}
+
+function ClientPhotoGallery({ assets }: { assets: ClientAsset[] }) {
+  const [selectedAsset, setSelectedAsset] = useState<ClientAsset | null>(null);
+  const groupedAssets = assets.reduce<Record<string, ClientAsset[]>>((groups, asset) => {
+    groups[asset.folder_key] = [...(groups[asset.folder_key] ?? []), asset];
+    return groups;
+  }, {});
+  const groups = Object.entries(groupedAssets).sort(
+    ([firstKey], [secondKey]) => photoFolderOrder(firstKey) - photoFolderOrder(secondKey),
+  );
+
+  useEffect(() => {
+    if (!selectedAsset) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedAsset(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedAsset]);
+
+  return (
+    <section className="client-gallery" aria-labelledby="client-gallery-heading">
+      <div className="gallery-heading">
+        <div>
+          <p className="eyebrow">Visual references</p>
+          <h3 id="client-gallery-heading">Client photos</h3>
+        </div>
+        <span className="muted-label">
+          {assets.length} saved image{assets.length === 1 ? "" : "s"}
+        </span>
+      </div>
+      {assets.length === 0 ? (
+        <p className="gallery-empty">
+          No local images are available yet. They will appear here after a successful asset
+          download during import.
+        </p>
+      ) : (
+        <div className="gallery-groups">
+          {groups.map(([folderKey, folderAssets]) => (
+            <section className="gallery-group" key={folderKey}>
+              <div className="gallery-group-heading">
+                <h4>{folderAssets[0]?.folder_label ?? folderKey}</h4>
+                <span>{folderAssets.length}</span>
+              </div>
+              <div className="photo-grid">
+                {folderAssets.map((asset) => (
+                  <button
+                    className="photo-tile"
+                    type="button"
+                    key={`${asset.submission_id}-${asset.field_key}-${asset.ordinal}`}
+                    onClick={() => setSelectedAsset(asset)}
+                    aria-label={`Open ${asset.folder_label} image ${asset.ordinal}`}
+                  >
+                    <img
+                      src={`${API_BASE_URL}${asset.url}`}
+                      alt={`${asset.folder_label}, image ${asset.ordinal}`}
+                      loading="lazy"
+                    />
+                    <span>{asset.filename}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+      {selectedAsset ? (
+        <div
+          className="photo-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedAsset.folder_label} image preview`}
+          onClick={() => setSelectedAsset(null)}
+        >
+          <div className="photo-lightbox-panel" onClick={(event) => event.stopPropagation()}>
+            <button
+              className="photo-lightbox-close"
+              type="button"
+              onClick={() => setSelectedAsset(null)}
+              aria-label="Close image preview"
+            >
+              ×
+            </button>
+            <img
+              src={`${API_BASE_URL}${selectedAsset.url}`}
+              alt={`${selectedAsset.folder_label}, image ${selectedAsset.ordinal}`}
+            />
+            <p>
+              {selectedAsset.folder_label} · {selectedAsset.filename}
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function photoFolderOrder(folderKey: string): number {
+  const index = PHOTO_FOLDER_ORDER.indexOf(folderKey);
+  return index === -1 ? PHOTO_FOLDER_ORDER.length : index;
 }
 
 function ReportPreview({ report }: { report: StyleReportResponse }) {
