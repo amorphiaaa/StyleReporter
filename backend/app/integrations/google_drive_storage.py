@@ -18,6 +18,10 @@ from app.domain.contracts import (
     ClientRecord,
     QuestionnaireSubmission,
 )
+from app.integrations.google_oauth import (
+    GOOGLE_DRIVE_OAUTH_SCOPE,
+    OAuthAccessTokenProvider,
+)
 from app.integrations.google_sheets import (
     GoogleSheetsConfigurationError,
     ServiceAccountAccessTokenProvider,
@@ -101,6 +105,27 @@ class GoogleDriveWorkspacePublisher(AssetPublisher):
             root_folder_id=root_folder_id,
             local_root=local_root,
             access_token_provider=provider,
+            timeout_seconds=timeout_seconds,
+        )
+
+    @classmethod
+    def from_oauth(
+        cls,
+        client_json: str,
+        refresh_token: str,
+        *,
+        root_folder_id: str,
+        local_root: Path,
+        timeout_seconds: float = 30.0,
+    ) -> GoogleDriveWorkspacePublisher:
+        return cls(
+            root_folder_id=root_folder_id,
+            local_root=local_root,
+            access_token_provider=OAuthAccessTokenProvider(
+                client_json,
+                refresh_token,
+                scopes=(GOOGLE_DRIVE_OAUTH_SCOPE,),
+            ),
             timeout_seconds=timeout_seconds,
         )
 

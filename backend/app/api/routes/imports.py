@@ -222,6 +222,22 @@ def _build_asset_downloader(settings):
         timeout_seconds=settings.asset_download_timeout_seconds,
         max_bytes=settings.asset_download_max_bytes,
     )
+    oauth_values = (
+        settings.google_drive_oauth_client_json,
+        settings.google_drive_oauth_refresh_token,
+    )
+    if any(oauth_values) and not all(oauth_values):
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive downloads require both GOOGLE_DRIVE_OAUTH_CLIENT_JSON "
+            "and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
+        )
+    if all(oauth_values):
+        return GoogleDriveAssetDownloader.from_oauth(
+            settings.google_drive_oauth_client_json,
+            settings.google_drive_oauth_refresh_token,
+            timeout_seconds=settings.asset_download_timeout_seconds,
+            max_bytes=settings.asset_download_max_bytes,
+        )
     if not settings.google_service_account_json:
         return fallback
 
@@ -242,13 +258,31 @@ def _build_asset_publisher(settings):
         raise GoogleDriveStorageConfigurationError(
             "Google Drive storage requires ASSET_STORAGE_ENABLED=true."
         )
-    if not settings.google_service_account_json:
-        raise GoogleDriveStorageConfigurationError(
-            "Google Drive storage requires GOOGLE_SERVICE_ACCOUNT_JSON."
-        )
     if not settings.google_drive_root_folder_id:
         raise GoogleDriveStorageConfigurationError(
             "Google Drive storage requires GOOGLE_DRIVE_ROOT_FOLDER_ID."
+        )
+    oauth_values = (
+        settings.google_drive_oauth_client_json,
+        settings.google_drive_oauth_refresh_token,
+    )
+    if any(oauth_values) and not all(oauth_values):
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires both GOOGLE_DRIVE_OAUTH_CLIENT_JSON "
+            "and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
+        )
+    if all(oauth_values):
+        return GoogleDriveWorkspacePublisher.from_oauth(
+            settings.google_drive_oauth_client_json,
+            settings.google_drive_oauth_refresh_token,
+            root_folder_id=settings.google_drive_root_folder_id,
+            local_root=settings.asset_storage_root,
+            timeout_seconds=settings.google_drive_timeout_seconds,
+        )
+    if not settings.google_service_account_json:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires OAuth credentials. Set "
+            "GOOGLE_DRIVE_OAUTH_CLIENT_JSON and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN."
         )
     return GoogleDriveWorkspacePublisher.from_service_account_json(
         settings.google_service_account_json,

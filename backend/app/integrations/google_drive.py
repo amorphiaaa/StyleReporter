@@ -15,6 +15,10 @@ from app.integrations.asset_downloader import (
     _failed,
     _save_response,
 )
+from app.integrations.google_oauth import (
+    GOOGLE_DRIVE_OAUTH_SCOPE,
+    OAuthAccessTokenProvider,
+)
 from app.integrations.google_sheets import (
     GoogleAccessTokenProvider,
     GoogleSheetsConfigurationError,
@@ -27,7 +31,7 @@ _DRIVE_FILE_ID_PATTERN = re.compile(r"/file/d/([A-Za-z0-9_-]+)")
 
 
 class GoogleDriveAssetDownloader(AssetDownloader):
-    """Download Drive file IDs with a service-account token.
+    """Download Drive file IDs with a Google access token.
 
     Non-Drive URLs are delegated to the public HTTP downloader, which keeps
     direct image links useful without coupling the workspace to Google.
@@ -66,6 +70,26 @@ class GoogleDriveAssetDownloader(AssetDownloader):
             )
         except GoogleSheetsConfigurationError:
             raise
+        return cls(
+            access_token_provider=provider,
+            timeout_seconds=timeout_seconds,
+            max_bytes=max_bytes,
+        )
+
+    @classmethod
+    def from_oauth(
+        cls,
+        client_json: str,
+        refresh_token: str,
+        *,
+        timeout_seconds: float = 30.0,
+        max_bytes: int = MAX_DEFAULT_BYTES,
+    ) -> GoogleDriveAssetDownloader:
+        provider = OAuthAccessTokenProvider(
+            client_json,
+            refresh_token,
+            scopes=(GOOGLE_DRIVE_OAUTH_SCOPE,),
+        )
         return cls(
             access_token_provider=provider,
             timeout_seconds=timeout_seconds,

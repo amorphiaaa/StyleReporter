@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     google_drive_storage_enabled: bool = False
     google_drive_root_folder_id: str | None = None
     google_drive_timeout_seconds: float = 30.0
+    google_drive_oauth_client_json: str | None = Field(default=None, repr=False)
+    google_drive_oauth_refresh_token: str | None = Field(default=None, repr=False)
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None

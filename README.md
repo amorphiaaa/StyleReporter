@@ -73,14 +73,15 @@ endpoint and should not be exposed as a public service. See
 
 To download questionnaire images into the shared client workspace, set
 `ASSET_DOWNLOAD_ENABLED=true` in `.env` and run a sync. The service account
-must have access to the uploaded Drive files. Existing submissions can be
+or OAuth user must have access to the uploaded Drive files. Existing submissions can be
 reprocessed with `{"refresh_existing": true}`. Only successfully downloaded
 images are attached to subsequent local Codex CLI report runs.
 
 To make Google Drive the canonical client workspace, also set
 `GOOGLE_DRIVE_STORAGE_ENABLED=true` and provide `GOOGLE_DRIVE_ROOT_FOLDER_ID`.
-The service account must have Editor access to that root folder. Each imported
-client then gets one stable folder with this structure:
+For a personal Drive, configure OAuth with `GOOGLE_DRIVE_OAUTH_CLIENT_JSON` and
+`GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN`; the user who authorizes OAuth must have
+access to the root folder. Each imported client then gets one stable folder:
 
 ```text
 <configured root>/<client name> [<client id>]/
@@ -97,6 +98,19 @@ versioned questionnaire mapping. The local workspace remains a shared cache
 for Codex CLI, and `Final Report` is reserved for the future report exporter.
 Drive publishing is disabled by default and has no effect until the flag is
 explicitly enabled.
+
+### One-time personal Drive OAuth setup
+
+1. In Google Cloud, create an OAuth consent screen and a Desktop OAuth client.
+2. Download the client JSON outside the repository.
+3. Run:
+
+       python tools/google_drive_oauth.py --client-json C:\path\client_secret.json
+
+   Complete the browser consent flow. The script prints a refresh token and a
+   compact client-JSON value for `.env`; keep both secret.
+4. Put those values in `.env`, set `GOOGLE_DRIVE_ROOT_FOLDER_ID`, and restart
+   the backend. The existing service account can continue to read Sheets.
 
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or

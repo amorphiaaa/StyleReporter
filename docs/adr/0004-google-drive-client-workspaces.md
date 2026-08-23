@@ -25,8 +25,9 @@ workspace remains the Codex CLI cache and the source for verified uploads.
 
 ## Consequences
 
-- A service account needs Editor access to the configured root folder and the
-  Drive write scope; the feature is disabled by default.
+- Personal Drive publishing uses OAuth on behalf of a human user; the service
+  account remains a Shared Drive option because service accounts have no My
+  Drive storage quota. The feature is disabled by default.
 - `questionnaire.json` is uploaded immediately. Image files are uploaded only
   after the optional downloader has verified them locally.
 - The `Final Report` folder is reserved for the later report exporter; this

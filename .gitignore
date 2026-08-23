@@ -21,6 +21,8 @@ dist/
 !.env.example
 *.json.key
 *service-account*.json
+*client_secret*.json
+*oauth*.json
 
 # Local infrastructure
 postgres-data/

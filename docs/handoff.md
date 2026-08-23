@@ -22,9 +22,9 @@ tree, while the local workspace remains the Codex CLI cache.
    are agreed.
 2. Configure and test the Google Sheets and Drive providers with a real service
    account, spreadsheet sharing, Drive-file access, and a controlled response
-   sheet. Give the service account Editor access to the configured Drive root;
-   keep `GOOGLE_DRIVE_STORAGE_ENABLED=false` and `ASSET_DOWNLOAD_ENABLED=false`
-   until access is verified.
+   sheet. For personal Drive use OAuth; for Shared Drive use a service account
+   with the appropriate shared-drive role. Keep `GOOGLE_DRIVE_STORAGE_ENABLED=false`
+   and `ASSET_DOWNLOAD_ENABLED=false` until access is verified.
 3. Review visual observations and generated reports against controlled
    questionnaire examples; keep `codex_cli` runs local and human-reviewed.
 4. Add persistence/indexing for `submission_assets` if the UI needs searchable

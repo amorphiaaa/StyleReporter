@@ -79,7 +79,9 @@ the manifest and do not reject the questionnaire submission.
 
 When `GOOGLE_DRIVE_STORAGE_ENABLED=true`, the importer publishes the local
 submission workspace under the configured `GOOGLE_DRIVE_ROOT_FOLDER_ID`. The
-service account must have Editor access to that root folder. Stable
+For a personal Drive, publishing uses a user OAuth refresh token, and that
+user must have access to the root folder. A service account is supported only
+for a Shared Drive deployment. Stable
 `appProperties` keys, rather than display names, make retries idempotent:
 
 ```text
