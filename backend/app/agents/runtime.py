@@ -4,7 +4,7 @@ import json
 
 import httpx
 from agents import Agent, Runner
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.agents.questionnaire_context import build_questionnaire_context
 from app.domain.contracts import (
@@ -41,6 +41,8 @@ Rules:
 
 
 class ActionPlanItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     priority: int = Field(ge=1, le=5)
     focus: str
     action: str
@@ -49,13 +51,15 @@ class ActionPlanItem(BaseModel):
 
 
 class StyleLanguageAnalysisOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str
     current_style_language: str
     desired_style_language: str
     disconnect: str
     your_action_plan: list[ActionPlanItem] = Field(min_length=3, max_length=5)
-    evidence: list[str] = Field(default_factory=list)
-    limitations: list[str] = Field(default_factory=list)
+    evidence: list[str]
+    limitations: list[str]
 
 
 class AgentsSdkStyleReportRuntime(StyleReportRuntime):

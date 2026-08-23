@@ -1,7 +1,11 @@
 import httpx
 import pytest
 
-from app.agents.runtime import AgentsSdkStyleReportRuntime, CodexCliStyleReportRuntime
+from app.agents.runtime import (
+    AgentsSdkStyleReportRuntime,
+    CodexCliStyleReportRuntime,
+    StyleLanguageAnalysisOutput,
+)
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.domain.contracts import StyleReportRequest
 
@@ -141,3 +145,13 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
         "model": None,
         "runner_url": "http://codex-worker:8787",
     }
+
+
+def test_codex_output_schema_is_strict_for_every_object() -> None:
+    schema = StyleLanguageAnalysisOutput.model_json_schema()
+
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    action_schema = schema["$defs"]["ActionPlanItem"]
+    assert action_schema["additionalProperties"] is False
+    assert set(action_schema["required"]) == set(action_schema["properties"])
