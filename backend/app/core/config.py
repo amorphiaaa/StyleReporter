@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     openai_model: str | None = None
     openai_agent_runtime_enabled: bool = False
 
+    codex_cli_enabled: bool = False
+    codex_cli_runner_url: str | None = None
+    codex_cli_runner_token: str | None = Field(default=None, repr=False)
+    codex_cli_model: str | None = None
+    codex_cli_timeout_seconds: float = 600.0
+
     canva_connector_url: str | None = None
     canva_client_id: str | None = Field(default=None, repr=False)
     canva_client_secret: str | None = Field(default=None, repr=False)

@@ -20,9 +20,10 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
   normalization, and source-row idempotency.
 - Questionnaire contract: versioned normalization for the known synthetic
   questionnaire; unknown versions remain raw-only.
-- Style report runtime: deterministic stub plus an Agents SDK dry-run adapter;
-  both expose the four-section Style Language analysis contract. Real Runner
-  calls remain behind the same runtime contract and a disabled-by-default flag.
+- Style report runtime: deterministic stub, Agents SDK dry-run adapter, and a
+  Codex CLI adapter. The real local path sends a structured prompt to the
+  host-side companion worker, which invokes `codex exec` with read-only
+  sandboxing and an output schema.
 - Canva connector: future provider boundary for asset workflows.
 
 ## Intended future flow
@@ -60,20 +61,23 @@ evidence; it does not diagnose the client.
 - PATCH /api/v1/clients/{client_id} updates only the display name; normalized
   email identity and raw submissions remain immutable through this UI.
 - POST /api/v1/clients/{client_id}/reports generates a local `stub-v1` report
-  for a persisted submission.
+  for a persisted submission or a `codex-cli-v1` report through the local
+  worker when `runtime: "codex_cli"` is selected.
 - Runtime failures are persisted as `failed` report runs with an error message;
   the generation endpoint returns `502` while report history remains available.
 - The same endpoint accepts `runtime: "agents_sdk_dry_run"` to construct the
   typed agent contract without a model call.
-- `runtime: "agents_sdk"` is accepted by the API but returns `503` until
-  `OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
-- The client detail UI exposes both local runtime choices and keeps `stub` as
-  the default.
+- `runtime: "codex_cli"` returns `503` with an actionable message when the
+  local worker is disabled, not configured, or unavailable.
+- The client detail UI exposes the deterministic preview, Agents SDK contract
+  preview, and Codex CLI (local) runtime, with Codex CLI selected by default.
 - The analysis UI renders current style language, desired style language, the
   disconnect, and a prioritized action plan when that structured output exists.
 - GET /api/v1/reports/{report_run_id} returns a persisted report run.
 - GET /api/v1/clients/{client_id}/reports returns report-run history ordered
   from newest to oldest.
-- No external credentials are required.
+- The import stack needs Google credentials only for live Sheets sync. The
+  report stack uses the user's host-side Codex CLI session and does not need an
+  OpenAI API key.
 - The database engine is created at startup, but connections are opened only
   when an API request obtains a session.

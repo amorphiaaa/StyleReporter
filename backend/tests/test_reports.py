@@ -21,6 +21,21 @@ def test_real_agents_sdk_runtime_returns_service_unavailable_when_disabled(
     assert "OPENAI_AGENT_RUNTIME_ENABLED=true" in str(exc_info.value.detail)
 
 
+def test_codex_cli_runtime_requires_a_local_worker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "app.api.routes.reports.get_settings",
+        lambda: Settings(_env_file=None, codex_cli_enabled=True),
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        _build_runtime("codex_cli")
+
+    assert exc_info.value.status_code == 503
+    assert "CODEX_CLI_RUNNER_URL" in str(exc_info.value.detail)
+
+
 def test_failed_report_run_keeps_error_for_history() -> None:
     report_run = StyleReportRun(
         id="cc9f2406-74d2-4392-be2b-8377039d11d9",

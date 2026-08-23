@@ -1,15 +1,15 @@
 # StyleReporter
 
-StyleReporter is a scaffold for a future FastAPI + React application that will
-turn client questionnaire data into personalized style reports.
+StyleReporter is a FastAPI + React application that imports client
+questionnaires and can generate a local style report through Codex CLI.
 
 ## Current stage: local report vertical slice
 
-This repository contains the handoff scaffold, a manual import slice, and a
-local report vertical slice. Already-read rows are persisted in PostgreSQL;
-the client detail screen can launch a deterministic stub report for a saved
-submission. The Google Sheets provider is present but disabled by default, so
-the local stack still makes no external provider calls.
+This repository contains the handoff scaffold, a Google Sheets import slice,
+and a local report vertical slice. Already-read rows are persisted in
+PostgreSQL. The client detail screen can launch a deterministic preview or
+send one saved submission to a host-side Codex CLI worker. The worker uses the
+local Codex CLI session rather than `OPENAI_API_KEY`.
 
 Questionnaires are normalized through versioned JSON definitions before identity
 fields are imported. Source header aliases and report-required fields live in
@@ -20,17 +20,16 @@ explicitly defined.
 
 The current MVP report target is a single-questionnaire analysis with four
 sections: `CURRENT STYLE LANGUAGE`, `DESIRED STYLE LANGUAGE`, `THE DISCONNECT`,
-and `YOUR ACTION PLAN`. The Agents SDK dry-run produces a deterministic preview
-of that contract without making a model call; the gated real runtime uses the
-same structured output after credentials and methodology review are complete.
+and `YOUR ACTION PLAN`. The Agents SDK dry-run remains as an offline contract
+preview; the real local runtime uses `codex exec --output-schema` through the
+companion worker.
 
 Not implemented:
 
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- OpenAI model calls and final production prompts (the Agents SDK dry-run
-  adapter and structured analysis contract are available)
+- unattended production scheduling and job retries for Codex CLI runs
 - Canva connector/OAuth/MCP calls
 - production methodology-driven style report generation
 - production deployment or CI/CD
@@ -55,6 +54,21 @@ Then open:
 - API docs: http://localhost:8000/docs
 - Frontend: http://localhost:5173
 
+For the real report runtime, authenticate Codex CLI once and start the local
+worker in a second PowerShell window:
+
+    codex login
+    .\tools\run-codex-cli-worker.ps1
+
+Check the worker before using the `Codex CLI (local)` option:
+
+    Invoke-RestMethod http://localhost:8787/health
+
+The worker is intentionally host-side because the saved Codex CLI session is
+owned by Windows, not by the backend container. It binds a local development
+endpoint and should not be exposed as a public service. See
+`docs/codex-cli-runtime.md` for the token and troubleshooting options.
+
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
 already-read rows. The read-only Google Sheets endpoint is available at
@@ -75,11 +89,9 @@ existing source rows without creating duplicate submissions.
 
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
-`submission_id` to generate a deterministic `stub-v1` response without an
-OpenAI key. You can also pass `runtime: "agents_sdk_dry_run"` to verify that
-the typed Agents SDK agent contract is constructed without calling a model. The
-real `agents_sdk` runtime is disabled by default; requests receive `503` until
-`OPENAI_AGENT_RUNTIME_ENABLED=true` and `OPENAI_API_KEY` are configured.
+`submission_id` and `runtime: "codex_cli"` to generate a structured report
+through the host worker without configuring an OpenAI API key. The
+`agents_sdk_dry_run` runtime remains available for offline contract checks.
 Runtime exceptions are saved as failed report runs and return `502`, so the
 attempt remains visible in report history.
 Retrieve the run later with

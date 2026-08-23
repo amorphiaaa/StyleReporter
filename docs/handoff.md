@@ -1,10 +1,9 @@
 # Handoff guide
 
 This repository is ready for the next engineer to continue the first product
-slice. The current commit contains a working manual importer, a read-only
-Google Sheets provider behind a disabled-by-default flag, client list/detail
-screens, and a deterministic local report runtime. The real OpenAI provider is
-still gated.
+slice. The current commit contains a working Google Sheets importer, client
+list/detail screens, structured report persistence, and a local Codex CLI
+runtime behind a host-side worker.
 
 ## Read first
 
@@ -19,10 +18,8 @@ still gated.
 
 1. Add client deletion only after retention, audit, and report-history policy
    are agreed.
-2. Review credentials, prompts, structured output validation, and tracing policy,
-   then enable the gated real `AgentsSdkStyleReportRuntime` path with
-   `OPENAI_AGENT_RUNTIME_ENABLED=true` and test it against a controlled model
-   environment.
+2. Review the methodology prompt and generated reports against controlled
+   questionnaire examples; keep `codex_cli` runs local and human-reviewed.
 3. Configure and test the Google Sheets provider with a real service account,
    spreadsheet sharing, and a controlled response sheet.
 4. Implement Canva through the documented connector boundary.

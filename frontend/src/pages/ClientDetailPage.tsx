@@ -16,7 +16,7 @@ export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [reports, setReports] = useState<ReportsBySubmission>({});
-  const [selectedRuntime, setSelectedRuntime] = useState<StyleReportRuntimeType>("stub");
+  const [selectedRuntime, setSelectedRuntime] = useState<StyleReportRuntimeType>("codex_cli");
   const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
   const [isSavingClient, setIsSavingClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -239,7 +239,9 @@ function ClientProfile({
                 <p className="report-help">
                   {selectedRuntime === "stub"
                     ? "Generate a local deterministic draft from this submission."
-                    : "Construct the typed Agents SDK agent and skip the model call."}
+                    : selectedRuntime === "codex_cli"
+                      ? "Generate the report through the locally authenticated Codex CLI."
+                      : "Construct the typed Agents SDK agent and skip the model call."}
                 </p>
               </div>
               <div className="report-controls">
@@ -254,6 +256,7 @@ function ClientProfile({
                   >
                     <option value="stub">Stub report</option>
                     <option value="agents_sdk_dry_run">Agents SDK dry-run</option>
+                    <option value="codex_cli">Codex CLI (local)</option>
                   </select>
                 </label>
                 <button
@@ -266,6 +269,8 @@ function ClientProfile({
                     ? "Generating..."
                     : selectedRuntime === "stub"
                       ? "Generate stub report"
+                    : selectedRuntime === "codex_cli"
+                      ? "Run Codex CLI report"
                       : "Run Agents SDK dry-run"}
                 </button>
               </div>

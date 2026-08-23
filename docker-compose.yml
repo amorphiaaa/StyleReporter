@@ -30,8 +30,15 @@ services:
       GOOGLE_REFRESH_EXISTING: ${GOOGLE_REFRESH_EXISTING:-false}
       GOOGLE_SHEETS_ENABLED: ${GOOGLE_SHEETS_ENABLED:-false}
       GOOGLE_SHEETS_TIMEOUT_SECONDS: ${GOOGLE_SHEETS_TIMEOUT_SECONDS:-10}
+      CODEX_CLI_ENABLED: ${CODEX_CLI_ENABLED:-true}
+      CODEX_CLI_RUNNER_URL: ${CODEX_CLI_RUNNER_URL:-http://host.docker.internal:8787}
+      CODEX_CLI_RUNNER_TOKEN: ${CODEX_CLI_RUNNER_TOKEN:-}
+      CODEX_CLI_MODEL: ${CODEX_CLI_MODEL:-}
+      CODEX_CLI_TIMEOUT_SECONDS: ${CODEX_CLI_TIMEOUT_SECONDS:-600}
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend/app:/app/app
       - ./backend/alembic:/app/alembic
