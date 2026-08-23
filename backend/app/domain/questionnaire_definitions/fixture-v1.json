@@ -15,7 +15,8 @@
     {
       "key": "current_style",
       "headers": [
-        "How would you describe your style today?"
+        "How would you describe your style today?",
+        "How would you describe your style today?\n\nExamples:\n\npractical but boring / elegant but repetitive / feminine but outdated etc."
       ],
       "report_required": true,
       "value_type": "text"
@@ -39,7 +40,8 @@
     {
       "key": "style_discomfort",
       "headers": [
-        "What usually makes an outfit feel wrong to you?"
+        "What usually makes an outfit feel wrong to you?",
+        "What usually makes an outfit feel “wrong” to you?"
       ],
       "report_required": true,
       "value_type": "text"
@@ -55,7 +57,8 @@
     {
       "key": "feels_like_me_images",
       "headers": [
-        "Feels Like Me images"
+        "Feels Like Me images",
+        "Please upload:\n-1 portrait photo of your face\nThis helps us identify your natural coloring as accurately as possible.\n-3 outfits where you feel MOST like yourself\nNot the trendiest.\nNot the most flattering.\nThe outfits that simply feel the most YOU.\nPlease choose photos where we can see your full body and figure clearly."
       ],
       "report_required": true,
       "multiple": true,
@@ -64,7 +67,8 @@
     {
       "key": "not_me_image",
       "headers": [
-        "Not Me image"
+        "Not Me image",
+        "Please upload:\n\nOne outfit you wear often but don’t really love yourself in\n\nThis helps us understand what currently feels misaligned."
       ],
       "report_required": true,
       "value_type": "image_link"
@@ -72,7 +76,8 @@
     {
       "key": "inspiration_images",
       "headers": [
-        "Inspiration images"
+        "Inspiration images",
+        "Please upload:\n\nThree inspiration images you are naturally drawn to\n\nDon’t overthink it.\nChoose what emotionally pulls you in."
       ],
       "report_required": true,
       "multiple": true,
@@ -81,9 +86,85 @@
     {
       "key": "visual_world",
       "headers": [
-        "Visual world"
+        "Visual world",
+        "Which visual world feels the most like YOU?\n\nChoose instinctively — not based on what you think you “should” wear."
       ],
       "report_required": true,
+      "value_type": "text"
+    },
+    {
+      "key": "visual_world_details",
+      "headers": [
+        "What is it about this visual world that feels most like you? Please share the details you’re drawn to — the mood, colors, textures, shapes, styling, or overall feeling."
+      ],
+      "report_required": false,
+      "value_type": "text"
+    },
+    {
+      "key": "lifestyle_context",
+      "headers": [
+        "Tell us a little about your current lifestyle. Where do you spend most of your time?\n\nExamples:\nWorking full-time\nRetired\nRunning a business\nTraveling frequently\nSocial events and dinners\nCasual everyday life\nActive lifestyle\nCaring for family"
+      ],
+      "report_required": false,
+      "value_type": "text"
+    },
+    {
+      "key": "daily_dressing",
+      "headers": [
+        "Which best describes how you dress most days?"
+      ],
+      "report_required": false,
+      "value_type": "text"
+    },
+    {
+      "key": "preferred_bottoms",
+      "headers": [
+        "Which bottoms do you feel most comfortable wearing?\n(Select all that apply)"
+      ],
+      "report_required": false,
+      "multiple": true,
+      "value_type": "text"
+    },
+    {
+      "key": "wears_dresses",
+      "headers": [
+        "Do you regularly wear dresses?"
+      ],
+      "report_required": false,
+      "value_type": "text"
+    },
+    {
+      "key": "preferred_outer_layers",
+      "headers": [
+        "Which outer layers do you wear most often? (Select all that apply)"
+      ],
+      "report_required": false,
+      "multiple": true,
+      "value_type": "text"
+    },
+    {
+      "key": "preferred_shoes",
+      "headers": [
+        "Which shoes do you wear most often? (Select all that apply)"
+      ],
+      "report_required": false,
+      "multiple": true,
+      "value_type": "text"
+    },
+    {
+      "key": "body_proportion_photo",
+      "headers": [
+        "Please upload one additional full-length photo for body proportion analysis.\n\nPhoto guidelines:\n\n-Full-height photo (head to toe visible)\n-Standing naturally facing the camera\n-Arms relaxed by your sides\n-Good lighting\n-Fitted clothing, activewear, leggings and a fitted top, swimwear, or similar\n-If you are not comfortable in swimwear, a sports outfit is perfectly fine\n-Avoid oversized clothing, jackets, coats, or loose dresses\n\nThis photo is used only to help us analyse silhouette recommendations and body proportions more accurately."
+      ],
+      "report_required": false,
+      "value_type": "image_link"
+    },
+    {
+      "key": "signature_report_feedback",
+      "headers": [
+        "Feedback on Signature Style Report (from info@europeanfashionschool.com inbox)"
+      ],
+      "report_required": false,
       "value_type": "text"
     }
   ]

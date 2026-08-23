@@ -16,6 +16,7 @@ https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheet
 - GOOGLE_SHEET_NAME
 - GOOGLE_SHEET_RANGE (optional A1 range)
 - GOOGLE_QUESTIONNAIRE_VERSION (optional versioned mapping)
+- GOOGLE_REFRESH_EXISTING (false by default; explicit backfill mode)
 - GOOGLE_SHEETS_ENABLED (false by default)
 - GOOGLE_SHEETS_TIMEOUT_SECONDS
 - an explicit email-column header
@@ -40,6 +41,11 @@ header row. Unknown headers must be preserved. The adapter should be read-only.
 7. Create the submission by source sheet and row identity.
 8. Skip a source row that was already seen in the same run or repository.
 9. Record invalid rows as structured import errors.
+
+The sync request accepts `refresh_existing=true` for an explicit mapping
+backfill. It still reports those rows as source duplicates, but reapplies the
+questionnaire version/raw row and fills a missing client display name without
+overwriting a manually edited profile.
 
 ## Local implementation
 

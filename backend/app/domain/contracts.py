@@ -90,6 +90,7 @@ class ImportRequest:
     timestamp_header: str | None = "Timestamp"
     source_type: str = "google_sheets"
     questionnaire_version: str | None = None
+    refresh_existing: bool = False
     import_id: str | None = None
 
 

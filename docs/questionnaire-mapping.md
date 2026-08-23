@@ -27,6 +27,19 @@ Create a new JSON definition when the questionnaire is materially changed:
 Existing submissions retain their original raw payload and questionnaire version.
 This keeps old reports reproducible while new responses use the new mapping.
 
+When an existing sheet has already been imported, run a deliberate refresh to
+apply a new mapping to those source rows without creating duplicate submissions:
+
+```powershell
+$syncBody = @{
+  questionnaire_version = "fixture-v1"
+  refresh_existing = $true
+} | ConvertTo-Json
+```
+
+The refresh fills a missing client display name but does not overwrite a name
+that was edited manually in the client profile.
+
 Unknown source columns are always preserved in `raw_payload`. Mapped fields are
 also exposed under `normalized_answers` in the agent context, so adding an
 optional field to a definition does not require a database migration.

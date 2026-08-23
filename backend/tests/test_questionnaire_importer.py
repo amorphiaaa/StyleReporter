@@ -120,6 +120,50 @@ async def test_importer_is_idempotent_for_rows_already_in_repository() -> None:
 
 
 @pytest.mark.asyncio
+async def test_importer_can_refresh_existing_rows_with_new_mapping() -> None:
+    first_row = SheetRow(
+        row_number=2,
+        values={"Email": "synthetic.client@example.test", "Name": ""},
+    )
+    refreshed_row = SheetRow(
+        row_number=2,
+        values={
+            "Your email": "synthetic.client@example.test",
+            "Your name": "Synthetic Client",
+        },
+    )
+    importer, clients, submissions = build_importer([first_row])
+
+    first_result = await importer.import_rows(import_request())
+    refresh_request = ImportRequest(
+        source=SheetReadRequest(
+            spreadsheet_id="synthetic-spreadsheet",
+            sheet_name="Form Responses 1",
+        ),
+        email_header="Email",
+        display_name_header="Name",
+        questionnaire_version="fixture-v1",
+        refresh_existing=True,
+    )
+    importer = QuestionnaireImportService(
+        FixtureGoogleSheetsSource([refreshed_row]),
+        clients,
+        submissions,
+    )
+
+    refresh_result = await importer.import_rows(refresh_request)
+
+    assert first_result.created_submissions == 1
+    assert refresh_result.created_submissions == 0
+    assert refresh_result.skipped_duplicates == 1
+    assert refresh_result.updated_clients == 1
+    assert clients.items["synthetic.client@example.test"].display_name == "Synthetic Client"
+    refreshed_submission = submissions.items[("synthetic-spreadsheet", "Form Responses 1", 2)]
+    assert refreshed_submission.questionnaire_version == "fixture-v1"
+    assert refreshed_submission.raw_payload["Your name"] == "Synthetic Client"
+
+
+@pytest.mark.asyncio
 async def test_fixture_source_rejects_another_sheet() -> None:
     source = FixtureGoogleSheetsSource(load_fixture_rows())
     request = SheetReadRequest(

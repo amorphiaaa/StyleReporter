@@ -69,6 +69,10 @@ the Imports screen displays their status and counters. Select a run there to
 load its persisted source metadata and row-level errors from
 `GET http://localhost:8000/api/v1/imports/{import_id}`.
 
+When a mapping or source header changes after rows were imported, pass
+`{"refresh_existing": true}` to the Google Sheets sync request to backfill the
+existing source rows without creating duplicate submissions.
+
 The local report endpoint is available at
 `POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
 `submission_id` to generate a deterministic `stub-v1` response without an

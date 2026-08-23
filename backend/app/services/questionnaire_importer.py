@@ -9,6 +9,7 @@ from app.domain.contracts import (
     ImportRowError,
     QuestionnaireImporter,
     QuestionnaireSubmission,
+    SheetRow,
     SubmissionRepository,
 )
 from app.domain.normalization import (
@@ -56,6 +57,12 @@ class QuestionnaireImportService(QuestionnaireImporter):
             )
             if existing_submission is not None:
                 skipped_duplicates += 1
+                if request.refresh_existing:
+                    updated_clients += await self._refresh_existing_submission(
+                        existing_submission,
+                        row,
+                        request,
+                    )
                 continue
 
             if row.row_number < 1:
@@ -142,6 +149,58 @@ class QuestionnaireImportService(QuestionnaireImporter):
             skipped_duplicates=skipped_duplicates,
             errors=errors,
         )
+
+    async def _refresh_existing_submission(
+        self,
+        existing_submission: QuestionnaireSubmission,
+        row: SheetRow,
+        request: ImportRequest,
+    ) -> int:
+        questionnaire = normalize_questionnaire_payload(
+            row.values,
+            version=request.questionnaire_version,
+            email_header=request.email_header,
+            display_name_header=request.display_name_header,
+        )
+        email = normalize_email(questionnaire.email)
+        if email is None:
+            return 0
+
+        client = await self._clients.get_by_id(existing_submission.client_id)
+        updated_clients = 0
+        if client is not None:
+            display_name = normalize_display_name(questionnaire.display_name)
+            if display_name and not client.display_name:
+                client = await self._clients.save(
+                    ClientRecord(
+                        id=client.id,
+                        email_normalized=client.email_normalized,
+                        display_name=display_name,
+                    )
+                )
+                updated_clients = 1
+
+        timestamp = (
+            parse_submission_timestamp(row.values.get(request.timestamp_header))
+            if request.timestamp_header
+            else None
+        )
+        await self._submissions.save(
+            QuestionnaireSubmission(
+                id=existing_submission.id,
+                client_id=existing_submission.client_id,
+                source_type=request.source_type,
+                source_spreadsheet_id=request.source.spreadsheet_id,
+                source_sheet_name=request.source.sheet_name,
+                source_row_number=row.row_number,
+                raw_payload=dict(row.values),
+                source_row_hash=hash_row(dict(row.values)),
+                questionnaire_version=request.questionnaire_version,
+                submitted_at=timestamp,
+                imported_at=existing_submission.imported_at,
+            )
+        )
+        return updated_clients
 
 
 class ScaffoldQuestionnaireImporter(QuestionnaireImporter):

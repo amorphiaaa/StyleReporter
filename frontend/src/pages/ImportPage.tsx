@@ -175,6 +175,9 @@ export function ImportPage() {
         error={historyError}
         isLoading={isHistoryLoading}
         selectedImportId={selectedImportId}
+        detail={importDetail}
+        detailError={importDetailError}
+        isDetailLoading={isImportDetailLoading}
         onSelect={async (importId) => {
           if (selectedImportId === importId) {
             setSelectedImportId(null);
@@ -198,12 +201,6 @@ export function ImportPage() {
           }
         }}
       />
-      <ImportDetail
-        detail={importDetail}
-        error={importDetailError}
-        isLoading={isImportDetailLoading}
-        isVisible={selectedImportId !== null}
-      />
     </section>
   );
 }
@@ -213,12 +210,18 @@ function ImportHistory({
   error,
   isLoading,
   selectedImportId,
+  detail,
+  detailError,
+  isDetailLoading,
   onSelect,
 }: {
   history: ImportHistoryItem[];
   error: string | null;
   isLoading: boolean;
   selectedImportId: string | null;
+  detail: ImportRunResponse | null;
+  detailError: string | null;
+  isDetailLoading: boolean;
   onSelect: (importId: string) => void | Promise<void>;
 }) {
   return (
@@ -238,12 +241,21 @@ function ImportHistory({
       {!isLoading && !error && history.length > 0 ? (
         <div className="import-history-list">
           {history.map((item) => (
-            <ImportHistoryItemCard
-              key={item.import_id}
-              item={item}
-              isSelected={item.import_id === selectedImportId}
-              onSelect={onSelect}
-            />
+            <div className="import-history-entry" key={item.import_id}>
+              <ImportHistoryItemCard
+                item={item}
+                isSelected={item.import_id === selectedImportId}
+                onSelect={onSelect}
+              />
+              {item.import_id === selectedImportId ? (
+                <ImportDetail
+                  detail={detail}
+                  error={detailError}
+                  isLoading={isDetailLoading}
+                  isVisible
+                />
+              ) : null}
+            </div>
           ))}
         </div>
       ) : null}

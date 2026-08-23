@@ -32,3 +32,22 @@ def test_manual_import_request_requires_at_least_one_row() -> None:
             email_header="Email",
             rows=[],
         )
+
+
+def test_manual_import_request_can_refresh_existing_rows() -> None:
+    payload = ManualImportRequest(
+        spreadsheet_id="synthetic-spreadsheet",
+        sheet_name="Form Responses 1",
+        email_header="Email",
+        refresh_existing=True,
+        rows=[
+            {
+                "row_number": 2,
+                "values": {"Email": "synthetic.client@example.test"},
+            }
+        ],
+    )
+
+    request = payload.to_domain(import_id="f71fa28b-e681-4fb9-9252-53078bd9ecf5")
+
+    assert request.refresh_existing is True

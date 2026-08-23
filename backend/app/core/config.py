@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     google_sheet_name: str = "Form Responses 1"
     google_sheet_range: str | None = None
     google_questionnaire_version: str | None = None
+    google_refresh_existing: bool = False
     google_sheets_enabled: bool = False
     google_sheets_timeout_seconds: float = 10.0
 

@@ -115,6 +115,7 @@ async def sync_google_sheets(
             questionnaire_version=(
                 request_payload.questionnaire_version or settings.google_questionnaire_version
             ),
+            refresh_existing=request_payload.refresh_existing or settings.google_refresh_existing,
             import_id=str(import_id),
         ),
         source=source,
