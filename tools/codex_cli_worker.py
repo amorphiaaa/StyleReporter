@@ -19,7 +19,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 RUN_LOCK = Lock()
 
@@ -68,9 +67,8 @@ class CodexCliRunner:
             try:
                 completed = subprocess.run(
                     command,
-                    input=prompt,
+                    input=prompt.encode("utf-8"),
                     capture_output=True,
-                    text=True,
                     timeout=self.timeout_seconds,
                     check=False,
                     cwd=self.project_dir,
@@ -83,12 +81,16 @@ class CodexCliRunner:
                 raise WorkerError(f"Could not start Codex CLI: {exc}") from exc
 
             if completed.returncode != 0:
-                detail = (completed.stderr or completed.stdout).strip()
+                detail = _decode_process_output(completed.stderr or completed.stdout).strip()
                 raise WorkerError(
                     f"Codex CLI exited with code {completed.returncode}: {detail[-1000:]}"
                 )
 
-            raw_output = output_path.read_text(encoding="utf-8") if output_path.exists() else completed.stdout
+            raw_output = (
+                output_path.read_text(encoding="utf-8")
+                if output_path.exists()
+                else _decode_process_output(completed.stdout)
+            )
             try:
                 payload = json.loads(raw_output)
             except json.JSONDecodeError as exc:
@@ -98,10 +100,16 @@ class CodexCliRunner:
             return payload
 
 
+def _decode_process_output(value: bytes) -> str:
+    """Decode CLI output without allowing a localized Windows code page to leak in."""
+
+    return value.decode("utf-8", errors="replace")
+
+
 class WorkerHandler(BaseHTTPRequestHandler):
     server_version = "StyleReporterCodexWorker/1.0"
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:
         if self.path != "/health":
             self._send_json(HTTPStatus.NOT_FOUND, {"detail": "Not found."})
             return
@@ -110,7 +118,7 @@ class WorkerHandler(BaseHTTPRequestHandler):
             {"status": "ok", "service": "stylereporter-codex-cli-worker"},
         )
 
-    def do_POST(self) -> None:  # noqa: N802
+    def do_POST(self) -> None:
         if self.path != "/v1/style-reports":
             self._send_json(HTTPStatus.NOT_FOUND, {"detail": "Not found."})
             return
