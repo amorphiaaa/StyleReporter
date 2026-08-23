@@ -4,6 +4,8 @@ This repository is ready for the next engineer to continue the first product
 slice. The current commit contains a working Google Sheets importer, client
 list/detail screens, structured report persistence, and a local Codex CLI
 runtime behind a host-side worker.
+The optional Google Drive publisher now creates the canonical per-client folder
+tree, while the local workspace remains the Codex CLI cache.
 
 ## Read first
 
@@ -20,7 +22,9 @@ runtime behind a host-side worker.
    are agreed.
 2. Configure and test the Google Sheets and Drive providers with a real service
    account, spreadsheet sharing, Drive-file access, and a controlled response
-   sheet. Keep `ASSET_DOWNLOAD_ENABLED=false` until access is verified.
+   sheet. Give the service account Editor access to the configured Drive root;
+   keep `GOOGLE_DRIVE_STORAGE_ENABLED=false` and `ASSET_DOWNLOAD_ENABLED=false`
+   until access is verified.
 3. Review visual observations and generated reports against controlled
    questionnaire examples; keep `codex_cli` runs local and human-reviewed.
 4. Add persistence/indexing for `submission_assets` if the UI needs searchable

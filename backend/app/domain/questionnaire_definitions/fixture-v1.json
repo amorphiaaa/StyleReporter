@@ -62,7 +62,11 @@
       ],
       "report_required": true,
       "multiple": true,
-      "value_type": "image_links"
+      "value_type": "image_links",
+      "asset_folder": "good_outfits",
+      "asset_folder_by_ordinal": {
+        "1": "questionnaire"
+      }
     },
     {
       "key": "not_me_image",
@@ -71,7 +75,8 @@
         "Please upload:\n\nOne outfit you wear often but don’t really love yourself in\n\nThis helps us understand what currently feels misaligned."
       ],
       "report_required": true,
-      "value_type": "image_link"
+      "value_type": "image_link",
+      "asset_folder": "bad_outfits"
     },
     {
       "key": "inspiration_images",
@@ -81,7 +86,8 @@
       ],
       "report_required": true,
       "multiple": true,
-      "value_type": "image_links"
+      "value_type": "image_links",
+      "asset_folder": "inspiration"
     },
     {
       "key": "visual_world",
@@ -157,7 +163,8 @@
         "Please upload one additional full-length photo for body proportion analysis.\n\nPhoto guidelines:\n\n-Full-height photo (head to toe visible)\n-Standing naturally facing the camera\n-Arms relaxed by your sides\n-Good lighting\n-Fitted clothing, activewear, leggings and a fitted top, swimwear, or similar\n-If you are not comfortable in swimwear, a sports outfit is perfectly fine\n-Avoid oversized clothing, jackets, coats, or loose dresses\n\nThis photo is used only to help us analyse silhouette recommendations and body proportions more accurately."
       ],
       "report_required": false,
-      "value_type": "image_link"
+      "value_type": "image_link",
+      "asset_folder": "questionnaire"
     },
     {
       "key": "signature_report_feedback",

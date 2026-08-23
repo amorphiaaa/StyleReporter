@@ -1,7 +1,7 @@
 """Load versioned questionnaire mappings from repository configuration files."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,8 @@ class QuestionnaireFieldDefinition:
     report_required: bool = True
     multiple: bool = False
     value_type: str = "text"
+    asset_folder: str | None = None
+    asset_folder_by_ordinal: dict[int, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -90,12 +92,35 @@ def _load_definition(path: Path) -> QuestionnaireDefinition:
 def _load_field(payload: Any, path: Path) -> QuestionnaireFieldDefinition:
     if not isinstance(payload, dict):
         raise ValueError(f"Questionnaire field is invalid: {path}")
+    asset_folder = payload.get("asset_folder")
+    if asset_folder is not None and (
+        not isinstance(asset_folder, str) or not asset_folder.strip()
+    ):
+        raise ValueError(f"Questionnaire field asset_folder is invalid: {path}")
+
+    raw_asset_folder_by_ordinal = payload.get("asset_folder_by_ordinal", {})
+    if not isinstance(raw_asset_folder_by_ordinal, dict):
+        raise ValueError(f"Questionnaire field asset_folder_by_ordinal is invalid: {path}")
+    asset_folder_by_ordinal: dict[int, str] = {}
+    for raw_ordinal, raw_folder in raw_asset_folder_by_ordinal.items():
+        try:
+            ordinal = int(raw_ordinal)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"Questionnaire field asset ordinal is invalid: {path}"
+            ) from exc
+        if ordinal < 1 or not isinstance(raw_folder, str) or not raw_folder.strip():
+            raise ValueError(f"Questionnaire field asset folder mapping is invalid: {path}")
+        asset_folder_by_ordinal[ordinal] = raw_folder.strip()
+
     return QuestionnaireFieldDefinition(
         key=_required_text(payload, "key", path),
         headers=_headers(payload.get("headers"), "headers", path),
         report_required=bool(payload.get("report_required", True)),
         multiple=bool(payload.get("multiple", False)),
         value_type=str(payload.get("value_type", "text")),
+        asset_folder=asset_folder.strip() if isinstance(asset_folder, str) else None,
+        asset_folder_by_ordinal=asset_folder_by_ordinal,
     )
 
 

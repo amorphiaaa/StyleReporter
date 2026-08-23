@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     asset_download_enabled: bool = False
     asset_download_timeout_seconds: float = 30.0
     asset_download_max_bytes: int = 20 * 1024 * 1024
+    google_drive_storage_enabled: bool = False
+    google_drive_root_folder_id: str | None = None
+    google_drive_timeout_seconds: float = 30.0
 
     openai_api_key: str | None = Field(default=None, repr=False)
     openai_model: str | None = None

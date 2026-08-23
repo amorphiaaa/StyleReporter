@@ -38,6 +38,13 @@ def test_image_assets_follow_the_versioned_questionnaire_mapping() -> None:
         ("inspiration_images", 1),
         ("inspiration_images", 2),
     ]
+    assert [asset.drive_folder for asset in assets] == [
+        "questionnaire",
+        "good_outfits",
+        "bad_outfits",
+        "inspiration",
+        "inspiration",
+    ]
 
 
 @pytest.mark.asyncio
@@ -85,6 +92,10 @@ async def test_local_workspace_writes_questionnaire_and_manifest(tmp_path: Path)
     assert [item["field_key"] for item in manifest["assets"]] == [
         "feels_like_me_images",
         "not_me_image",
+    ]
+    assert [item["drive_folder"] for item in manifest["assets"]] == [
+        "questionnaire",
+        "bad_outfits",
     ]
     assert (submission_directory / "images" / "feels_like_me_images").is_dir()
     assert (submission_directory / "images" / "not_me_image").is_dir()

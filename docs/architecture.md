@@ -23,6 +23,10 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 - Asset workspace: local per-client folders with preserved questionnaire JSON,
   image-role directories, and a manifest of source URLs. Optional direct HTTP
   and Google Drive downloaders populate verified local image files.
+- Google Drive workspace publisher: optional write provider that creates one
+  stable client folder and the five required subfolders, then publishes the
+  questionnaire JSON and verified images. It is disabled by default and uses
+  Drive app properties for idempotent retries.
 - Style report runtime: deterministic stub, Agents SDK dry-run adapter, and a
   Codex CLI adapter. The real local path sends a structured prompt to the
   host-side companion worker, which invokes `codex exec` with read-only
@@ -32,8 +36,9 @@ internal endpoints wire persisted evidence to PostgreSQL repositories.
 ## Intended future flow
 
 Google Forms -> linked response Sheet -> GoogleSheetsSource ->
-QuestionnaireImporter -> client/submission repositories + asset workspace ->
-StyleReportRuntime -> report run persistence.
+QuestionnaireImporter -> client/submission repositories + local asset workspace
+-> optional Google Drive workspace publisher -> StyleReportRuntime -> report
+run persistence.
 
 The unit tests exercise the same flow with FixtureGoogleSheetsSource and
 in-memory repositories. The Compose smoke test exercises the manual endpoint
@@ -61,6 +66,10 @@ evidence; it does not diagnose the client.
   with `client.json`, `questionnaire.json`, `manifest.json`, and role-based
   image directories. With `ASSET_DOWNLOAD_ENABLED=true`, successful downloads
   are recorded with a checksum and become eligible for local visual analysis.
+- With `GOOGLE_DRIVE_STORAGE_ENABLED=true`, successful imports also create the
+  configured client folder and `Questionnaire`, `Good Outfits`, `Bad Outfits`,
+  `Inspiration`, and `Final Report` subfolders. Drive publishing uses the local
+  workspace as its source, so unverified image URLs are never uploaded.
 - GET /api/v1/clients returns persisted client summaries.
 - GET /api/v1/clients?search=... filters summaries by display name or
   normalized email.

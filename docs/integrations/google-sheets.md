@@ -19,6 +19,9 @@ https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheet
 - GOOGLE_REFRESH_EXISTING (false by default; explicit backfill mode)
 - GOOGLE_SHEETS_ENABLED (false by default)
 - GOOGLE_SHEETS_TIMEOUT_SECONDS
+- GOOGLE_DRIVE_STORAGE_ENABLED (false by default)
+- GOOGLE_DRIVE_ROOT_FOLDER_ID (the shared client-workspace parent folder)
+- GOOGLE_DRIVE_TIMEOUT_SECONDS
 - an explicit email-column header
 
 The response sheet must be shared with the service-account email. Credentials
@@ -69,6 +72,15 @@ URL. Set `ASSET_DOWNLOAD_ENABLED=true` to enable the read-only Google Drive
 downloader; failed downloads are recorded in the per-submission manifest
 without rejecting the source row. The provider boundary remains separate from
 row persistence.
+
+Set `GOOGLE_DRIVE_STORAGE_ENABLED=true` to publish each successful local
+workspace to a canonical Drive folder. The service account needs Editor access
+to `GOOGLE_DRIVE_ROOT_FOLDER_ID`. The publisher creates the client folder and
+`Questionnaire`, `Good Outfits`, `Bad Outfits`, `Inspiration`, and `Final
+Report` children idempotently. It uploads the questionnaire JSON and only
+verified local image files; source URLs that were not downloaded remain in the
+manifest but are not copied as files. Use `refresh_existing=true` to re-run
+the publisher for already imported rows after changing access or mappings.
 
 The current fixture covers a new client, a repeat email, a missing email, and a
 second client. It intentionally includes synthetic `example.test` image URLs

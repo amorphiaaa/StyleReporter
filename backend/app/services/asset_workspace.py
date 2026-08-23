@@ -152,6 +152,7 @@ class LocalAssetWorkspace(AssetWorkspace):
                     "field_key": asset.field_key,
                     "ordinal": asset.ordinal,
                     "source_url": asset.source_url,
+                    "drive_folder": asset.drive_folder or asset.field_key,
                     "status": "reference_only" if self.downloader is None else "pending",
                     "planned_relative_path": _relative_to_root(planned_path, self.root),
                 }

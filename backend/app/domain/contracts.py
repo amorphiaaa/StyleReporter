@@ -42,6 +42,7 @@ class QuestionnaireAsset:
     field_key: str
     ordinal: int
     source_url: str
+    drive_folder: str | None = None
 
 
 @dataclass(frozen=True)
@@ -65,6 +66,16 @@ class AssetWorkspaceResult:
     manifest_relative_path: str
     asset_count: int
     downloaded_count: int = 0
+
+
+@dataclass(frozen=True)
+class AssetPublicationResult:
+    """Result of publishing a local submission workspace to a provider."""
+
+    client_folder_id: str
+    subfolder_ids: Mapping[str, str]
+    uploaded_count: int
+    skipped_count: int
 
 
 @dataclass(frozen=True)
@@ -236,6 +247,17 @@ class AssetWorkspace(Protocol):
         client_id: str,
         submission_id: str,
     ) -> Sequence[str]:
+        ...
+
+
+class AssetPublisher(Protocol):
+    async def publish_submission(
+        self,
+        *,
+        client: ClientRecord,
+        submission: QuestionnaireSubmission,
+        workspace: AssetWorkspaceResult,
+    ) -> AssetPublicationResult:
         ...
 
 

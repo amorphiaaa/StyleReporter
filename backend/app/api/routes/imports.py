@@ -19,6 +19,11 @@ from app.db.models import ImportRun
 from app.domain.contracts import GoogleSheetsSource, ImportRequest, ImportResult, SheetReadRequest
 from app.integrations.asset_downloader import HttpAssetDownloader
 from app.integrations.google_drive import GoogleDriveAssetDownloader
+from app.integrations.google_drive_storage import (
+    GoogleDriveStorageConfigurationError,
+    GoogleDriveStorageError,
+    GoogleDriveWorkspacePublisher,
+)
 from app.integrations.google_sheets import (
     GoogleSheetsApiError,
     GoogleSheetsApiSource,
@@ -158,6 +163,7 @@ async def _run_import(
                 if settings.asset_storage_enabled
                 else None
             ),
+            publisher=_build_asset_publisher(settings),
         )
         result = await importer.import_rows(request)
         import_run.status = "completed"
@@ -189,6 +195,18 @@ async def _run_import(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"Google Sheets API request failed: {exc.detail}",
         ) from exc
+    except GoogleDriveStorageConfigurationError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+    except GoogleDriveStorageError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        ) from exc
     except Exception:
         await session.rollback()
         raise
@@ -215,6 +233,29 @@ def _build_asset_downloader(settings):
         )
     except GoogleSheetsConfigurationError:
         return fallback
+
+
+def _build_asset_publisher(settings):
+    if not settings.google_drive_storage_enabled:
+        return None
+    if not settings.asset_storage_enabled:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires ASSET_STORAGE_ENABLED=true."
+        )
+    if not settings.google_service_account_json:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires GOOGLE_SERVICE_ACCOUNT_JSON."
+        )
+    if not settings.google_drive_root_folder_id:
+        raise GoogleDriveStorageConfigurationError(
+            "Google Drive storage requires GOOGLE_DRIVE_ROOT_FOLDER_ID."
+        )
+    return GoogleDriveWorkspacePublisher.from_service_account_json(
+        settings.google_service_account_json,
+        root_folder_id=settings.google_drive_root_folder_id,
+        local_root=settings.asset_storage_root,
+        timeout_seconds=settings.google_drive_timeout_seconds,
+    )
 
 
 @router.get("/{import_id}", response_model=ImportRunResponse)

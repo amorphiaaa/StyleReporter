@@ -77,6 +77,27 @@ must have access to the uploaded Drive files. Existing submissions can be
 reprocessed with `{"refresh_existing": true}`. Only successfully downloaded
 images are attached to subsequent local Codex CLI report runs.
 
+To make Google Drive the canonical client workspace, also set
+`GOOGLE_DRIVE_STORAGE_ENABLED=true` and provide `GOOGLE_DRIVE_ROOT_FOLDER_ID`.
+The service account must have Editor access to that root folder. Each imported
+client then gets one stable folder with this structure:
+
+```text
+<configured root>/<client name> [<client id>]/
+  Questionnaire/
+  Good Outfits/
+  Bad Outfits/
+  Inspiration/
+  Final Report/
+```
+
+The five folders are created idempotently on import. `questionnaire.json` is
+uploaded to `Questionnaire`; downloaded images are uploaded according to the
+versioned questionnaire mapping. The local workspace remains a shared cache
+for Codex CLI, and `Final Report` is reserved for the future report exporter.
+Drive publishing is disabled by default and has no effect until the flag is
+explicitly enabled.
+
 The internal manual import endpoint is available at
 `POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
 already-read rows. The read-only Google Sheets endpoint is available at

@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.domain.contracts import (
+    AssetPublisher,
     AssetWorkspace,
     ClientRecord,
     ClientRepository,
@@ -34,11 +35,13 @@ class QuestionnaireImportService(QuestionnaireImporter):
         clients: ClientRepository,
         submissions: SubmissionRepository,
         assets: AssetWorkspace | None = None,
+        publisher: AssetPublisher | None = None,
     ) -> None:
         self._source = source
         self._clients = clients
         self._submissions = submissions
         self._assets = assets
+        self._publisher = publisher
 
     async def import_rows(self, request: ImportRequest) -> ImportResult:
         rows = await self._source.read_rows(request.source)
@@ -143,14 +146,25 @@ class QuestionnaireImportService(QuestionnaireImporter):
                     submitted_at=timestamp,
                 )
             )
+            workspace = None
             if self._assets is not None:
-                await self._assets.register_submission(
+                workspace = await self._assets.register_submission(
                     client=client,
                     submission=saved_submission,
                     assets=extract_questionnaire_assets(
                         raw_payload,
                         version=request.questionnaire_version,
                     ),
+                )
+            if self._publisher is not None:
+                if workspace is None:
+                    raise RuntimeError(
+                        "Asset publisher requires an enabled local asset workspace."
+                    )
+                await self._publisher.publish_submission(
+                    client=client,
+                    submission=saved_submission,
+                    workspace=workspace,
                 )
             created_submissions += 1
 
@@ -215,8 +229,9 @@ class QuestionnaireImportService(QuestionnaireImporter):
                 imported_at=existing_submission.imported_at,
             )
         )
+        workspace = None
         if self._assets is not None:
-            await self._assets.register_submission(
+            workspace = await self._assets.register_submission(
                 client=client or ClientRecord(
                     id=existing_submission.client_id,
                     email_normalized=email,
@@ -226,6 +241,17 @@ class QuestionnaireImportService(QuestionnaireImporter):
                     row.values,
                     version=request.questionnaire_version,
                 ),
+            )
+        if self._publisher is not None:
+            if workspace is None:
+                raise RuntimeError("Asset publisher requires an enabled local asset workspace.")
+            await self._publisher.publish_submission(
+                client=client or ClientRecord(
+                    id=existing_submission.client_id,
+                    email_normalized=email,
+                ),
+                submission=saved_submission,
+                workspace=workspace,
             )
         return updated_clients
 

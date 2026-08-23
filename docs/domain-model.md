@@ -75,6 +75,30 @@ validated by content type and size, while common Google Drive file links are
 read with the service-account Drive scope. Failed downloads remain visible in
 the manifest and do not reject the questionnaire submission.
 
+### Canonical Google Drive workspace
+
+When `GOOGLE_DRIVE_STORAGE_ENABLED=true`, the importer publishes the local
+submission workspace under the configured `GOOGLE_DRIVE_ROOT_FOLDER_ID`. The
+service account must have Editor access to that root folder. Stable
+`appProperties` keys, rather than display names, make retries idempotent:
+
+```text
+<root>/<client display name> [<client_id>]/
+  Questionnaire/
+  Good Outfits/
+  Bad Outfits/
+  Inspiration/
+  Final Report/
+```
+
+`questionnaire.json` is stored in `Questionnaire`. Downloaded image files are
+published to the folder declared by the versioned questionnaire definition:
+the first `Feels Like Me` image (portrait) and body-proportion photo go to
+`Questionnaire`, remaining `Feels Like Me` images go to `Good Outfits`, and
+the `Not Me` and `Inspiration` groups go to their matching folders. The local
+workspace remains the Codex CLI cache. `Final Report` is created now but is
+reserved for a later report exporter.
+
 ### import_runs
 
 Future manual syncs should create an auditable run record with status, counts,

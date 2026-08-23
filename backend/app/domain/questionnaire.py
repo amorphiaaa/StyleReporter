@@ -133,7 +133,12 @@ def extract_questionnaire_assets(
         value = normalized.answers.get(field.key)
         values = value if isinstance(value, tuple) else ((value,) if isinstance(value, str) else ())
         assets.extend(
-            QuestionnaireAsset(field_key=field.key, ordinal=index, source_url=source_url)
+            QuestionnaireAsset(
+                field_key=field.key,
+                ordinal=index,
+                source_url=source_url,
+                drive_folder=field.asset_folder_by_ordinal.get(index, field.asset_folder),
+            )
             for index, source_url in enumerate(values, start=1)
             if source_url.strip()
         )
