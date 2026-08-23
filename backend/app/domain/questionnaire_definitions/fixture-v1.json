@@ -1,0 +1,90 @@
+{
+  "version": "fixture-v1",
+  "identity": {
+    "email": [
+      "Email",
+      "Your email",
+      "Email Address"
+    ],
+    "display_name": [
+      "Name",
+      "Your name"
+    ]
+  },
+  "fields": [
+    {
+      "key": "current_style",
+      "headers": [
+        "How would you describe your style today?"
+      ],
+      "report_required": true,
+      "value_type": "text"
+    },
+    {
+      "key": "style_goal",
+      "headers": [
+        "What would you love your style to help you feel?"
+      ],
+      "report_required": true,
+      "value_type": "text"
+    },
+    {
+      "key": "style_self_perception",
+      "headers": [
+        "Which sentence sounds MOST like you?"
+      ],
+      "report_required": true,
+      "value_type": "text"
+    },
+    {
+      "key": "style_discomfort",
+      "headers": [
+        "What usually makes an outfit feel wrong to you?"
+      ],
+      "report_required": true,
+      "value_type": "text"
+    },
+    {
+      "key": "style_challenge",
+      "headers": [
+        "What feels hardest in your style right now?"
+      ],
+      "report_required": false,
+      "value_type": "text"
+    },
+    {
+      "key": "feels_like_me_images",
+      "headers": [
+        "Feels Like Me images"
+      ],
+      "report_required": true,
+      "multiple": true,
+      "value_type": "image_links"
+    },
+    {
+      "key": "not_me_image",
+      "headers": [
+        "Not Me image"
+      ],
+      "report_required": true,
+      "value_type": "image_link"
+    },
+    {
+      "key": "inspiration_images",
+      "headers": [
+        "Inspiration images"
+      ],
+      "report_required": true,
+      "multiple": true,
+      "value_type": "image_links"
+    },
+    {
+      "key": "visual_world",
+      "headers": [
+        "Visual world"
+      ],
+      "report_required": true,
+      "value_type": "text"
+    }
+  ]
+}

@@ -112,7 +112,9 @@ async def sync_google_sheets(
             display_name_header=request_payload.display_name_header,
             timestamp_header=request_payload.timestamp_header,
             source_type=request_payload.source_type,
-            questionnaire_version=request_payload.questionnaire_version,
+            questionnaire_version=(
+                request_payload.questionnaire_version or settings.google_questionnaire_version
+            ),
             import_id=str(import_id),
         ),
         source=source,

@@ -15,6 +15,7 @@ https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheet
 - GOOGLE_SPREADSHEET_ID
 - GOOGLE_SHEET_NAME
 - GOOGLE_SHEET_RANGE (optional A1 range)
+- GOOGLE_QUESTIONNAIRE_VERSION (optional versioned mapping)
 - GOOGLE_SHEETS_ENABLED (false by default)
 - GOOGLE_SHEETS_TIMEOUT_SECONDS
 - an explicit email-column header
@@ -32,12 +33,13 @@ header row. Unknown headers must be preserved. The adapter should be read-only.
 
 1. Read the configured sheet range.
 2. Preserve all source headers and values in raw payload.
-3. Normalize the configured email value by trimming and case-folding it.
-4. Reject blank or structurally invalid email values.
-5. Upsert the client by normalized email.
-6. Create the submission by source sheet and row identity.
-7. Skip a source row that was already seen in the same run or repository.
-8. Record invalid rows as structured import errors.
+3. Resolve the configured questionnaire version and its header aliases.
+4. Normalize the configured email value by trimming and case-folding it.
+5. Reject blank or structurally invalid email values.
+6. Upsert the client by normalized email.
+7. Create the submission by source sheet and row identity.
+8. Skip a source row that was already seen in the same run or repository.
+9. Record invalid rows as structured import errors.
 
 ## Local implementation
 
@@ -49,7 +51,10 @@ provides deterministic `SheetRow` values for local tests.
 
 `QuestionnaireImportService` consumes the `GoogleSheetsSource`,
 `ClientRepository`, and `SubmissionRepository` contracts without knowing
-whether they are backed by fixtures, PostgreSQL, or Google APIs.
+whether they are backed by fixtures, PostgreSQL, or Google APIs. The
+versioned questionnaire definitions in
+`backend/app/domain/questionnaire_definitions/` resolve source headers into
+stable internal keys and keep unknown columns in the raw payload.
 
 The current fixture covers a new client, a repeat email, a missing email, and a
 second client. It intentionally includes synthetic `example.test` image URLs

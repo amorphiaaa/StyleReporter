@@ -13,15 +13,19 @@ These are source fields, not yet a diagnosis schema.
 
 ## Questionnaire contract
 
-`fixture-v1` has a typed normalization boundary in
-`backend/app/domain/questionnaire.py`. It maps source headers into stable keys
-for future report and agent work: current style, style goal, self-perception,
-style discomfort, image groups, and visual world.
+`fixture-v1` has a typed normalization boundary driven by
+`backend/app/domain/questionnaire_definitions/fixture-v1.json`. It maps source
+headers and aliases into stable keys for future report and agent work: current
+style, style goal, self-perception, style discomfort, image groups, and visual
+world. New questionnaire versions are added as configuration files rather than
+new hardcoded branches in the importer.
 
 The importer still stores the complete original row as raw JSONB. Normalization
 is additive and non-diagnostic: missing report fields are reported on the typed
 object, but they do not discard otherwise valid source evidence. Unknown
 questionnaire versions remain raw-only until an explicit mapping is added.
+Mapped optional fields are available dynamically in the agent's
+`normalized_answers` object without a database migration.
 
 ## Future persistence model
 

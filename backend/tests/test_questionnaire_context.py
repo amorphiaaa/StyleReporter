@@ -30,3 +30,22 @@ def test_questionnaire_context_contains_typed_answers_and_excludes_identity() ->
     assert "Name" not in context["raw_answers"]
     assert "client@example.test" not in serialized
     assert json.loads(serialized)["questionnaire"] == context
+
+
+def test_questionnaire_context_supports_identity_aliases_and_dynamic_answers() -> None:
+    request = StyleReportRequest(
+        client_id="client-1",
+        submission_id="submission-1",
+        questionnaire_version="fixture-v1",
+        raw_payload={
+            "Your email": "client@example.test",
+            "Your name": "Synthetic Client",
+            "What feels hardest in your style right now?": "Time pressure",
+        },
+    )
+
+    context = build_questionnaire_context(request)
+
+    assert context["normalized_answers"]["style_challenge"] == "Time pressure"
+    assert "Your email" not in context["raw_answers"]
+    assert "Your name" not in context["raw_answers"]

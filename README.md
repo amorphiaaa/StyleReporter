@@ -11,10 +11,12 @@ the client detail screen can launch a deterministic stub report for a saved
 submission. The Google Sheets provider is present but disabled by default, so
 the local stack still makes no external provider calls.
 
-The known synthetic questionnaire is normalized through a versioned domain
-contract before identity fields are imported. Full source rows remain preserved
-as raw JSONB, and unknown questionnaire versions stay raw-only until their
-mapping is explicitly defined.
+Questionnaires are normalized through versioned JSON definitions before identity
+fields are imported. Source header aliases and report-required fields live in
+`backend/app/domain/questionnaire_definitions/`, so a form label change does not
+require changing importer code. Full source rows remain preserved as raw JSONB,
+and unknown questionnaire versions stay raw-only until their mapping is
+explicitly defined.
 
 The current MVP report target is a single-questionnaire analysis with four
 sections: `CURRENT STYLE LANGUAGE`, `DESIRED STYLE LANGUAGE`, `THE DISCONNECT`,
@@ -58,8 +60,9 @@ The internal manual import endpoint is available at
 already-read rows. The read-only Google Sheets endpoint is available at
 `POST http://localhost:8000/api/v1/imports/google-sheets/sync`; it remains
 disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
-spreadsheet ID are supplied. Its provider is covered by offline mock tests;
-no Google credentials are committed.
+spreadsheet ID are supplied. Set `GOOGLE_QUESTIONNAIRE_VERSION` when a mapped
+questionnaire definition should be applied during sync. Its provider is covered
+by offline mock tests; no Google credentials are committed.
 
 Recent runs are available at `GET http://localhost:8000/api/v1/imports?limit=20`;
 the Imports screen displays their status and counters. Select a run there to

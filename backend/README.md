@@ -16,6 +16,7 @@ implemented behind a disabled-by-default feature flag; OpenAI remains gated.
 
 - Google Sheets adapter and auth/transport boundary: app/integrations/google_sheets.py
 - Questionnaire orchestration: app/services/questionnaire_importer.py
+- Versioned questionnaire mappings: app/domain/questionnaire_definitions/
 - Repositories: app/repositories/
 - Report runtime contract: app/domain/contracts.py
 - Stub methodologist runtime: app/agents/style_methodologist.py
