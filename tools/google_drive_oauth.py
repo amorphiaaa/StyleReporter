@@ -12,6 +12,7 @@ import base64
 import hashlib
 import json
 import secrets
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -24,11 +25,16 @@ DRIVE_SCOPE = "https://www.googleapis.com/auth/drive"
 DEFAULT_REDIRECT_PORT = 8765
 
 
+class _LoopbackHTTPServer(HTTPServer):
+    allow_reuse_address = True
+
+
 class _OAuthCallbackHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         parsed = urllib.parse.urlparse(self.path)
         values = urllib.parse.parse_qs(parsed.query)
-        self.server.oauth_result = {key: items[0] for key, items in values.items()}
+        if "state" in values:
+            self.server.oauth_result = {key: items[0] for key, items in values.items()}
         body = (
             b"<html><body><h1>StyleReporter authorization received.</h1>"
             b"<p>You can close this tab and return to the terminal.</p></body></html>"
@@ -38,6 +44,8 @@ class _OAuthCallbackHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+        if "state" in values:
+            self.server.callback_received.set()
 
     def log_message(self, format: str, *args: Any) -> None:
         return
@@ -66,13 +74,22 @@ def main() -> int:
         }
     )
 
-    server = HTTPServer(("127.0.0.1", args.port), _OAuthCallbackHandler)
-    server.timeout = args.timeout
+    server = _LoopbackHTTPServer(("127.0.0.1", args.port), _OAuthCallbackHandler)
+    server.callback_received = threading.Event()
+    server.oauth_result = {}
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
     print("Opening Google authorization in your browser...")
     print(auth_url)
     webbrowser.open(auth_url)
-    server.handle_request()
-    result = getattr(server, "oauth_result", {})
+    if not server.callback_received.wait(timeout=args.timeout):
+        server.shutdown()
+        server.server_close()
+        raise SystemExit("OAuth callback timed out.")
+    server.shutdown()
+    server.server_close()
+    server_thread.join(timeout=5)
+    result = server.oauth_result
     if result.get("state") != state:
         raise SystemExit("OAuth state validation failed or the callback timed out.")
     if result.get("error"):
