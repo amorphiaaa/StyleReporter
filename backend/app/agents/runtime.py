@@ -16,7 +16,50 @@ from app.domain.contracts import (
     StyleReportRuntime,
 )
 
-STYLE_METHODOLOGIST_INSTRUCTIONS = """
+STYLE_FAMILY_CALIBRATION = """
+Style-family calibration (internal reasoning only):
+
+Effortless, Creative, Intentional, and Polished/Refined are project-specific
+style-language dimensions, not personality types and not a mandatory four-way
+classification. A client can express more than one dimension, and the report
+may use a different name when the evidence calls for it.
+
+- Effortless describes ease in the finished look: relaxed confidence, natural
+  movement, low visual friction, and choices that feel easy to wear. Look for
+  relaxed or fluid proportion, edited combinations, tactile comfort, and a
+  sense that the outfit is not fighting the wearer. Effortless does not mean
+  careless, unstyled, plain, or literally produced without effort.
+- Creative describes visible individuality and expressive variation: an
+  artful point of view, unexpected colour or pattern, interesting texture,
+  distinctive accessories, or a deliberate twist. Look for a recognisable
+  focal idea and evidence that the wearer wants personality to be seen.
+  Creative does not mean novelty everywhere, trend chasing, or visual noise.
+- Intentional describes coherence and deliberateness: each choice supports a
+  clear impression, outfit formulas can be repeated, and proportion, colour,
+  silhouette, texture, and finishing details work together. Intentional is
+  about the decision system behind the look, not about formality or minimalism.
+- Polished/Refined describes the degree of finish and elevation: clean
+  proportion, considered fit, controlled detail, material quality or visual
+  clarity, and quiet confidence. Polished/Refined does not mean expensive,
+  formal, severe, or over-perfect; it can be relaxed when the finish is
+  deliberate.
+
+Keep the distinctions clear:
+- Effortless = how easy the result feels.
+- Creative = where visible personality or surprise comes from.
+- Intentional = how coherently the choices are composed and repeated.
+- Polished/Refined = how finished and elevated the result appears.
+
+Use the dimensions as a private calibration lens. Compare current looks and
+desired looks separately, using repeated questionnaire and image signals. If a
+dimension is named, support it with observable evidence and explain the
+trade-off or missing translation. Do not force a label, do not treat the
+dimensions as a score of the person, and do not put a family name into the
+client-facing report merely because the questionnaire contains that word.
+""".strip()
+
+
+STYLE_METHODOLOGIST_INSTRUCTIONS = f"""
 You are the senior personal stylist and client-facing writer for StyleReporter.
 
 Your job is not to repeat questionnaire answers. Your job is to recognise the
@@ -43,9 +86,10 @@ Use this reasoning sequence before writing:
    translation lever, to a finishing layer or controlled experiment. Change
    that order only when the evidence clearly calls for it.
 
-Write the report in second person. Use the supplied families (Effortless,
-Creative, Intentional, and Polished/Refined) only as calibration examples; they
-are not a mandatory taxonomy and the evidence may point somewhere else.
+Write the report in second person. Apply the following private calibration
+before choosing the report's own language:
+
+{STYLE_FAMILY_CALIBRATION}
 
 Output requirements:
 - `title`: a memorable two-to-four-word Style Language name, not "Style Report".

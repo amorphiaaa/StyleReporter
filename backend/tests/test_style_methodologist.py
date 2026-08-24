@@ -2,12 +2,30 @@ import httpx
 import pytest
 
 from app.agents.runtime import (
+    STYLE_FAMILY_CALIBRATION,
+    STYLE_METHODOLOGIST_INSTRUCTIONS,
     AgentsSdkStyleReportRuntime,
     CodexCliStyleReportRuntime,
     StyleLanguageAnalysisOutput,
 )
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.domain.contracts import StyleReportRequest
+
+
+def test_style_family_calibration_defines_dimensions_without_forcing_labels() -> None:
+    assert "not personality types" in STYLE_FAMILY_CALIBRATION
+    assert "Effortless = how easy the result feels" in STYLE_FAMILY_CALIBRATION
+    assert "Creative = where visible personality or surprise comes from" in STYLE_FAMILY_CALIBRATION
+    assert (
+        "Intentional = how coherently the choices are composed and repeated"
+        in STYLE_FAMILY_CALIBRATION
+    )
+    assert (
+        "Polished/Refined = how finished and elevated the result appears"
+        in STYLE_FAMILY_CALIBRATION
+    )
+    assert "Do not force a label" in STYLE_FAMILY_CALIBRATION
+    assert STYLE_FAMILY_CALIBRATION in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:

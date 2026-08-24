@@ -10,6 +10,9 @@ Intentional, and Polished/Refined. They are calibration examples, not a fixed
 classification system for future clients. A new client may sit between these
 families or need a completely different name.
 
+The detailed operational definitions, overlap rules, and confidence rubric are
+in [style-family-calibration.md](style-family-calibration.md).
+
 ## What the reference reports do
 
 The reports consistently move through four different jobs:
