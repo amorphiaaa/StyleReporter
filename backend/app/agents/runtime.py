@@ -17,12 +17,18 @@ from app.domain.contracts import (
 )
 
 STYLE_FAMILY_CALIBRATION = """
-Style-family calibration (internal reasoning only):
+Style-family calibration (post-draft internal validation only):
 
 Effortless, Creative, Intentional, and Polished/Refined are project-specific
 style-language dimensions, not personality types and not a mandatory four-way
 classification. A client can express more than one dimension, and the report
 may use a different name when the evidence calls for it.
+
+Do not choose one of these families before analysing the questionnaire and
+images. First complete the evidence, interpretation, Style Language,
+disconnect, and action plan. Only then use the dimensions as an optional
+quality check on the direction you have already derived. If no family clearly
+adds meaning, do not assign one.
 
 - Effortless describes ease in the finished look: relaxed confidence, natural
   movement, low visual friction, and choices that feel easy to wear. Look for
@@ -50,12 +56,13 @@ Keep the distinctions clear:
 - Intentional = how coherently the choices are composed and repeated.
 - Polished/Refined = how finished and elevated the result appears.
 
-Use the dimensions as a private calibration lens. Compare current looks and
-desired looks separately, using repeated questionnaire and image signals. If a
-dimension is named, support it with observable evidence and explain the
-trade-off or missing translation. Do not force a label, do not treat the
-dimensions as a score of the person, and do not put a family name into the
-client-facing report merely because the questionnaire contains that word.
+Use the dimensions only after the draft analysis exists. Compare current looks
+and desired looks separately, using repeated questionnaire and image signals.
+If a dimension is named internally, support it with observable evidence and
+explain the trade-off or missing translation. Do not force a label, do not
+treat the dimensions as a score of the person, and do not put a family name
+into the client-facing report merely because the questionnaire contains that
+word.
 """.strip()
 
 
@@ -86,8 +93,9 @@ Use this reasoning sequence before writing:
    translation lever, to a finishing layer or controlled experiment. Change
    that order only when the evidence clearly calls for it.
 
-Write the report in second person. Apply the following private calibration
-before choosing the report's own language:
+Write the report in second person. Complete the report's own analysis first;
+then apply the following post-draft calibration only as an optional internal
+quality check:
 
 {STYLE_FAMILY_CALIBRATION}
 

@@ -27,10 +27,13 @@ expressive idea rather than random decoration. “Intentional polished” means
 the outfit reads considered and complete. The combinations are not labels the
 agent must print; they are useful checks on the reasoning.
 
-## How to use the calibration
+## How to use the calibration after the draft
 
-For each dimension, assess the current wardrobe and desired direction
-separately. Use a simple internal scale:
+Do not begin a report by selecting a family. First write the evidence-bound
+analysis: current style language, desired direction, disconnect, and action
+plan. Only after that draft exists, assess the current wardrobe and desired
+direction separately as an optional quality check. Use a simple internal
+scale:
 
 | Score | Meaning |
 | --- | --- |
@@ -40,9 +43,10 @@ separately. Use a simple internal scale:
 | 3 | A defining, strongly supported pattern |
 
 The score is not a rating of the person. It is a confidence check for the
-writer. A dimension should influence the report only when it is supported by
-repeated answers, repeated outfit observations, or a clearly stated desired
-feeling. One isolated item is not enough.
+writer after the reasoning is complete. A dimension should influence internal
+review only when it is supported by repeated answers, repeated outfit
+observations, or a clearly stated desired feeling. One isolated item is not
+enough. If no family adds meaning, leave the result unlabelled.
 
 When two dimensions are both strong, ask what each one contributes. For
 example, Creative supplies the expressive idea while Intentional makes that

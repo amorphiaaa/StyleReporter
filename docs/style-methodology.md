@@ -47,9 +47,10 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Explain the disconnect as a tension between a current operating pattern and
   a desired feeling. Do not merely place the two answer fields next to each
   other.
-- Use the supplied style-family labels only as calibration. Do not force a
-  client into Effortless, Creative, Intentional, or Refined when the evidence
-  points elsewhere.
+- Use the supplied style-family labels only as post-draft calibration. First
+  derive the analysis from the evidence, then use the labels as an optional
+  quality check. Do not force a client into Effortless, Creative, Intentional,
+  or Refined when the evidence points elsewhere.
 - Recommendations may introduce possible garment categories, styling choices,
   or experiments, but they must be presented as options—not as facts about the
   client's existing wardrobe.
