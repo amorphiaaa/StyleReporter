@@ -38,6 +38,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
   recommendation that follows.
 - Describe the current wardrobe as a language with strengths and limitations,
   not as a personal failure.
+- Keep the balance visible: current language normally contains several genuine
+  strengths and only one or two friction points. A negative word must not erase
+  a strength that appears repeatedly in the evidence.
 - Explain the disconnect as a tension between a current operating pattern and
   a desired feeling. Do not merely place the two answer fields next to each
   other.
@@ -49,6 +52,17 @@ finishing details. They focus on principles rather than a fixed shopping list.
   client's existing wardrobe.
 - If images are missing, inaccessible, or contradictory, state that limitation
   and reduce the confidence of visual conclusions.
+
+The default action-plan hierarchy is:
+
+1. make the desired direction repeatable through an outfit formula or decision
+   rule;
+2. change one visible translation lever such as colour, proportion,
+   silhouette, texture, or detail;
+3. add a finishing layer or run one small controlled experiment.
+
+This is a reasoning order, not a fixed list of recommendations. The agent may
+change it when the client's evidence clearly calls for another priority.
 
 ## Client-facing language rules
 
@@ -81,6 +95,6 @@ Before returning JSON, verify that:
 - the disconnect explains why the gap matters and what direction closes it;
 - the named Style Language is memorable but grounded in the evidence;
 - the three action-plan items are distinct, prioritised, and immediately
-  usable;
+  usable, moving from repeatability to visible translation to finishing;
 - every visual claim is supported by an attached image or marked as unknown;
 - the report uses second person and sounds natural when read aloud.
