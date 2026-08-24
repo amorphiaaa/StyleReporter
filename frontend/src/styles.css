@@ -944,6 +944,13 @@ textarea:focus {
   gap: 10px;
 }
 
+.alignment-summary {
+  margin: 0 0 18px;
+  color: #4e443d;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
 .analysis-block {
   padding: 14px;
   border: 1px solid #e2d9d0;
@@ -960,6 +967,54 @@ textarea:focus {
   color: #62574f;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.analysis-terms {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+  padding: 0;
+  color: #62574f;
+  font-size: 14px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.analysis-terms li::before {
+  margin-right: 7px;
+  color: #b99d83;
+  content: "•";
+}
+
+.style-language-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e2d9d0;
+  border-radius: 10px;
+  background: #f4efe9;
+}
+
+.style-language-summary h5 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.style-language-summary > p {
+  margin: 0;
+  color: #62574f;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.style-language-summary .style-language-anchors {
+  color: #80654f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-style: italic;
 }
 
 .action-plan {

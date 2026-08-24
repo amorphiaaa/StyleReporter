@@ -67,8 +67,10 @@ async def test_agents_sdk_dry_run_contains_style_language_analysis_sections() ->
     )
 
     assert result.content["title"] == "Style Language analysis preview"
-    assert "elegant but repetitive" in result.content["current_style_language"]
-    assert "More like myself" in result.content["desired_style_language"]
+    assert result.content["alignment_summary"]
+    assert "Practical" in result.content["current_style_language"]
+    assert "Intentional" in result.content["desired_style_language"]
+    assert len(result.content["style_language_anchors"]) == 3
     assert result.content["disconnect"]
     assert len(result.content["your_action_plan"]) == 3
     assert "Missing questionnaire field: style_discomfort" in result.content["limitations"]
@@ -93,9 +95,24 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
         assert b"clients/client-1/submission-1/01.jpg" in request.read()
         payload = {
             "title": "Synthetic Codex report",
-            "current_style_language": "Current signals are clear.",
-            "desired_style_language": "Desired signals are expressive.",
+            "alignment_summary": "The current and desired directions are clear.",
+            "current_style_language": [
+                "Practical",
+                "Safe",
+                "Casual",
+                "Familiar",
+                "Inconsistent",
+            ],
+            "desired_style_language": [
+                "Intentional",
+                "Expressive",
+                "Modern",
+                "Confident",
+                "Recognisable",
+            ],
             "disconnect": "The target needs one visible experiment.",
+            "style_language_summary": "A clear direction makes everyday choices easier.",
+            "style_language_anchors": ["Ease", "Intention", "Expression"],
             "your_action_plan": [
                 {
                     "priority": 1,

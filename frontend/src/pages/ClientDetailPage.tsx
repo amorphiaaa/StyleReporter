@@ -460,11 +460,28 @@ function ReportPreview({ report }: { report: StyleReportResponse }) {
 function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalysis }) {
   return (
     <div className="style-analysis">
+      {analysis.alignment_summary ? (
+        <p className="alignment-summary">{analysis.alignment_summary}</p>
+      ) : null}
       <div className="analysis-grid">
         <AnalysisBlock label="Current Style Language" value={analysis.current_style_language} />
         <AnalysisBlock label="Desired Style Language" value={analysis.desired_style_language} />
         <AnalysisBlock label="The Disconnect" value={analysis.disconnect} />
       </div>
+      {analysis.style_language_summary ? (
+        <div className="style-language-summary">
+          <div>
+            <p className="eyebrow">Signature Style Language</p>
+            <h5>{analysis.title}</h5>
+          </div>
+          <p>{analysis.style_language_summary}</p>
+          {analysis.style_language_anchors.length > 0 ? (
+            <p className="style-language-anchors">
+              {analysis.style_language_anchors.join(" · ")}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <div className="action-plan">
         <div className="analysis-section-heading">
           <p className="eyebrow">Client-facing next steps</p>
@@ -503,11 +520,20 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
   );
 }
 
-function AnalysisBlock({ label, value }: { label: string; value: string }) {
+function AnalysisBlock({ label, value }: { label: string; value: string | string[] }) {
+  const items = Array.isArray(value) ? value : null;
   return (
     <article className="analysis-block">
       <p className="eyebrow">{label}</p>
-      <p>{value}</p>
+      {items ? (
+        <ul className="analysis-terms">
+          {items.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>{value}</p>
+      )}
     </article>
   );
 }
@@ -522,21 +548,28 @@ function readStyleLanguageAnalysis(
   const actionPlan = Array.isArray(report.your_action_plan)
     ? report.your_action_plan.filter(isStyleLanguageAction)
     : [];
+  const currentStyleLanguage = readTextList(report.current_style_language);
+  const desiredStyleLanguage = readTextList(report.desired_style_language);
   if (
     typeof report.title !== "string" ||
-    typeof report.current_style_language !== "string" ||
-    typeof report.desired_style_language !== "string" ||
     typeof report.disconnect !== "string" ||
-    actionPlan.length === 0
+    actionPlan.length === 0 ||
+    currentStyleLanguage.length === 0 ||
+    desiredStyleLanguage.length === 0
   ) {
     return null;
   }
 
   return {
     title: report.title,
-    current_style_language: report.current_style_language,
-    desired_style_language: report.desired_style_language,
+    alignment_summary:
+      typeof report.alignment_summary === "string" ? report.alignment_summary : "",
+    current_style_language: currentStyleLanguage,
+    desired_style_language: desiredStyleLanguage,
     disconnect: report.disconnect,
+    style_language_summary:
+      typeof report.style_language_summary === "string" ? report.style_language_summary : "",
+    style_language_anchors: readTextList(report.style_language_anchors),
     your_action_plan: actionPlan,
     evidence: readStringList(report.evidence),
     limitations: readStringList(report.limitations),
@@ -561,6 +594,13 @@ function readStringList(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
+}
+
+function readTextList(value: unknown): string[] {
+  if (typeof value === "string") {
+    return value.trim() ? [value] : [];
+  }
+  return readStringList(value);
 }
 
 function groupReportsBySubmission(reports: StyleReportResponse[]): ReportsBySubmission {

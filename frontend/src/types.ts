@@ -138,9 +138,12 @@ export type StyleLanguageAction = {
 
 export type StyleLanguageAnalysis = {
   title: string;
-  current_style_language: string;
-  desired_style_language: string;
+  alignment_summary: string;
+  current_style_language: string[];
+  desired_style_language: string[];
   disconnect: string;
+  style_language_summary: string;
+  style_language_anchors: string[];
   your_action_plan: StyleLanguageAction[];
   evidence: string[];
   limitations: string[];
