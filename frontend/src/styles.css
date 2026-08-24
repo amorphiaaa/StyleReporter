@@ -683,6 +683,164 @@ textarea:focus {
   gap: 10px;
 }
 
+.client-gallery {
+  margin-bottom: 26px;
+  padding: 24px;
+  border: 1px solid #ded8cf;
+  border-radius: 16px;
+  background: #fbfaf7;
+}
+
+.gallery-heading,
+.gallery-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gallery-heading h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.gallery-groups {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.gallery-group-heading {
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.gallery-group-heading h4 {
+  margin: 0;
+  color: #62574f;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gallery-group-heading span {
+  display: inline-grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: #eadfd3;
+  color: #80654f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.photo-tile {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #ded8cf;
+  border-radius: 10px;
+  background: #f0ece6;
+  color: #62574f;
+  text-align: left;
+  cursor: pointer;
+}
+
+.photo-tile:hover {
+  border-color: #b99d83;
+  box-shadow: 0 4px 12px rgb(95 71 52 / 12%);
+}
+
+.photo-tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #e8e1d9;
+}
+
+.photo-tile span {
+  overflow: hidden;
+  padding: 0 9px 10px;
+  color: #766d66;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-empty {
+  margin: 20px 0 0;
+  color: #766d66;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.photo-lightbox {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  padding: 24px;
+  place-items: center;
+  background: rgb(40 35 31 / 78%);
+}
+
+.photo-lightbox-panel {
+  position: relative;
+  display: grid;
+  max-width: min(720px, 92vw);
+  max-height: 92vh;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #fbfaf7;
+  box-shadow: 0 20px 60px rgb(40 35 31 / 30%);
+}
+
+.photo-lightbox-panel img {
+  display: block;
+  max-width: min(680px, 88vw);
+  max-height: 78vh;
+  object-fit: contain;
+}
+
+.photo-lightbox-panel p {
+  margin: 0;
+  color: #766d66;
+  font-size: 12px;
+}
+
+.photo-lightbox-close {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(40 35 31 / 72%);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .submission-stack {
   display: grid;
   gap: 18px;
@@ -786,6 +944,13 @@ textarea:focus {
   gap: 10px;
 }
 
+.alignment-summary {
+  margin: 0 0 18px;
+  color: #4e443d;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
 .analysis-block {
   padding: 14px;
   border: 1px solid #e2d9d0;
@@ -802,6 +967,54 @@ textarea:focus {
   color: #62574f;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.analysis-terms {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+  padding: 0;
+  color: #62574f;
+  font-size: 14px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.analysis-terms li::before {
+  margin-right: 7px;
+  color: #b99d83;
+  content: "•";
+}
+
+.style-language-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #e2d9d0;
+  border-radius: 10px;
+  background: #f4efe9;
+}
+
+.style-language-summary h5 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.style-language-summary > p {
+  margin: 0;
+  color: #62574f;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.style-language-summary .style-language-anchors {
+  color: #80654f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-style: italic;
 }
 
 .action-plan {
@@ -1054,6 +1267,20 @@ details summary {
 
   .submission-card {
     padding: 22px;
+  }
+
+  .client-gallery {
+    padding: 22px;
+  }
+
+  .gallery-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .report-actions {

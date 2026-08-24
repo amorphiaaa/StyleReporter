@@ -2,12 +2,33 @@ import httpx
 import pytest
 
 from app.agents.runtime import (
+    STYLE_FAMILY_CALIBRATION,
+    STYLE_METHODOLOGIST_INSTRUCTIONS,
     AgentsSdkStyleReportRuntime,
     CodexCliStyleReportRuntime,
     StyleLanguageAnalysisOutput,
 )
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.domain.contracts import StyleReportRequest
+
+
+def test_style_family_calibration_defines_dimensions_without_forcing_labels() -> None:
+    assert "post-draft internal validation only" in STYLE_FAMILY_CALIBRATION
+    assert "Do not choose one of these families before analysing" in STYLE_FAMILY_CALIBRATION
+    assert "not personality types" in STYLE_FAMILY_CALIBRATION
+    assert "Effortless = how easy the result feels" in STYLE_FAMILY_CALIBRATION
+    assert "Creative = where visible personality or surprise comes from" in STYLE_FAMILY_CALIBRATION
+    assert (
+        "Intentional = how coherently the choices are composed and repeated"
+        in STYLE_FAMILY_CALIBRATION
+    )
+    assert (
+        "Polished/Refined = how finished and elevated the result appears"
+        in STYLE_FAMILY_CALIBRATION
+    )
+    assert "Do not force a label" in STYLE_FAMILY_CALIBRATION
+    assert STYLE_FAMILY_CALIBRATION in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "post-draft calibration only as an optional internal" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
@@ -67,8 +88,10 @@ async def test_agents_sdk_dry_run_contains_style_language_analysis_sections() ->
     )
 
     assert result.content["title"] == "Style Language analysis preview"
-    assert "elegant but repetitive" in result.content["current_style_language"]
-    assert "More like myself" in result.content["desired_style_language"]
+    assert result.content["alignment_summary"]
+    assert "Practical" in result.content["current_style_language"]
+    assert "Intentional" in result.content["desired_style_language"]
+    assert len(result.content["style_language_anchors"]) == 3
     assert result.content["disconnect"]
     assert len(result.content["your_action_plan"]) == 3
     assert "Missing questionnaire field: style_discomfort" in result.content["limitations"]
@@ -93,9 +116,24 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
         assert b"clients/client-1/submission-1/01.jpg" in request.read()
         payload = {
             "title": "Synthetic Codex report",
-            "current_style_language": "Current signals are clear.",
-            "desired_style_language": "Desired signals are expressive.",
+            "alignment_summary": "The current and desired directions are clear.",
+            "current_style_language": [
+                "Practical",
+                "Safe",
+                "Casual",
+                "Familiar",
+                "Inconsistent",
+            ],
+            "desired_style_language": [
+                "Intentional",
+                "Expressive",
+                "Modern",
+                "Confident",
+                "Recognisable",
+            ],
             "disconnect": "The target needs one visible experiment.",
+            "style_language_summary": "A clear direction makes everyday choices easier.",
+            "style_language_anchors": ["Ease", "Intention", "Expression"],
             "your_action_plan": [
                 {
                     "priority": 1,

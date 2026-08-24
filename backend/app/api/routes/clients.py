@@ -1,21 +1,27 @@
+import asyncio
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
 from app.api.schemas.clients import (
+    ClientAssetResponse,
     ClientDetailResponse,
     ClientListItem,
     ClientSubmissionResponse,
     ClientUpdateResponse,
     UpdateClientRequest,
 )
+from app.core.config import get_settings
 from app.domain.contracts import ClientRecord
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemySubmissionRepository,
 )
+from app.services.client_assets import find_downloaded_asset, list_downloaded_assets
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 db_session_dependency = Depends(get_db_session)
@@ -53,6 +59,11 @@ async def get_client(
         )
 
     submissions = await SqlAlchemySubmissionRepository(session).list_by_client_id(str(client_id))
+    assets = await asyncio.to_thread(
+        list_downloaded_assets,
+        get_settings().asset_storage_root,
+        str(client_id),
+    )
     return ClientDetailResponse(
         id=UUID(client.id),
         email_normalized=client.email_normalized,
@@ -72,7 +83,48 @@ async def get_client(
             )
             for submission in submissions
         ],
+        assets=[
+            ClientAssetResponse(
+                submission_id=UUID(asset.submission_id),
+                field_key=asset.field_key,
+                ordinal=asset.ordinal,
+                folder_key=asset.folder_key,
+                folder_label=asset.folder_label,
+                filename=asset.filename,
+                content_type=asset.content_type,
+                url=(
+                    f"/api/v1/clients/{client_id}/assets/"
+                    f"{quote(asset.submission_id, safe='')}/"
+                    f"{quote(asset.field_key, safe='')}/{asset.ordinal}"
+                ),
+            )
+            for asset in assets
+        ],
     )
+
+
+@router.get(
+    "/{client_id}/assets/{submission_id}/{field_key}/{ordinal}",
+    response_class=FileResponse,
+    include_in_schema=False,
+)
+async def get_client_asset(
+    client_id: UUID,
+    submission_id: UUID,
+    field_key: str,
+    ordinal: int,
+) -> FileResponse:
+    asset = await asyncio.to_thread(
+        find_downloaded_asset,
+        get_settings().asset_storage_root,
+        client_id=str(client_id),
+        submission_id=str(submission_id),
+        field_key=field_key,
+        ordinal=ordinal,
+    )
+    if asset is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Asset was not found.")
+    return FileResponse(asset.path, media_type=asset.content_type, filename=asset.filename)
 
 
 @router.patch("/{client_id}", response_model=ClientUpdateResponse)

@@ -97,6 +97,18 @@ export type ClientDetail = {
   email_normalized: string;
   display_name: string | null;
   submissions: ClientSubmission[];
+  assets: ClientAsset[];
+};
+
+export type ClientAsset = {
+  submission_id: string;
+  field_key: string;
+  ordinal: number;
+  folder_key: string;
+  folder_label: string;
+  filename: string;
+  content_type: string;
+  url: string;
 };
 
 export type UpdateClientRequest = {
@@ -126,9 +138,12 @@ export type StyleLanguageAction = {
 
 export type StyleLanguageAnalysis = {
   title: string;
-  current_style_language: string;
-  desired_style_language: string;
+  alignment_summary: string;
+  current_style_language: string[];
+  desired_style_language: string[];
   disconnect: string;
+  style_language_summary: string;
+  style_language_anchors: string[];
   your_action_plan: StyleLanguageAction[];
   evidence: string[];
   limitations: string[];
