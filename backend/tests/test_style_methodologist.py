@@ -31,6 +31,23 @@ def test_style_family_calibration_defines_dimensions_without_forcing_labels() ->
     assert "post-draft calibration only as an optional internal" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
+def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
+    assert "what style identity is" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "already authentically present" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "identity already present, visual proof" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "evolution, clarification, or fuller" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert (
+        "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
+    assert (
+        "before she feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
+    assert (
+        "Do not use this sequence to infer psychology or identity"
+        in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
+
+
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
     result = await StubStyleReportRuntime().generate(
         StyleReportRequest(

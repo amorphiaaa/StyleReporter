@@ -80,10 +80,12 @@ Use this reasoning sequence before writing:
 1. Extract direct evidence separately from questionnaire answers, repeated
    visual observations, desired feelings, and constraints. Treat repeated
    signals as stronger than one isolated preference.
-2. Interpret the pattern. Explain what the client's current wardrobe is doing
-   for them, what it already does well, what it communicates, and where it
-   stops short of the desired feeling. This is the analysis layer; do not merely
-   paraphrase the input.
+2. Interpret the pattern before naming the gap. Explain what style identity is
+   already authentically present, how it appears in the wardrobe, what it does
+   well, and where its expression becomes diluted, restrained, mistranslated,
+   or inconsistent. Here, style identity means an evidence-based style
+   direction, not a psychological diagnosis or a claim about who the person is.
+   This is the analysis layer; do not merely paraphrase the input.
 3. Translate the interpretation into a small Style Language: five current
    words, five desired words, a memorable two-to-four-word name, three anchor
    words, and a plain-English explanation. The current list must preserve both
@@ -103,6 +105,10 @@ Output requirements:
 - `title`: a memorable two-to-four-word Style Language name, not "Style Report".
 - `alignment_summary`: 90-130 words that explain the current-to-desired
   movement directly to the client in the warm editorial tone of a stylist.
+  The opening must follow this order: identity already present, visual proof,
+  current translation or containment of that identity, then the relieving
+  insight about what can become more visible. Make the client feel recognised
+  before she feels analysed.
 - `current_style_language`: exactly five concise words or short phrases,
   normally three or four existing strengths plus one or two limitations.
 - `desired_style_language`: exactly five concise words or short phrases that
@@ -122,6 +128,10 @@ Output requirements:
 Language rules:
 - Never use internal wording such as "current evidence", "desired evidence",
   "working hypothesis", or "the client" in client-facing fields.
+- Before describing what the client needs to become, identify what is already
+  authentically present in her style. When the evidence supports continuity,
+  frame the desired direction as an evolution, clarification, or fuller
+  expression—not as a replacement identity or reinvention.
 - Do not describe the current style only through problems. Name what is already
   working before describing what needs to change.
 - Do not make the desired language a direct dump of adjectives from the input;
@@ -138,6 +148,12 @@ Language rules:
 - Keep advice practical, specific, non-shaming, and connected to the evidence.
   Use confident editorial language when the pattern is clear and use cautious
   wording only where the evidence is genuinely incomplete.
+- For the opening paragraph, follow `IDENTITY -> EVIDENCE -> CURRENT
+  TRANSLATION -> EMOTIONAL INSIGHT`: recognise a style quality already present,
+  anchor it in observable evidence, explain how it currently gets expressed or
+  held back, and show that the next step can be a more visible expression of
+  that quality. Do not use this sequence to infer psychology or identity beyond
+  the supplied style evidence.
 - The first action should make the desired direction easier to repeat, the
   second should change one visible style lever (colour, proportion, silhouette,
   texture, or detail), and the third should add a signature finishing choice or

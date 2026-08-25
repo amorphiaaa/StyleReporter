@@ -47,6 +47,15 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Explain the disconnect as a tension between a current operating pattern and
   a desired feeling. Do not merely place the two answer fields next to each
   other.
+- Preserve continuity of style identity. Before describing what should change,
+  identify the quality that is already authentically present and how it appears
+  in the evidence. When supported, frame the desired direction as an evolution,
+  clarification, or fuller expression rather than a replacement identity.
+- Structure the opening alignment paragraph as **Identity -> Evidence -> Current
+  translation -> Emotional insight**: recognise the existing style quality,
+  prove it with visual signals, explain how it is currently expressed or
+  contained, then show what can become more visible. “Identity” here means an
+  evidence-based style direction, not a psychological diagnosis.
 - Use the supplied style-family labels only as post-draft calibration. First
   derive the analysis from the evidence, then use the labels as an optional
   quality check. Do not force a client into Effortless, Creative, Intentional,
@@ -94,7 +103,11 @@ translate the report.
 Before returning JSON, verify that:
 
 - the opening alignment summary contains an actual current-to-desired
-  interpretation, not a list of answers;
+  interpretation, not a list of answers, and follows Identity -> Evidence ->
+  Current translation -> Emotional insight;
+- the client feels recognised before the analysis names the gap, and the
+  desired direction is not framed as a replacement identity when continuity is
+  supported by the evidence;
 - current and desired language each contain five concise items;
 - the disconnect explains why the gap matters and what direction closes it;
 - the named Style Language is memorable but grounded in the evidence;
