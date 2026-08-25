@@ -92,10 +92,13 @@ Use this reasoning sequence before writing:
    as paired slots: each current term should have a readable desired movement
    beside it. Repeat a term on both sides when that quality is already
    authentic and should remain.
-4. Turn the disconnect into exactly three prioritised actions. As a default,
-   move from a repeatable outfit formula or decision rule, to one visible
-   translation lever, to a finishing layer or controlled experiment. Change
-   that order only when the evidence clearly calls for it.
+4. Turn the disconnect into exactly three prioritised actions. Each action must
+   correct a different high-leverage behavioural problem. As a default, move
+   from using an established outfit formula or decision rule, to one separate
+   visible translation lever, to a separate finishing or completion principle.
+   Do not invent a new multi-part formula when the report already contains a
+   usable system, and change the order only when the evidence clearly calls for
+   it.
 
 Write the report in second person. Complete the report's own analysis first;
 then apply the following post-draft calibration only as an optional internal
@@ -131,9 +134,10 @@ Output requirements:
 - `style_language_summary`: 60-100 words that make the named Style Language
   feel recognisable and human.
 - `style_language_anchors`: exactly three memorable anchor words or phrases.
-- `your_action_plan`: exactly three distinct actions with priority, focus,
-  action, rationale, and first_step. Prioritise principles and repeatable
-  decisions over shopping lists.
+- `your_action_plan`: exactly three distinct actions. Each item has a clear
+  command in `focus`, one diagnostic reason in `rationale`, and one practical
+  application in `action`. Prioritise principles and repeatable decisions over
+  shopping lists.
 - `evidence`: short, concrete observations supporting the interpretation.
 - `limitations`: missing or uncertain information that affects confidence.
 
@@ -163,6 +167,23 @@ Language rules:
   `playful pattern` as Style Language terms unless they are genuinely the only
   precise expression of the client's state; those details belong later as
   evidence or practical styling levers.
+- Treat the action plan as a navigation system, not a to-do list or coaching
+  workbook. Use one clear, ordinary command per title, explain why that change
+  matters for this client, and give one practical way to apply the principle
+  using the report. Stop there: do not add `first_step`, homework, deadlines,
+  photo assignments, tracking, or experiments unless the product explicitly
+  becomes a guided programme.
+- The three actions must solve three different problems. If the same
+  recommendation appears in more than one item, distil the plan again. Keep
+  colour, accessories, outfit formulas, and finishing layers separate unless
+  the evidence proves they are one inseparable problem.
+- Prefer titles such as `Follow the outfit formulas`, `Introduce colour with
+  intention`, and `Finish with one styling layer`. Avoid invented phrases such
+  as `Build a three-part outfit formula`, `Make color the visible shift`, or
+  `Add one signature finishing spark`.
+- Use ordinary words with precise meaning. Do not optimise for polished or
+  original-sounding language; the client should recognise the observation and
+  be able to say, “Yes, that is exactly what I do.”
 - Write `disconnect` with direct human causality. Each sentence should make the
   previous sentence more specific. Prefer concrete behaviour such as “you stop
   short of making it the focal point” or “you keep choosing familiar
@@ -211,7 +232,6 @@ class ActionPlanItem(BaseModel):
     focus: str
     action: str
     rationale: str
-    first_step: str
 
 
 class StyleLanguageAnalysisOutput(BaseModel):
@@ -314,14 +334,12 @@ class AgentsSdkStyleReportRuntime(StyleReportRuntime):
                     focus="Name the target signal",
                     action="Write three observable words for the desired style language.",
                     rationale="A clear target makes the current-to-desired gap actionable.",
-                    first_step="Choose the three words that best match the desired feeling.",
                 ),
                 ActionPlanItem(
                     priority=2,
                     focus="Audit the current signal",
                     action="Review three recent outfits and note which signals repeat.",
                     rationale="Repeated choices reveal the current style language in practice.",
-                    first_step="Photograph or list three outfits from the last two weeks.",
                 ),
                 ActionPlanItem(
                     priority=3,
@@ -331,7 +349,6 @@ class AgentsSdkStyleReportRuntime(StyleReportRuntime):
                         "A small experiment tests the direction without requiring a full "
                         "wardrobe change."
                     ),
-                    first_step="Select one outfit and change only one styling decision.",
                 ),
             ],
             evidence=[

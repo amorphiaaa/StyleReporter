@@ -72,6 +72,14 @@ def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
     assert "one-sentence human test" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
+def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
+    assert "navigation system, not a to-do list" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "three different problems" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "do not add `first_step`" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Follow the outfit formulas" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "signature finishing spark" in STYLE_METHODOLOGIST_INSTRUCTIONS
+
+
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
     result = await StubStyleReportRuntime().generate(
         StyleReportRequest(
@@ -181,21 +189,18 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
                     "focus": "Test one signal",
                     "action": "Change one styling decision.",
                     "rationale": "A small test creates evidence.",
-                    "first_step": "Choose one outfit.",
                 },
                 {
                     "priority": 2,
                     "focus": "Review repetition",
                     "action": "List repeated choices.",
                     "rationale": "Repetition shows current language.",
-                    "first_step": "Review three outfits.",
                 },
                 {
                     "priority": 3,
                     "focus": "Record the result",
                     "action": "Note what changed.",
                     "rationale": "Notes make the experiment useful.",
-                    "first_step": "Write two observations.",
                 },
             ],
             "evidence": ["Synthetic questionnaire evidence."],
@@ -240,3 +245,5 @@ def test_codex_output_schema_is_strict_for_every_object() -> None:
     action_schema = schema["$defs"]["ActionPlanItem"]
     assert action_schema["additionalProperties"] is False
     assert set(action_schema["required"]) == set(action_schema["properties"])
+    assert set(action_schema["required"]) == {"priority", "focus", "action", "rationale"}
+    assert "first_step" not in action_schema["properties"]

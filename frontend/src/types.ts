@@ -133,7 +133,6 @@ export type StyleLanguageAction = {
   focus: string;
   action: string;
   rationale: string;
-  first_step: string;
 };
 
 export type StyleLanguageAnalysis = {

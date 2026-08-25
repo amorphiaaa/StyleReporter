@@ -24,9 +24,9 @@ The reports consistently move through four different jobs:
    or phrases for each side of the gap.
 3. **Style Language synthesis** — name the emerging direction in two to four
    words, explain it in a warm paragraph, and reduce it to three anchor words.
-4. **Your Action Plan** — give three practical priorities. Each one explains
-   the principle, why it matters for this client, how to apply it, and what to
-   try first.
+4. **Your Action Plan** — give three practical priorities. Each one has a clear
+   command, explains why it matters for this client, and shows how to apply the
+   principle. It is a navigation system, not a homework list.
 
 The visual pages reinforce the reasoning with recurring patterns such as
 silhouette, proportion, colour, texture, accessories, outfit formulas, and
@@ -63,6 +63,15 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Prefer concrete human behaviour over abstract fashion language. If the client
   cannot explain the disconnect to a friend in one plain sentence after reading
   it, rewrite it.
+- Treat the Action Plan as three different high-leverage behavioural changes,
+  not as a coaching workbook. Each item needs one clear command, one
+  client-specific reason, and one practical application. Do not add first steps,
+  deadlines, photo assignments, tracking, or experiments unless the product is
+  explicitly a guided programme.
+- Keep the three actions distinct. If the same recommendation appears twice,
+  distil the plan again. Use ordinary titles such as `Follow the outfit
+  formulas`, `Introduce colour with intention`, and `Finish with one styling
+  layer`; avoid clever phrases that do not add meaning.
 - Preserve continuity of style identity. Before describing what should change,
   identify the quality that is already authentically present and how it appears
   in the evidence. When supported, frame the desired direction as an evolution,
@@ -135,6 +144,7 @@ Before returning JSON, verify that:
   a friend in one plain sentence;
 - the named Style Language is memorable but grounded in the evidence;
 - the three action-plan items are distinct, prioritised, and immediately
-  usable, moving from repeatability to visible translation to finishing;
+  usable, each containing one clear command, one diagnostic reason, and one
+  practical application without homework or a `first_step`;
 - every visual claim is supported by an attached image or marked as unknown;
 - the report uses second person and sounds natural when read aloud.

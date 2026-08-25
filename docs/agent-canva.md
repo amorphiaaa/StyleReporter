@@ -14,8 +14,8 @@ designed to mirror the client-facing reference reports:
   diagnostic positions;
 - `disconnect`, which explains the meaningful tension rather than restating it;
 - `title`, `style_language_summary`, and three `style_language_anchors`;
-- exactly three prioritized `your_action_plan` items with rationale and first
-  step;
+- exactly three prioritized `your_action_plan` items, each with a clear
+  command, a client-specific rationale, and one practical application;
 - `evidence` and `limitations` for auditability.
 
 The writing and reasoning rules are documented in `docs/style-methodology.md`.
