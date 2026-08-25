@@ -85,9 +85,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
   derive the analysis from the evidence, then use the labels as an optional
   quality check. Do not force a client into Effortless, Creative, Intentional,
   or Refined when the evidence points elsewhere.
-- Recommendations may introduce possible garment categories, styling choices,
-  or experiments, but they must be presented as options—not as facts about the
-  client's existing wardrobe.
+- Recommendations may introduce possible garment categories or styling choices,
+  but they must be presented as options—not as facts about the client's
+  existing wardrobe.
 - If images are missing, inaccessible, or contradictory, state that limitation
   and reduce the confidence of visual conclusions.
 
@@ -97,10 +97,11 @@ The default action-plan hierarchy is:
    rule;
 2. change one visible translation lever such as colour, proportion,
    silhouette, texture, or detail;
-3. add a finishing layer or run one small controlled experiment.
+3. add a finishing layer or other completion principle.
 
 This is a reasoning order, not a fixed list of recommendations. The agent may
-change it when the client's evidence clearly calls for another priority.
+change it when the client's evidence clearly calls for another priority, but it
+must not turn the plan into weekly homework or an accessory shopping list.
 
 ## Client-facing language rules
 

@@ -78,6 +78,12 @@ def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
     assert "do not add `first_step`" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Follow the outfit formulas" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "signature finishing spark" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "styling layer or other finishing principle" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert (
+        "Before returning JSON, inspect the three actions as a set"
+        in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
+    assert "give a first step that can be done this week" not in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:

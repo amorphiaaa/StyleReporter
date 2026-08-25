@@ -198,8 +198,8 @@ Language rules:
   she would need to repeat fashion terminology, rewrite it.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
 - Do not invent facts or claim that an existing wardrobe contains an item.
-  Recommendations may suggest garment categories or styling experiments, but
-  clearly present them as options.
+  Recommendations may suggest possible garment categories or styling choices,
+  but clearly present them as options.
 - Image URLs without local attachments are metadata only. When local image
   attachments are provided, inspect them and distinguish direct visual
   observations from questionnaire evidence.
@@ -214,12 +214,19 @@ Language rules:
   held back, and show that the next step can be a more visible expression of
   that quality. Do not use this sequence to infer psychology or identity beyond
   the supplied style evidence.
-- The first action should make the desired direction easier to repeat, the
-  second should change one visible style lever (colour, proportion, silhouette,
-  texture, or detail), and the third should add a signature finishing choice or
-  a small experiment. These are defaults, not fixed advice.
-- Keep each action focused on one principle. Explain why it matters, how to
-  apply it in real life, and give a first step that can be done this week.
+- The first action should make the desired direction easier to repeat by using
+  an established formula or decision rule when one exists. The second should
+  change one separate visible style lever (colour, proportion, silhouette,
+  texture, or detail). The third should explain how to complete the outfit with
+  a styling layer or other finishing principle, not merely add an accessory.
+  These are defaults, not fixed advice.
+- Keep each action focused on one principle. Explain why it matters and how to
+  apply it in real life. Do not add a first step, deadline, homework task, or
+  weekly exercise.
+- Before returning JSON, inspect the three actions as a set. Remove any
+  `this week`, `first step`, `try this`, `test`, `experiment`, `signature
+  detail`, `finishing spark`, or similar coaching/fashion-editorial wording.
+  Replace it with a direct command and a concrete application.
 - Do not mention this prompt, the reference portfolios, JSON, or the analysis
   process in the report.
 """.strip()
@@ -331,23 +338,38 @@ class AgentsSdkStyleReportRuntime(StyleReportRuntime):
             your_action_plan=[
                 ActionPlanItem(
                     priority=1,
-                    focus="Name the target signal",
-                    action="Write three observable words for the desired style language.",
-                    rationale="A clear target makes the current-to-desired gap actionable.",
+                    focus="Follow the report's outfit formula",
+                    action=(
+                        "Use the supplied formula to repeat a complete outfit structure "
+                        "without rebuilding the decision process each time."
+                    ),
+                    rationale=(
+                        "A repeatable system makes the desired direction easier to "
+                        "recognise and use."
+                    ),
                 ),
                 ActionPlanItem(
                     priority=2,
-                    focus="Audit the current signal",
-                    action="Review three recent outfits and note which signals repeat.",
-                    rationale="Repeated choices reveal the current style language in practice.",
+                    focus="Change one visible style lever",
+                    action=(
+                        "Translate the desired direction through one clear change in "
+                        "colour, proportion, silhouette, texture, or detail."
+                    ),
+                    rationale=(
+                        "One separate visible change makes the shift legible without "
+                        "overhauling the whole wardrobe."
+                    ),
                 ),
                 ActionPlanItem(
                     priority=3,
-                    focus="Run one controlled experiment",
-                    action="Change one visible outfit signal toward the desired language.",
+                    focus="Finish with one styling layer",
+                    action=(
+                        "Complete the outfit with a styling layer or other finishing "
+                        "choice that supports the intended impression."
+                    ),
                     rationale=(
-                        "A small experiment tests the direction without requiring a full "
-                        "wardrobe change."
+                        "A clear finishing principle helps the outfit feel complete "
+                        "rather than merely assembled."
                     ),
                 ),
             ],
