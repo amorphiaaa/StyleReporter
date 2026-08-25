@@ -9,12 +9,13 @@ The real output contract is defined by `StyleLanguageAnalysisOutput` and is
 designed to mirror the client-facing reference reports:
 
 - `alignment_summary`, a human explanation of the current-to-desired movement;
-- exactly five `current_style_language` words or short phrases;
-- exactly five `desired_style_language` words or short phrases;
+- four or five concise `current_style_language` terms;
+- four or five concise `desired_style_language` terms in corresponding
+  diagnostic positions;
 - `disconnect`, which explains the meaningful tension rather than restating it;
 - `title`, `style_language_summary`, and three `style_language_anchors`;
-- exactly three prioritized `your_action_plan` items with rationale and first
-  step;
+- exactly three prioritized `your_action_plan` items, each with a clear
+  command, a client-specific rationale, and one practical application;
 - `evidence` and `limitations` for auditability.
 
 The writing and reasoning rules are documented in `docs/style-methodology.md`.

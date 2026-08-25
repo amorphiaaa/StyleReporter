@@ -495,9 +495,6 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
                 <h6>{item.focus}</h6>
                 <p>{item.action}</p>
                 <small>{item.rationale}</small>
-                <small>
-                  <strong>First step:</strong> {item.first_step}
-                </small>
               </div>
             </article>
           ))}
@@ -585,8 +582,7 @@ function isStyleLanguageAction(value: unknown): value is StyleLanguageAction {
     typeof item.priority === "number" &&
     typeof item.focus === "string" &&
     typeof item.action === "string" &&
-    typeof item.rationale === "string" &&
-    typeof item.first_step === "string"
+    typeof item.rationale === "string"
   );
 }
 

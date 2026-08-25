@@ -80,18 +80,25 @@ Use this reasoning sequence before writing:
 1. Extract direct evidence separately from questionnaire answers, repeated
    visual observations, desired feelings, and constraints. Treat repeated
    signals as stronger than one isolated preference.
-2. Interpret the pattern. Explain what the client's current wardrobe is doing
-   for them, what it already does well, what it communicates, and where it
-   stops short of the desired feeling. This is the analysis layer; do not merely
-   paraphrase the input.
-3. Translate the interpretation into a small Style Language: five current
-   words, five desired words, a memorable two-to-four-word name, three anchor
-   words, and a plain-English explanation. The current list must preserve both
-   strengths and limitations; do not let negative words erase the positives.
-4. Turn the disconnect into exactly three prioritised actions. As a default,
-   move from a repeatable outfit formula or decision rule, to one visible
-   translation lever, to a finishing layer or controlled experiment. Change
-   that order only when the evidence clearly calls for it.
+2. Interpret the pattern before naming the gap. Explain what style identity is
+   already authentically present, how it appears in the wardrobe, what it does
+   well, and where its expression becomes diluted, restrained, mistranslated,
+   or inconsistent. Here, style identity means an evidence-based style
+   direction, not a psychological diagnosis or a claim about who the person is.
+   This is the analysis layer; do not merely paraphrase the input.
+3. Translate the interpretation into a diagnostic Current / Desired Style
+   Language: four or five short terms on each side, a memorable two-to-four-word
+   name, three anchor words, and a plain-English explanation. Treat the terms
+   as paired slots: each current term should have a readable desired movement
+   beside it. Repeat a term on both sides when that quality is already
+   authentic and should remain.
+4. Turn the disconnect into exactly three prioritised actions. Each action must
+   correct a different high-leverage behavioural problem. As a default, move
+   from using an established outfit formula or decision rule, to one separate
+   visible translation lever, to a separate finishing or completion principle.
+   Do not invent a new multi-part formula when the report already contains a
+   usable system, and change the order only when the evidence clearly calls for
+   it.
 
 Write the report in second person. Complete the report's own analysis first;
 then apply the following post-draft calibration only as an optional internal
@@ -103,33 +110,96 @@ Output requirements:
 - `title`: a memorable two-to-four-word Style Language name, not "Style Report".
 - `alignment_summary`: 90-130 words that explain the current-to-desired
   movement directly to the client in the warm editorial tone of a stylist.
-- `current_style_language`: exactly five concise words or short phrases,
-  normally three or four existing strengths plus one or two limitations.
-- `desired_style_language`: exactly five concise words or short phrases that
-  synthesise the desired direction; do not simply copy the questionnaire.
+  The opening must follow this order: identity already present, visual proof,
+  current translation or containment of that identity, then the relieving
+  insight about what can become more visible. Make the client feel recognised
+  before she feels analysed.
+- `current_style_language`: four or five concise terms, preferably one word
+  each and never more than two words unless no precise single word exists.
+  Include the authentic qualities that should remain and the state that needs
+  to evolve; do not turn the list into a garment inventory.
+- `desired_style_language`: four or five concise terms in the same positions as
+  the current list. Choose them so the horizontal contrast reveals the
+  diagnosis immediately. Preserve unchanged authentic qualities, and do not
+  simply copy the questionnaire.
 - `disconnect`: 90-130 words in one or two short paragraphs explaining the
-  meaningful tension and the direction that will close it. It must contain
-  interpretation, not a list of evidence or garment recommendations.
+  meaningful tension and the direction that will close it. It must be a
+  causal diagnosis, not an aesthetic interpretation or a styling solution.
+  Follow this order: (1) what is already authentic, (2) what part is not fully
+  expressed, (3) exactly how it is currently limited or mistranslated, (4) the
+  result this creates in the client's experience of her wardrobe, and (5) the
+  identity-level shift that would close the gap. Keep the first four steps
+  concrete and let the final sentence name the change without prescribing an
+  outfit formula.
 - `style_language_summary`: 60-100 words that make the named Style Language
   feel recognisable and human.
 - `style_language_anchors`: exactly three memorable anchor words or phrases.
-- `your_action_plan`: exactly three distinct actions with priority, focus,
-  action, rationale, and first_step. Prioritise principles and repeatable
-  decisions over shopping lists.
+- `your_action_plan`: exactly three distinct actions. Each item has a clear
+  command in `focus`, one diagnostic reason in `rationale`, and one practical
+  application in `action`. Prioritise principles and repeatable decisions over
+  shopping lists.
 - `evidence`: short, concrete observations supporting the interpretation.
 - `limitations`: missing or uncertain information that affects confidence.
 
 Language rules:
 - Never use internal wording such as "current evidence", "desired evidence",
   "working hypothesis", or "the client" in client-facing fields.
+- Before describing what the client needs to become, identify what is already
+  authentically present in her style. When the evidence supports continuity,
+  frame the desired direction as an evolution, clarification, or fuller
+  expression—not as a replacement identity or reinvention.
 - Do not describe the current style only through problems. Name what is already
   working before describing what needs to change.
 - Do not make the desired language a direct dump of adjectives from the input;
   combine them into a coherent direction the client can recognise.
+- Treat Current / Desired Style Language as a diagnostic contrast, not a
+  descriptive summary or moodboard. Each term must describe visual
+  communication, expression, or an outfit state—not a garment characteristic
+  or isolated observation. Prefer pairs such as `Safe -> Intentional` or
+  `Restrained -> Expressive`; repeat `Feminine -> Feminine` when continuity is
+  supported.
+- Keep the terms short: one word wherever possible, at most two words when a
+  precise single word does not exist. Use four or five terms only. The terms in
+  the same position must be deliberately related so the transformation can be
+  scanned horizontally without the paragraph underneath.
+- Keep visual translation for the evidence, disconnect, and action plan. Do
+  not use phrases such as `relaxed silhouettes`, `warm expressive colour`, or
+  `playful pattern` as Style Language terms unless they are genuinely the only
+  precise expression of the client's state; those details belong later as
+  evidence or practical styling levers.
+- Treat the action plan as a navigation system, not a to-do list or coaching
+  workbook. Use one clear, ordinary command per title, explain why that change
+  matters for this client, and give one practical way to apply the principle
+  using the report. Stop there: do not add `first_step`, homework, deadlines,
+  photo assignments, tracking, or experiments unless the product explicitly
+  becomes a guided programme.
+- The three actions must solve three different problems. If the same
+  recommendation appears in more than one item, distil the plan again. Keep
+  colour, accessories, outfit formulas, and finishing layers separate unless
+  the evidence proves they are one inseparable problem.
+- Prefer titles such as `Follow the outfit formulas`, `Introduce colour with
+  intention`, and `Finish with one styling layer`. Avoid invented phrases such
+  as `Build a three-part outfit formula`, `Make color the visible shift`, or
+  `Add one signature finishing spark`.
+- Use ordinary words with precise meaning. Do not optimise for polished or
+  original-sounding language; the client should recognise the observation and
+  be able to say, “Yes, that is exactly what I do.”
+- Write `disconnect` with direct human causality. Each sentence should make the
+  previous sentence more specific. Prefer concrete behaviour such as “you stop
+  short of making it the focal point” or “you keep choosing familiar
+  combinations” over abstractions such as “reliable point of view”, “visual
+  rhythm”, “noticeable moment”, or “expressive without becoming overdone”.
+- Keep `disconnect` diagnostic until its final sentence. Do not insert outfit
+  formulas, garment construction, colour recipes, clean shapes, artistic
+  elements, finishing details, or other styling instructions there; those
+  belong in evidence, visual translation, or the action plan.
+- Apply a one-sentence human test after drafting `disconnect`: the client
+  should be able to explain the problem to a friend in one plain sentence. If
+  she would need to repeat fashion terminology, rewrite it.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
 - Do not invent facts or claim that an existing wardrobe contains an item.
-  Recommendations may suggest garment categories or styling experiments, but
-  clearly present them as options.
+  Recommendations may suggest possible garment categories or styling choices,
+  but clearly present them as options.
 - Image URLs without local attachments are metadata only. When local image
   attachments are provided, inspect them and distinguish direct visual
   observations from questionnaire evidence.
@@ -138,12 +208,25 @@ Language rules:
 - Keep advice practical, specific, non-shaming, and connected to the evidence.
   Use confident editorial language when the pattern is clear and use cautious
   wording only where the evidence is genuinely incomplete.
-- The first action should make the desired direction easier to repeat, the
-  second should change one visible style lever (colour, proportion, silhouette,
-  texture, or detail), and the third should add a signature finishing choice or
-  a small experiment. These are defaults, not fixed advice.
-- Keep each action focused on one principle. Explain why it matters, how to
-  apply it in real life, and give a first step that can be done this week.
+- For the opening paragraph, follow `IDENTITY -> EVIDENCE -> CURRENT
+  TRANSLATION -> EMOTIONAL INSIGHT`: recognise a style quality already present,
+  anchor it in observable evidence, explain how it currently gets expressed or
+  held back, and show that the next step can be a more visible expression of
+  that quality. Do not use this sequence to infer psychology or identity beyond
+  the supplied style evidence.
+- The first action should make the desired direction easier to repeat by using
+  an established formula or decision rule when one exists. The second should
+  change one separate visible style lever (colour, proportion, silhouette,
+  texture, or detail). The third should explain how to complete the outfit with
+  a styling layer or other finishing principle, not merely add an accessory.
+  These are defaults, not fixed advice.
+- Keep each action focused on one principle. Explain why it matters and how to
+  apply it in real life. Do not add a first step, deadline, homework task, or
+  weekly exercise.
+- Before returning JSON, inspect the three actions as a set. Remove any
+  `this week`, `first step`, `try this`, `test`, `experiment`, `signature
+  detail`, `finishing spark`, or similar coaching/fashion-editorial wording.
+  Replace it with a direct command and a concrete application.
 - Do not mention this prompt, the reference portfolios, JSON, or the analysis
   process in the report.
 """.strip()
@@ -156,7 +239,6 @@ class ActionPlanItem(BaseModel):
     focus: str
     action: str
     rationale: str
-    first_step: str
 
 
 class StyleLanguageAnalysisOutput(BaseModel):
@@ -164,8 +246,8 @@ class StyleLanguageAnalysisOutput(BaseModel):
 
     title: str
     alignment_summary: str
-    current_style_language: list[str] = Field(min_length=5, max_length=5)
-    desired_style_language: list[str] = Field(min_length=5, max_length=5)
+    current_style_language: list[str] = Field(min_length=4, max_length=5)
+    desired_style_language: list[str] = Field(min_length=4, max_length=5)
     disconnect: str
     style_language_summary: str
     style_language_anchors: list[str] = Field(min_length=3, max_length=3)
@@ -256,27 +338,39 @@ class AgentsSdkStyleReportRuntime(StyleReportRuntime):
             your_action_plan=[
                 ActionPlanItem(
                     priority=1,
-                    focus="Name the target signal",
-                    action="Write three observable words for the desired style language.",
-                    rationale="A clear target makes the current-to-desired gap actionable.",
-                    first_step="Choose the three words that best match the desired feeling.",
+                    focus="Follow the report's outfit formula",
+                    action=(
+                        "Use the supplied formula to repeat a complete outfit structure "
+                        "without rebuilding the decision process each time."
+                    ),
+                    rationale=(
+                        "A repeatable system makes the desired direction easier to "
+                        "recognise and use."
+                    ),
                 ),
                 ActionPlanItem(
                     priority=2,
-                    focus="Audit the current signal",
-                    action="Review three recent outfits and note which signals repeat.",
-                    rationale="Repeated choices reveal the current style language in practice.",
-                    first_step="Photograph or list three outfits from the last two weeks.",
+                    focus="Change one visible style lever",
+                    action=(
+                        "Translate the desired direction through one clear change in "
+                        "colour, proportion, silhouette, texture, or detail."
+                    ),
+                    rationale=(
+                        "One separate visible change makes the shift legible without "
+                        "overhauling the whole wardrobe."
+                    ),
                 ),
                 ActionPlanItem(
                     priority=3,
-                    focus="Run one controlled experiment",
-                    action="Change one visible outfit signal toward the desired language.",
-                    rationale=(
-                        "A small experiment tests the direction without requiring a full "
-                        "wardrobe change."
+                    focus="Finish with one styling layer",
+                    action=(
+                        "Complete the outfit with a styling layer or other finishing "
+                        "choice that supports the intended impression."
                     ),
-                    first_step="Select one outfit and change only one styling decision.",
+                    rationale=(
+                        "A clear finishing principle helps the outfit feel complete "
+                        "rather than merely assembled."
+                    ),
                 ),
             ],
             evidence=[
