@@ -137,7 +137,7 @@ class WorkerHandler(BaseHTTPRequestHandler):
         )
 
     def do_POST(self) -> None:
-        if self.path != "/v1/style-reports":
+        if self.path not in {"/v1/style-reports", "/v1/canva/design-candidates"}:
             self._send_json(HTTPStatus.NOT_FOUND, {"detail": "Not found."})
             return
         if not self._authorized():
@@ -164,13 +164,14 @@ class WorkerHandler(BaseHTTPRequestHandler):
                     os.getenv("CODEX_CLI_ASSET_ROOT", str(project_dir / "var" / "assets"))
                 ),
             )
-            report = runner.run(
+            result = runner.run(
                 prompt=prompt,
                 output_schema=output_schema,
                 model=payload.get("model") if isinstance(payload.get("model"), str) else None,
                 image_paths=_validated_image_paths(payload.get("image_paths")),
             )
-            self._send_json(HTTPStatus.OK, {"report": report})
+            response_key = "report" if self.path == "/v1/style-reports" else "result"
+            self._send_json(HTTPStatus.OK, {response_key: result})
         except (ValueError, WorkerError) as exc:
             self._send_json(HTTPStatus.BAD_GATEWAY, {"detail": str(exc)})
         finally:

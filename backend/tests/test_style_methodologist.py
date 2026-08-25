@@ -1,6 +1,12 @@
+import json
+
 import httpx
 import pytest
 
+from app.agents.canva_portfolio import (
+    CanvaPortfolioOutput,
+    CodexCliCanvaPortfolioRuntime,
+)
 from app.agents.runtime import (
     STYLE_FAMILY_CALIBRATION,
     STYLE_METHODOLOGIST_INSTRUCTIONS,
@@ -9,7 +15,7 @@ from app.agents.runtime import (
     StyleLanguageAnalysisOutput,
 )
 from app.agents.style_methodologist import StubStyleReportRuntime
-from app.domain.contracts import StyleReportRequest
+from app.domain.contracts import CanvaPortfolioRequest, StyleReportRequest
 
 
 def test_style_family_calibration_defines_dimensions_without_forcing_labels() -> None:
@@ -237,6 +243,62 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
         "model": None,
         "runner_url": "http://codex-worker:8787",
     }
+
+
+async def test_canva_runtime_validates_candidate_payload_without_provider_calls() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/canva/design-candidates"
+        payload = json.loads(request.read())
+        assert "StyleReporter" in payload["prompt"]
+        return httpx.Response(
+            200,
+            json={
+                "result": {
+                    "status": "completed",
+                    "candidates": [
+                        {
+                            "candidate_id": "candidate-1",
+                            "job_id": "job-1",
+                            "title": "Editorial Style Report",
+                            "design_url": "https://canva.example/design-1",
+                            "thumbnail_url": "https://canva.example/thumb-1",
+                        }
+                    ],
+                    "note": "Synthetic candidate response.",
+                }
+            },
+            request=request,
+        )
+
+    runtime = CodexCliCanvaPortfolioRuntime(
+        runner_url="http://codex-worker:8787/",
+        transport=httpx.MockTransport(handler),
+    )
+    result = await runtime.generate_candidates(
+        CanvaPortfolioRequest(
+            client_id="client-1",
+            report_run_id="report-1",
+            client_name="Synthetic Client",
+            report={"title": "Synthetic Style Language"},
+            questionnaire_context={"normalized_answers": {}},
+            asset_paths=("clients/client-1/submission-1/01.jpg",),
+        )
+    )
+
+    assert result.status == "completed"
+    assert result.note == "Synthetic candidate response."
+    assert result.candidates[0].candidate_id == "candidate-1"
+    assert result.candidates[0].design_url == "https://canva.example/design-1"
+
+
+def test_canva_output_schema_is_strict() -> None:
+    schema = CanvaPortfolioOutput.model_json_schema()
+
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    candidate_schema = schema["$defs"]["CanvaDesignCandidateOutput"]
+    assert candidate_schema["additionalProperties"] is False
+    assert set(candidate_schema["required"]) == set(candidate_schema["properties"])
 
 
 def test_codex_output_schema_is_strict_for_every_object() -> None:

@@ -115,6 +115,37 @@ class StyleReportRuntime(Protocol):
 
 
 @dataclass(frozen=True)
+class CanvaPortfolioRequest:
+    client_id: str
+    report_run_id: str
+    client_name: str
+    report: JsonObject
+    questionnaire_context: JsonObject
+    asset_paths: Sequence[str] = ()
+
+
+@dataclass(frozen=True)
+class CanvaDesignCandidate:
+    candidate_id: str
+    job_id: str
+    title: str
+    design_url: str | None = None
+    thumbnail_url: str | None = None
+
+
+@dataclass(frozen=True)
+class CanvaPortfolioResult:
+    status: str
+    candidates: Sequence[CanvaDesignCandidate]
+    note: str
+
+
+class CanvaPortfolioRuntime(Protocol):
+    async def generate_candidates(self, request: CanvaPortfolioRequest) -> CanvaPortfolioResult:
+        ...
+
+
+@dataclass(frozen=True)
 class SheetReadRequest:
     spreadsheet_id: str
     sheet_name: str

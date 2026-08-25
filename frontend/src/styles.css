@@ -893,6 +893,60 @@ textarea:focus {
   background: #fff9f7;
 }
 
+.canva-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e8dfd5;
+}
+
+.canva-candidates {
+  display: grid;
+  gap: 8px;
+}
+
+.canva-note {
+  margin: 0;
+  color: #62574f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.canva-candidate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.canva-candidate {
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  color: #28231f;
+  text-decoration: none;
+  border: 1px solid #d9cdbf;
+  border-radius: 10px;
+  background: #fffdf9;
+}
+
+.canva-candidate:hover {
+  border-color: #a7896e;
+}
+
+.canva-candidate img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #f1ebe4;
+}
+
+.canva-candidate span {
+  padding: 0 10px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .report-history {
   display: grid;
   gap: 12px;

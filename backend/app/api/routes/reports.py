@@ -4,12 +4,24 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.canva_portfolio import CodexCliCanvaPortfolioRuntime
+from app.agents.questionnaire_context import build_questionnaire_context
 from app.agents.runtime import AgentsSdkStyleReportRuntime, CodexCliStyleReportRuntime
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.api.dependencies import get_db_session
-from app.api.schemas.reports import GenerateStyleReportRequest, StyleReportResponse
+from app.api.schemas.reports import (
+    CanvaCandidatesResponse,
+    CanvaDesignCandidateResponse,
+    GenerateStyleReportRequest,
+    StyleReportResponse,
+)
 from app.core.config import get_settings
-from app.domain.contracts import StyleReportRequest, StyleReportRun, StyleReportRuntime
+from app.domain.contracts import (
+    CanvaPortfolioRequest,
+    StyleReportRequest,
+    StyleReportRun,
+    StyleReportRuntime,
+)
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
     SqlAlchemyStyleReportRunRepository,
@@ -134,6 +146,109 @@ async def get_style_report(
             detail=f"Style report run {report_run_id} was not found.",
         )
     return _to_response(report_run)
+
+
+@router.post(
+    "/clients/{client_id}/reports/{report_run_id}/canva/candidates",
+    response_model=CanvaCandidatesResponse,
+)
+async def generate_canva_candidates(
+    client_id: UUID,
+    report_run_id: UUID,
+    session: AsyncSession = db_session_dependency,
+) -> CanvaCandidatesResponse:
+    client = await SqlAlchemyClientRepository(session).get_by_id(str(client_id))
+    if client is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Client {client_id} was not found.",
+        )
+
+    report_run = await SqlAlchemyStyleReportRunRepository(session).get_by_id(str(report_run_id))
+    if report_run is None or report_run.client_id != str(client_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Style report run {report_run_id} was not found for this client.",
+        )
+    if report_run.status != "completed" or report_run.report is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Canva candidates require a completed style report.",
+        )
+
+    submission = await SqlAlchemySubmissionRepository(session).get_by_id(report_run.submission_id)
+    if submission is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Submission {report_run.submission_id} was not found.",
+        )
+
+    settings = get_settings()
+    if not settings.canva_mcp_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Canva MCP is disabled. Set CANVA_MCP_ENABLED=true and restart the backend."
+            ),
+        )
+    if not settings.codex_cli_enabled or not settings.codex_cli_runner_url:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Canva MCP requires the local Codex CLI worker to be running.",
+        )
+
+    asset_paths = (
+        await LocalAssetWorkspace(settings.asset_storage_root).get_verified_image_paths(
+            client_id=str(client_id),
+            submission_id=submission.id,
+        )
+        if settings.asset_storage_enabled
+        else ()
+    )
+    request = StyleReportRequest(
+        client_id=str(client_id),
+        submission_id=submission.id,
+        raw_payload=submission.raw_payload,
+        questionnaire_version=submission.questionnaire_version,
+        asset_paths=asset_paths,
+    )
+    runtime = CodexCliCanvaPortfolioRuntime(
+        runner_url=settings.codex_cli_runner_url,
+        runner_token=settings.codex_cli_runner_token,
+        model=settings.codex_cli_model,
+        timeout_seconds=settings.canva_mcp_timeout_seconds,
+    )
+    try:
+        result = await runtime.generate_candidates(
+            CanvaPortfolioRequest(
+                client_id=str(client_id),
+                report_run_id=str(report_run_id),
+                client_name=client.display_name or "Style Report Client",
+                report=report_run.report,
+                questionnaire_context=build_questionnaire_context(request),
+                asset_paths=asset_paths,
+            )
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Canva candidate generation failed: {exc}",
+        ) from exc
+
+    return CanvaCandidatesResponse(
+        status=result.status,
+        candidates=[
+            CanvaDesignCandidateResponse(
+                candidate_id=candidate.candidate_id,
+                job_id=candidate.job_id,
+                title=candidate.title,
+                design_url=candidate.design_url,
+                thumbnail_url=candidate.thumbnail_url,
+            )
+            for candidate in result.candidates
+        ],
+        note=result.note,
+    )
 
 
 def _build_runtime(runtime_type: str) -> StyleReportRuntime:
