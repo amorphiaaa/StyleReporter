@@ -61,6 +61,17 @@ def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
     assert "relaxed silhouettes" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
+def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
+    assert "causal diagnosis, not an aesthetic interpretation" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "what is already authentic" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "what part is not fully" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "identity-level shift" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "direct human causality" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "reliable point of view" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Do not insert outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "one-sentence human test" in STYLE_METHODOLOGIST_INSTRUCTIONS
+
+
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
     result = await StubStyleReportRuntime().generate(
         StyleReportRequest(

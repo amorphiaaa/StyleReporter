@@ -55,6 +55,14 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Explain the disconnect as a tension between a current operating pattern and
   a desired feeling. Do not merely place the two answer fields next to each
   other.
+- Write The Disconnect as a causal explanation, not an aesthetic interpretation
+  or styling solution. Use this order: authentic quality already present,
+  quality not fully expressed, current limitation or mistranslation, resulting
+  wardrobe experience, then the identity-level shift that would close the gap.
+  Keep recommendations and outfit construction for the action plan.
+- Prefer concrete human behaviour over abstract fashion language. If the client
+  cannot explain the disconnect to a friend in one plain sentence after reading
+  it, rewrite it.
 - Preserve continuity of style identity. Before describing what should change,
   identify the quality that is already authentically present and how it appears
   in the evidence. When supported, frame the desired direction as an evolution,
@@ -121,7 +129,10 @@ Before returning JSON, verify that:
 - the Style Language terms describe communication or expression rather than a
   garment inventory, and the diagnosis remains understandable without the
   paragraph underneath;
-- the disconnect explains why the gap matters and what direction closes it;
+- the disconnect follows authentic -> under-expressed -> current limitation ->
+  result -> identity-level shift, and contains no styling recipe;
+- the disconnect uses concrete causal language that the client could repeat to
+  a friend in one plain sentence;
 - the named Style Language is memorable but grounded in the evidence;
 - the three action-plan items are distinct, prioritised, and immediately
   usable, moving from repeatability to visible translation to finishing;

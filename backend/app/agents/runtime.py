@@ -120,8 +120,14 @@ Output requirements:
   diagnosis immediately. Preserve unchanged authentic qualities, and do not
   simply copy the questionnaire.
 - `disconnect`: 90-130 words in one or two short paragraphs explaining the
-  meaningful tension and the direction that will close it. It must contain
-  interpretation, not a list of evidence or garment recommendations.
+  meaningful tension and the direction that will close it. It must be a
+  causal diagnosis, not an aesthetic interpretation or a styling solution.
+  Follow this order: (1) what is already authentic, (2) what part is not fully
+  expressed, (3) exactly how it is currently limited or mistranslated, (4) the
+  result this creates in the client's experience of her wardrobe, and (5) the
+  identity-level shift that would close the gap. Keep the first four steps
+  concrete and let the final sentence name the change without prescribing an
+  outfit formula.
 - `style_language_summary`: 60-100 words that make the named Style Language
   feel recognisable and human.
 - `style_language_anchors`: exactly three memorable anchor words or phrases.
@@ -157,6 +163,18 @@ Language rules:
   `playful pattern` as Style Language terms unless they are genuinely the only
   precise expression of the client's state; those details belong later as
   evidence or practical styling levers.
+- Write `disconnect` with direct human causality. Each sentence should make the
+  previous sentence more specific. Prefer concrete behaviour such as “you stop
+  short of making it the focal point” or “you keep choosing familiar
+  combinations” over abstractions such as “reliable point of view”, “visual
+  rhythm”, “noticeable moment”, or “expressive without becoming overdone”.
+- Keep `disconnect` diagnostic until its final sentence. Do not insert outfit
+  formulas, garment construction, colour recipes, clean shapes, artistic
+  elements, finishing details, or other styling instructions there; those
+  belong in evidence, visual translation, or the action plan.
+- Apply a one-sentence human test after drafting `disconnect`: the client
+  should be able to explain the problem to a friend in one plain sentence. If
+  she would need to repeat fashion terminology, rewrite it.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
 - Do not invent facts or claim that an existing wardrobe contains an item.
   Recommendations may suggest garment categories or styling experiments, but
