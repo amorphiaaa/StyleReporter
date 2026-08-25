@@ -41,6 +41,14 @@ finishing details. They focus on principles rather than a fixed shopping list.
   recommendation that follows.
 - Describe the current wardrobe as a language with strengths and limitations,
   not as a personal failure.
+- Treat Current / Desired Style Language as a diagnostic contrast, not a
+  descriptive inventory. Use four or five short terms, preferably one word
+  each, and choose corresponding positions so the transformation can be read
+  horizontally. Keep garment details and visual translation for the evidence,
+  disconnect, and action plan.
+- Repeat an authentic quality on both sides when it should remain stable. The
+  changed pairs should show exactly what needs to evolve—for example,
+  `Safe -> Intentional` or `Restrained -> Expressive`.
 - Keep the balance visible: current language normally contains several genuine
   strengths and only one or two friction points. A negative word must not erase
   a strength that appears repeatedly in the evidence.
@@ -108,7 +116,11 @@ Before returning JSON, verify that:
 - the client feels recognised before the analysis names the gap, and the
   desired direction is not framed as a replacement identity when continuity is
   supported by the evidence;
-- current and desired language each contain five concise items;
+- current and desired language each contain four or five concise diagnostic
+  terms, with corresponding positions that make the gap legible;
+- the Style Language terms describe communication or expression rather than a
+  garment inventory, and the diagnosis remains understandable without the
+  paragraph underneath;
 - the disconnect explains why the gap matters and what direction closes it;
 - the named Style Language is memorable but grounded in the evidence;
 - the three action-plan items are distinct, prioritised, and immediately

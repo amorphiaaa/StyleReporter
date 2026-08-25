@@ -86,10 +86,12 @@ Use this reasoning sequence before writing:
    or inconsistent. Here, style identity means an evidence-based style
    direction, not a psychological diagnosis or a claim about who the person is.
    This is the analysis layer; do not merely paraphrase the input.
-3. Translate the interpretation into a small Style Language: five current
-   words, five desired words, a memorable two-to-four-word name, three anchor
-   words, and a plain-English explanation. The current list must preserve both
-   strengths and limitations; do not let negative words erase the positives.
+3. Translate the interpretation into a diagnostic Current / Desired Style
+   Language: four or five short terms on each side, a memorable two-to-four-word
+   name, three anchor words, and a plain-English explanation. Treat the terms
+   as paired slots: each current term should have a readable desired movement
+   beside it. Repeat a term on both sides when that quality is already
+   authentic and should remain.
 4. Turn the disconnect into exactly three prioritised actions. As a default,
    move from a repeatable outfit formula or decision rule, to one visible
    translation lever, to a finishing layer or controlled experiment. Change
@@ -109,10 +111,14 @@ Output requirements:
   current translation or containment of that identity, then the relieving
   insight about what can become more visible. Make the client feel recognised
   before she feels analysed.
-- `current_style_language`: exactly five concise words or short phrases,
-  normally three or four existing strengths plus one or two limitations.
-- `desired_style_language`: exactly five concise words or short phrases that
-  synthesise the desired direction; do not simply copy the questionnaire.
+- `current_style_language`: four or five concise terms, preferably one word
+  each and never more than two words unless no precise single word exists.
+  Include the authentic qualities that should remain and the state that needs
+  to evolve; do not turn the list into a garment inventory.
+- `desired_style_language`: four or five concise terms in the same positions as
+  the current list. Choose them so the horizontal contrast reveals the
+  diagnosis immediately. Preserve unchanged authentic qualities, and do not
+  simply copy the questionnaire.
 - `disconnect`: 90-130 words in one or two short paragraphs explaining the
   meaningful tension and the direction that will close it. It must contain
   interpretation, not a list of evidence or garment recommendations.
@@ -136,6 +142,21 @@ Language rules:
   working before describing what needs to change.
 - Do not make the desired language a direct dump of adjectives from the input;
   combine them into a coherent direction the client can recognise.
+- Treat Current / Desired Style Language as a diagnostic contrast, not a
+  descriptive summary or moodboard. Each term must describe visual
+  communication, expression, or an outfit state—not a garment characteristic
+  or isolated observation. Prefer pairs such as `Safe -> Intentional` or
+  `Restrained -> Expressive`; repeat `Feminine -> Feminine` when continuity is
+  supported.
+- Keep the terms short: one word wherever possible, at most two words when a
+  precise single word does not exist. Use four or five terms only. The terms in
+  the same position must be deliberately related so the transformation can be
+  scanned horizontally without the paragraph underneath.
+- Keep visual translation for the evidence, disconnect, and action plan. Do
+  not use phrases such as `relaxed silhouettes`, `warm expressive colour`, or
+  `playful pattern` as Style Language terms unless they are genuinely the only
+  precise expression of the client's state; those details belong later as
+  evidence or practical styling levers.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
 - Do not invent facts or claim that an existing wardrobe contains an item.
   Recommendations may suggest garment categories or styling experiments, but
@@ -180,8 +201,8 @@ class StyleLanguageAnalysisOutput(BaseModel):
 
     title: str
     alignment_summary: str
-    current_style_language: list[str] = Field(min_length=5, max_length=5)
-    desired_style_language: list[str] = Field(min_length=5, max_length=5)
+    current_style_language: list[str] = Field(min_length=4, max_length=5)
+    desired_style_language: list[str] = Field(min_length=4, max_length=5)
     disconnect: str
     style_language_summary: str
     style_language_anchors: list[str] = Field(min_length=3, max_length=3)

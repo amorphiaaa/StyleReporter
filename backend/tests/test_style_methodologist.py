@@ -48,6 +48,19 @@ def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
     )
 
 
+def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
+    assert "diagnostic Current / Desired Style" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "four or five concise terms" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same positions as" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert (
+        "diagnostic contrast, not a"
+        in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
+    assert "descriptive summary or moodboard" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Safe -> Intentional" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "relaxed silhouettes" in STYLE_METHODOLOGIST_INSTRUCTIONS
+
+
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
     result = await StubStyleReportRuntime().generate(
         StyleReportRequest(
@@ -209,6 +222,10 @@ def test_codex_output_schema_is_strict_for_every_object() -> None:
 
     assert schema["additionalProperties"] is False
     assert set(schema["required"]) == set(schema["properties"])
+    assert schema["properties"]["current_style_language"]["minItems"] == 4
+    assert schema["properties"]["current_style_language"]["maxItems"] == 5
+    assert schema["properties"]["desired_style_language"]["minItems"] == 4
+    assert schema["properties"]["desired_style_language"]["maxItems"] == 5
     action_schema = schema["$defs"]["ActionPlanItem"]
     assert action_schema["additionalProperties"] is False
     assert set(action_schema["required"]) == set(action_schema["properties"])
