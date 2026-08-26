@@ -42,10 +42,14 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Describe the current wardrobe as a language with strengths and limitations,
   not as a personal failure.
 - Treat Current / Desired Style Language as a diagnostic contrast, not a
-  descriptive inventory. Use four or five short terms, preferably one word
-  each, and choose corresponding positions so the transformation can be read
-  horizontally. Keep garment details and visual translation for the evidence,
-  disconnect, and action plan.
+  descriptive inventory or moodboard. Use the same four or five positions on
+  both sides, preferably one word per term, so each pair shows the movement
+  horizontally. Repeat an authentic quality when it should remain stable; make
+  the changed pairs explain the actual mechanism of change, such as
+  `Practical -> Creative`, `Safe -> Intentional`, or `Restrained -> Expressive`.
+  Do not use unattached positive words such as `Finished`, `Flexible`, or
+  `Alive` simply because they sound desirable. Keep garment details and visual
+  translation for the evidence, disconnect, and action plan.
 - Repeat an authentic quality on both sides when it should remain stable. The
   changed pairs should show exactly what needs to evolve—for example,
   `Safe -> Intentional` or `Restrained -> Expressive`.
@@ -85,9 +89,13 @@ finishing details. They focus on principles rather than a fixed shopping list.
   derive the analysis from the evidence, then use the labels as an optional
   quality check. Do not force a client into Effortless, Creative, Intentional,
   or Refined when the evidence points elsewhere.
-- Recommendations may introduce possible garment categories or styling choices,
-  but they must be presented as options—not as facts about the client's
-  existing wardrobe.
+- Recommendations must be general and reusable across several outfits. Keep
+  them at the level of a decision rule or visual lever such as colour,
+  proportion, silhouette, texture, detail, or a styling layer. Do not name one
+  garment, accessory, photographed outfit, or shopping item as the answer.
+- Each action follows **principle -> reusable application -> effect**. It should
+  tell the client what to change, why that matters in her specific pattern, and
+  how to apply the principle without prescribing one item.
 - If images are missing, inaccessible, or contradictory, state that limitation
   and reduce the confidence of visual conclusions.
 
@@ -137,8 +145,8 @@ Before returning JSON, verify that:
 - current and desired language each contain four or five concise diagnostic
   terms, with corresponding positions that make the gap legible;
 - the Style Language terms describe communication or expression rather than a
-  garment inventory, and the diagnosis remains understandable without the
-  paragraph underneath;
+  garment inventory, contain the same number of short terms on both sides, and
+  make the diagnosis understandable without the paragraph underneath;
 - the disconnect follows authentic -> under-expressed -> current limitation ->
   result -> identity-level shift, and contains no styling recipe;
 - the disconnect uses concrete causal language that the client could repeat to
@@ -146,6 +154,7 @@ Before returning JSON, verify that:
 - the named Style Language is memorable but grounded in the evidence;
 - the three action-plan items are distinct, prioritised, and immediately
   usable, each containing one clear command, one diagnostic reason, and one
-  practical application without homework or a `first_step`;
+  practical application without homework, a `first_step`, or a prescription
+  for one named item;
 - every visual claim is supported by an attached image or marked as unknown;
 - the report uses second person and sounds natural when read aloud.

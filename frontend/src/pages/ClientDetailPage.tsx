@@ -549,8 +549,10 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
         <p className="alignment-summary">{analysis.alignment_summary}</p>
       ) : null}
       <div className="analysis-grid">
-        <AnalysisBlock label="Current Style Language" value={analysis.current_style_language} />
-        <AnalysisBlock label="Desired Style Language" value={analysis.desired_style_language} />
+        <StyleLanguageContrast
+          current={analysis.current_style_language}
+          desired={analysis.desired_style_language}
+        />
         <AnalysisBlock label="The Disconnect" value={analysis.disconnect} />
       </div>
       {analysis.style_language_summary ? (
@@ -599,6 +601,42 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
         </details>
       ) : null}
     </div>
+  );
+}
+
+function StyleLanguageContrast({
+  current,
+  desired,
+}: {
+  current: string[];
+  desired: string[];
+}) {
+  const pairCount = Math.min(current.length, desired.length);
+
+  return (
+    <article className="analysis-block style-language-contrast">
+      <div className="style-language-contrast-header">
+        <p className="eyebrow">Style Language movement</p>
+        <div className="style-language-column-labels" aria-hidden="true">
+          <span>Current</span>
+          <span>Desired</span>
+        </div>
+      </div>
+      <div className="style-language-pairs">
+        {Array.from({ length: pairCount }, (_, index) => (
+          <div
+            className="style-language-pair"
+            key={`${current[index]}-${desired[index]}-${index}`}
+          >
+            <span>{current[index]}</span>
+            <span className="style-language-arrow" aria-hidden="true">
+              →
+            </span>
+            <span>{desired[index]}</span>
+          </div>
+        ))}
+      </div>
+    </article>
   );
 }
 

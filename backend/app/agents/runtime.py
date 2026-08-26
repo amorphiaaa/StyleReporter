@@ -4,7 +4,7 @@ import json
 
 import httpx
 from agents import Agent, Runner
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.agents.questionnaire_context import build_questionnaire_context
 from app.domain.contracts import (
@@ -113,7 +113,9 @@ Output requirements:
   The opening must follow this order: identity already present, visual proof,
   current translation or containment of that identity, then the relieving
   insight about what can become more visible. Make the client feel recognised
-  before she feels analysed.
+  before she feels analysed. Keep visual proof concise: synthesise two or
+  three repeated qualities or styling behaviours instead of listing named
+  garments, accessories, or individual outfits.
 - `current_style_language`: four or five concise terms, preferably one word
   each and never more than two words unless no precise single word exists.
   Include the authentic qualities that should remain and the state that needs
@@ -137,7 +139,8 @@ Output requirements:
 - `your_action_plan`: exactly three distinct actions. Each item has a clear
   command in `focus`, one diagnostic reason in `rationale`, and one practical
   application in `action`. Prioritise principles and repeatable decisions over
-  shopping lists.
+  shopping lists. Keep all advice item-agnostic: do not prescribe a named
+  garment, accessory, outfit, or single item from the evidence.
 - `evidence`: short, concrete observations supporting the interpretation.
 - `limitations`: missing or uncertain information that affects confidence.
 
@@ -162,6 +165,16 @@ Language rules:
   precise single word does not exist. Use four or five terms only. The terms in
   the same position must be deliberately related so the transformation can be
   scanned horizontally without the paragraph underneath.
+- Treat each Current / Desired position as one diagnostic pair. Use the same
+  number of terms on both sides, preferably one word per term and never more
+  than two words. The changed pairs must show the actual mechanism of change,
+  for example `Practical -> Creative`, `Soft -> Confident`, `Safe ->
+  Intentional`, or `Restrained -> Expressive`. Do not fill the desired side
+  with unattached positive mood words such as `Repeatable`, `Finished`,
+  `Flexible`, or `Alive` unless the current term beside it makes the movement
+  clear and the evidence supports it. The language section compresses the
+  diagnosis; it is not a list of desired qualities.
+- Current and Desired lists must have the same number of terms on both sides.
 - Keep visual translation for the evidence, disconnect, and action plan. Do
   not use phrases such as `relaxed silhouettes`, `warm expressive colour`, or
   `playful pattern` as Style Language terms unless they are genuinely the only
@@ -173,6 +186,13 @@ Language rules:
   using the report. Stop there: do not add `first_step`, homework, deadlines,
   photo assignments, tracking, or experiments unless the product explicitly
   becomes a guided programme.
+- Keep recommendations general enough to reuse across several outfits. Name
+  the principle and the decision it changes, then describe the result it should
+  create. Do not name a particular blouse, trouser, dress, shoe, bag, scarf,
+  pair of glasses, piece of jewellery, or other single item; do not tell the
+  client to repeat one photographed outfit. Broad levers such as colour,
+  proportion, silhouette, texture, detail, or a styling layer are acceptable
+  when they are tied to the diagnosis.
 - The three actions must solve three different problems. If the same
   recommendation appears in more than one item, distil the plan again. Keep
   colour, accessories, outfit formulas, and finishing layers separate unless
@@ -197,9 +217,9 @@ Language rules:
   should be able to explain the problem to a friend in one plain sentence. If
   she would need to repeat fashion terminology, rewrite it.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
-- Do not invent facts or claim that an existing wardrobe contains an item.
-  Recommendations may suggest possible garment categories or styling choices,
-  but clearly present them as options.
+- Do not invent facts or claim that an existing wardrobe contains an item. Keep
+  recommendations at the level of reusable styling choices and principles,
+  not individual items or shopping suggestions.
 - Image URLs without local attachments are metadata only. When local image
   attachments are provided, inspect them and distinguish direct visual
   observations from questionnaire evidence.
@@ -219,7 +239,10 @@ Language rules:
   change one separate visible style lever (colour, proportion, silhouette,
   texture, or detail). The third should explain how to complete the outfit with
   a styling layer or other finishing principle, not merely add an accessory.
-  These are defaults, not fixed advice.
+  For every action, use the sequence principle -> reusable application ->
+  effect; never turn the application into a prescription for one item. These
+  are defaults, not fixed advice.
+- For every action, use: principle -> reusable application -> effect.
 - Keep each action focused on one principle. Explain why it matters and how to
   apply it in real life. Do not add a first step, deadline, homework task, or
   weekly exercise.
@@ -254,6 +277,23 @@ class StyleLanguageAnalysisOutput(BaseModel):
     your_action_plan: list[ActionPlanItem] = Field(min_length=3, max_length=3)
     evidence: list[str]
     limitations: list[str]
+
+    @field_validator("current_style_language", "desired_style_language")
+    @classmethod
+    def validate_style_language_terms(cls, values: list[str]) -> list[str]:
+        if any(not term.strip() for term in values):
+            raise ValueError("Style Language terms must not be empty")
+        if any(len(term.split()) > 2 for term in values):
+            raise ValueError("Style Language terms must contain at most two words")
+        return values
+
+    @model_validator(mode="after")
+    def validate_style_language_pair_lengths(self) -> StyleLanguageAnalysisOutput:
+        if len(self.current_style_language) != len(self.desired_style_language):
+            raise ValueError(
+                "Current and Desired Style Language must contain the same number of terms"
+            )
+        return self
 
 
 class AgentsSdkStyleReportRuntime(StyleReportRuntime):

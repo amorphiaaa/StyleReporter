@@ -2,6 +2,7 @@ import json
 
 import httpx
 import pytest
+from pydantic import ValidationError
 
 from app.agents.canva_portfolio import (
     CanvaPortfolioOutput,
@@ -65,6 +66,9 @@ def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
     assert "descriptive summary or moodboard" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Safe -> Intentional" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "relaxed silhouettes" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same number of terms on both sides" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Practical -> Creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "unattached positive mood words" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
@@ -85,6 +89,9 @@ def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
     assert "Follow the outfit formulas" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "signature finishing spark" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "styling layer or other finishing principle" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Keep all advice item-agnostic" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "principle -> reusable application -> effect" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Do not name a particular blouse" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Before returning JSON, inspect the three actions as a set"
         in STYLE_METHODOLOGIST_INSTRUCTIONS
@@ -315,3 +322,58 @@ def test_codex_output_schema_is_strict_for_every_object() -> None:
     assert set(action_schema["required"]) == set(action_schema["properties"])
     assert set(action_schema["required"]) == {"priority", "focus", "action", "rationale"}
     assert "first_step" not in action_schema["properties"]
+
+
+def test_codex_output_rejects_unpaired_or_overlong_style_terms() -> None:
+    base = {
+        "title": "Synthetic Style",
+        "alignment_summary": "A useful summary.",
+        "current_style_language": ["Feminine", "Safe", "Soft", "Practical"],
+        "desired_style_language": [
+            "Feminine",
+            "Intentional",
+            "Confident",
+            "Creative",
+        ],
+        "disconnect": "A clear causal explanation.",
+        "style_language_summary": "A clear direction.",
+        "style_language_anchors": ["Ease", "Clarity", "Expression"],
+        "your_action_plan": [
+            {
+                "priority": 1,
+                "focus": "Use a repeatable principle",
+                "action": "Apply the report's decision rule.",
+                "rationale": "It reduces uncertainty.",
+            },
+            {
+                "priority": 2,
+                "focus": "Change one visual lever",
+                "action": "Change one visible quality.",
+                "rationale": "It makes the shift clearer.",
+            },
+            {
+                "priority": 3,
+                "focus": "Complete the look",
+                "action": "Use a finishing principle.",
+                "rationale": "It makes the result feel coherent.",
+            },
+        ],
+        "evidence": ["Synthetic evidence."],
+        "limitations": [],
+    }
+
+    unpaired = {**base, "desired_style_language": ["Feminine"] * 5}
+    with pytest.raises(ValidationError, match="same number of terms"):
+        StyleLanguageAnalysisOutput.model_validate(unpaired)
+
+    overlong = {
+        **base,
+        "current_style_language": [
+            "Too many words here",
+            "Safe",
+            "Soft",
+            "Practical",
+        ],
+    }
+    with pytest.raises(ValidationError, match="at most two words"):
+        StyleLanguageAnalysisOutput.model_validate(overlong)
