@@ -69,6 +69,8 @@ def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
     assert "same number of terms on both sides" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Practical -> Creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "unattached positive mood words" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "colour word such as `Colourful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Contained -> Expressive" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
@@ -92,6 +94,8 @@ def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
     assert "Keep all advice item-agnostic" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "principle -> reusable application -> effect" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Do not name a particular blouse" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "fashion-editorial filler" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "carry through the outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Before returning JSON, inspect the three actions as a set"
         in STYLE_METHODOLOGIST_INSTRUCTIONS

@@ -50,6 +50,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
   Do not use unattached positive words such as `Finished`, `Flexible`, or
   `Alive` simply because they sound desirable. Keep garment details and visual
   translation for the evidence, disconnect, and action plan.
+- Prefer communication or behaviour terms over raw visual attributes. A colour
+  term belongs in the diagnostic pairs only when colour itself is the central
+  shift; otherwise use a clearer state pair such as `Contained -> Expressive`.
 - Repeat an authentic quality on both sides when it should remain stable. The
   changed pairs should show exactly what needs to evolve—for example,
   `Safe -> Intentional` or `Restrained -> Expressive`.
@@ -83,8 +86,11 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Structure the opening alignment paragraph as **Identity -> Evidence -> Current
   translation -> Emotional insight**: recognise the existing style quality,
   prove it with visual signals, explain how it is currently expressed or
-  contained, then show what can become more visible. “Identity” here means an
-  evidence-based style direction, not a psychological diagnosis.
+  contained, then show what can become more visible. Keep the evidence as a
+  synthesis of no more than three broad qualities; do not list named garments,
+  accessories, colours, or individual outfits in the opening paragraph.
+  “Identity” here means an evidence-based style direction, not a psychological
+  diagnosis.
 - Use the supplied style-family labels only as post-draft calibration. First
   derive the analysis from the evidence, then use the labels as an optional
   quality check. Do not force a client into Effortless, Creative, Intentional,
@@ -96,6 +102,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Each action follows **principle -> reusable application -> effect**. It should
   tell the client what to change, why that matters in her specific pattern, and
   how to apply the principle without prescribing one item.
+- Replace fashion-editorial filler such as "finishing move", "visual rhythm",
+  "reliable point of view", or "focal point" with ordinary language that a
+  stylist would naturally say aloud.
 - If images are missing, inaccessible, or contradictory, state that limitation
   and reduce the confidence of visual conclusions.
 

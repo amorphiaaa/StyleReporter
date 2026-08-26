@@ -113,9 +113,10 @@ Output requirements:
   The opening must follow this order: identity already present, visual proof,
   current translation or containment of that identity, then the relieving
   insight about what can become more visible. Make the client feel recognised
-  before she feels analysed. Keep visual proof concise: synthesise two or
-  three repeated qualities or styling behaviours instead of listing named
-  garments, accessories, or individual outfits.
+  before she feels analysed. Keep visual proof concise: synthesise no more
+  than three repeated qualities or styling behaviours. Do not list named
+  garments, accessories, colours, or individual outfits in this paragraph;
+  use broad language such as colour, proportion, texture, detail, or ease.
 - `current_style_language`: four or five concise terms, preferably one word
   each and never more than two words unless no precise single word exists.
   Include the authentic qualities that should remain and the state that needs
@@ -175,6 +176,11 @@ Language rules:
   clear and the evidence supports it. The language section compresses the
   diagnosis; it is not a list of desired qualities.
 - Current and Desired lists must have the same number of terms on both sides.
+- Prefer terms that describe the client's communication or behaviour rather
+  than raw visual attributes. Use a colour word such as `Colourful` only when
+  colour itself is the central diagnosed shift; otherwise prefer a clearer
+  state pair such as `Practical -> Creative`, `Contained -> Expressive`, or
+  `Safe -> Intentional`.
 - Keep visual translation for the evidence, disconnect, and action plan. Do
   not use phrases such as `relaxed silhouettes`, `warm expressive colour`, or
   `playful pattern` as Style Language terms unless they are genuinely the only
@@ -246,6 +252,10 @@ Language rules:
 - Keep each action focused on one principle. Explain why it matters and how to
   apply it in real life. Do not add a first step, deadline, homework task, or
   weekly exercise.
+- Avoid fashion-editorial filler such as `carry through the outfit`,
+  `finishing move`, `visual rhythm`, `reliable point of view`, or `focal point`
+  when a plain human sentence says the same thing. The insight should sound
+  natural when read aloud in a consultation.
 - Before returning JSON, inspect the three actions as a set. Remove any
   `this week`, `first step`, `try this`, `test`, `experiment`, `signature
   detail`, `finishing spark`, or similar coaching/fashion-editorial wording.
