@@ -53,6 +53,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
 - Prefer communication or behaviour terms over raw visual attributes. A colour
   term belongs in the diagnostic pairs only when colour itself is the central
   shift; otherwise use a clearer state pair such as `Contained -> Expressive`.
+- When caution is the central gap, include `Confident` or another evidenced
+  term for fuller self-expression on the desired side. Do not use `Playful` as
+  a generic positive replacement for a clearer diagnosis.
 - Repeat an authentic quality on both sides when it should remain stable. The
   changed pairs should show exactly what needs to evolve—for example,
   `Safe -> Intentional` or `Restrained -> Expressive`.
@@ -67,6 +70,9 @@ finishing details. They focus on principles rather than a fixed shopping list.
   quality not fully expressed, current limitation or mistranslation, resulting
   wardrobe experience, then the identity-level shift that would close the gap.
   Keep recommendations and outfit construction for the action plan.
+- Keep The Disconnect person-first as well: explain what is already expressed,
+  what is held back, and how familiar combinations soften the result. End with
+  a fuller expression of the existing identity, not a replacement persona.
 - Prefer concrete human behaviour over abstract fashion language. If the client
   cannot explain the disconnect to a friend in one plain sentence after reading
   it, rewrite it.
@@ -91,6 +97,10 @@ finishing details. They focus on principles rather than a fixed shopping list.
   accessories, colours, or individual outfits in the opening paragraph.
   “Identity” here means an evidence-based style direction, not a psychological
   diagnosis.
+- Use a person-first opening: begin with what the woman is naturally drawn to,
+  then show how that taste appears. Describe cautious self-expression as an
+  observed pattern, not as a diagnosis of insecurity or another psychological
+  cause. The client should feel recognised before the wardrobe is analysed.
 - Use the supplied style-family labels only as post-draft calibration. First
   derive the analysis from the evidence, then use the labels as an optional
   quality check. Do not force a client into Effortless, Creative, Intentional,

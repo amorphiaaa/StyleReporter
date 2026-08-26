@@ -41,18 +41,22 @@ def test_style_family_calibration_defines_dimensions_without_forcing_labels() ->
 def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
     assert "what style identity is" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "already authentically present" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "identity already present, visual proof" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert (
+        "personal style identity already present, soft visual proof"
+        in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
     assert "evolution, clarification, or fuller" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert (
-        "before she feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
+    assert "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Do not use this sequence to infer psychology or identity"
         in STYLE_METHODOLOGIST_INSTRUCTIONS
     )
+    assert "naturally drawn to ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Your style already has ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "has learned" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "express an existing creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "or feminine quality carefully" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
@@ -71,6 +75,8 @@ def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
     assert "unattached positive mood words" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "colour word such as `Colourful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Contained -> Expressive" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Prefer `Confident` or" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "`Expressive` over `Playful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
@@ -96,6 +102,7 @@ def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
     assert "Do not name a particular blouse" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "fashion-editorial filler" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "carry through the outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same person-first movement as the opening" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Before returning JSON, inspect the three actions as a set"
         in STYLE_METHODOLOGIST_INSTRUCTIONS
