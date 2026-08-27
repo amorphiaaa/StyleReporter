@@ -53,9 +53,9 @@ Requirements: Docker Desktop with Compose.
 
 Then open:
 
-- API health: http://localhost:8000/health
-- API docs: http://localhost:8000/docs
-- Frontend: http://localhost:5173
+- API health: http://127.0.0.1:8001/health
+- API docs: http://127.0.0.1:8001/docs
+- Frontend: http://127.0.0.1:5174
 
 For the real report runtime, authenticate Codex CLI once and start the local
 worker in a second PowerShell window:
@@ -124,32 +124,32 @@ explicitly enabled.
    the backend. The existing service account can continue to read Sheets.
 
 The internal manual import endpoint is available at
-`POST http://localhost:8000/api/v1/imports/manual`. It accepts synthetic or
+`POST http://127.0.0.1:8001/api/v1/imports/manual`. It accepts synthetic or
 already-read rows. The read-only Google Sheets endpoint is available at
-`POST http://localhost:8000/api/v1/imports/google-sheets/sync`; it remains
+`POST http://127.0.0.1:8001/api/v1/imports/google-sheets/sync`; it remains
 disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
 spreadsheet ID are supplied. Set `GOOGLE_QUESTIONNAIRE_VERSION` when a mapped
 questionnaire definition should be applied during sync. Its provider is covered
 by offline mock tests; no Google credentials are committed.
 
-Recent runs are available at `GET http://localhost:8000/api/v1/imports?limit=20`;
+Recent runs are available at `GET http://127.0.0.1:8001/api/v1/imports?limit=20`;
 the Imports screen displays their status and counters. Select a run there to
 load its persisted source metadata and row-level errors from
-`GET http://localhost:8000/api/v1/imports/{import_id}`.
+`GET http://127.0.0.1:8001/api/v1/imports/{import_id}`.
 
 When a mapping or source header changes after rows were imported, pass
 `{"refresh_existing": true}` to the Google Sheets sync request to backfill the
 existing source rows without creating duplicate submissions.
 
 The local report endpoint is available at
-`POST http://localhost:8000/api/v1/clients/{client_id}/reports`. Pass a saved
+`POST http://127.0.0.1:8001/api/v1/clients/{client_id}/reports`. Pass a saved
 `submission_id` and `runtime: "codex_cli"` to generate a structured report
 through the host worker without configuring an OpenAI API key. The
 `agents_sdk_dry_run` runtime remains available for offline contract checks.
 Runtime exceptions are saved as failed report runs and return `502`, so the
 attempt remains visible in report history.
 Retrieve the run later with
-`GET http://localhost:8000/api/v1/reports/{report_run_id}`.
+`GET http://127.0.0.1:8001/api/v1/reports/{report_run_id}`.
 
 To stop the stack:
 

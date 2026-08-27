@@ -20,7 +20,7 @@ describe("API client", () => {
   });
 
   it("has a local development fallback", () => {
-    expect(API_BASE_URL).toContain("localhost");
+    expect(API_BASE_URL).toContain("127.0.0.1");
   });
 
   it("posts a manual import payload", async () => {

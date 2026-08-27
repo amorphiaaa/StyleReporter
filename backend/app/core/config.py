@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    api_cors_origins: str = "http://localhost:5173"
+    api_cors_origins: str = "http://127.0.0.1:5174,http://localhost:5174"
     database_url: str = "postgresql+asyncpg://styler:styler@localhost:5432/stylereporter"
 
     google_service_account_json: str | None = None
