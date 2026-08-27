@@ -3,6 +3,7 @@ import type {
   ClientDetail,
   ClientListItem,
   ClientUpdateResponse,
+  CanvaCandidatesResponse,
   GenerateStyleReportRequest,
   ImportResponse,
   ImportHistoryItem,
@@ -126,6 +127,26 @@ export async function listStyleReports(clientId: string): Promise<StyleReportRes
   }
 
   return response.json() as Promise<StyleReportResponse[]>;
+}
+
+export async function generateCanvaCandidates(
+  clientId: string,
+  reportRunId: string,
+): Promise<CanvaCandidatesResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/reports/${reportRunId}/canva/candidates`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Canva candidate generation failed"));
+  }
+
+  return response.json() as Promise<CanvaCandidatesResponse>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {

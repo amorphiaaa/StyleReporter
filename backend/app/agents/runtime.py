@@ -4,7 +4,7 @@ import json
 
 import httpx
 from agents import Agent, Runner
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.agents.questionnaire_context import build_questionnaire_context
 from app.domain.contracts import (
@@ -110,10 +110,16 @@ Output requirements:
 - `title`: a memorable two-to-four-word Style Language name, not "Style Report".
 - `alignment_summary`: 90-130 words that explain the current-to-desired
   movement directly to the client in the warm editorial tone of a stylist.
-  The opening must follow this order: identity already present, visual proof,
-  current translation or containment of that identity, then the relieving
-  insight about what can become more visible. Make the client feel recognised
-  before she feels analysed.
+  The opening must begin with the person and her natural aesthetic pull, not
+  with a verdict about "your style" or a description of her wardrobe. Follow
+  this order: personal style identity already present, soft visual proof,
+  cautious or contained current expression, then the relieving insight about
+  what can become more visible. Make the client feel recognised before she
+  feels analysed. Keep visual proof concise: synthesise no more than three
+  repeated qualities or styling behaviours. Do not list named garments,
+  accessories, colours, or individual outfits in this paragraph; use broad,
+  human language such as softness, femininity, creativity, ease, colour,
+  proportion, texture, or thoughtful detail.
 - `current_style_language`: four or five concise terms, preferably one word
   each and never more than two words unless no precise single word exists.
   Include the authentic qualities that should remain and the state that needs
@@ -137,7 +143,8 @@ Output requirements:
 - `your_action_plan`: exactly three distinct actions. Each item has a clear
   command in `focus`, one diagnostic reason in `rationale`, and one practical
   application in `action`. Prioritise principles and repeatable decisions over
-  shopping lists.
+  shopping lists. Keep all advice item-agnostic: do not prescribe a named
+  garment, accessory, outfit, or single item from the evidence.
 - `evidence`: short, concrete observations supporting the interpretation.
 - `limitations`: missing or uncertain information that affects confidence.
 
@@ -152,6 +159,15 @@ Language rules:
   working before describing what needs to change.
 - Do not make the desired language a direct dump of adjectives from the input;
   combine them into a coherent direction the client can recognise.
+- Write the opening in a person-first voice. Begin with an equivalent of "You
+  are naturally drawn to ..."; do not begin with "Your style already has ..."
+  or a wardrobe verdict. The evidence should feel like a gentle recognition of
+  her taste, not a technical audit of her wardrobe.
+- Describe caution as an observed pattern of self-expression: she has learned
+  to express an existing creative or feminine quality carefully, often through
+  familiar combinations. Do not invent a psychological cause or diagnose
+  insecurity; show the relationship between the quality she wants and the way
+  she currently allows it to appear.
 - Treat Current / Desired Style Language as a diagnostic contrast, not a
   descriptive summary or moodboard. Each term must describe visual
   communication, expression, or an outfit state—not a garment characteristic
@@ -162,6 +178,25 @@ Language rules:
   precise single word does not exist. Use four or five terms only. The terms in
   the same position must be deliberately related so the transformation can be
   scanned horizontally without the paragraph underneath.
+- Treat each Current / Desired position as one diagnostic pair. Use the same
+  number of terms on both sides, preferably one word per term and never more
+  than two words. The changed pairs must show the actual mechanism of change,
+  for example `Practical -> Creative`, `Soft -> Confident`, `Safe ->
+  Intentional`, or `Restrained -> Expressive`. Do not fill the desired side
+  with unattached positive mood words such as `Repeatable`, `Finished`,
+  `Flexible`, or `Alive` unless the current term beside it makes the movement
+  clear and the evidence supports it. The language section compresses the
+  diagnosis; it is not a list of desired qualities.
+- Current and Desired lists must have the same number of terms on both sides.
+- When cautious self-expression is the central gap, include confidence or a
+  closely evidenced equivalent on the desired side. Prefer `Confident` or
+  `Expressive` over `Playful` when the evidence is about allowing an existing
+  identity to show more fully; do not use `Playful` as a generic positive word.
+- Prefer terms that describe the client's communication or behaviour rather
+  than raw visual attributes. Use a colour word such as `Colourful` only when
+  colour itself is the central diagnosed shift; otherwise prefer a clearer
+  state pair such as `Practical -> Creative`, `Contained -> Expressive`, or
+  `Safe -> Intentional`.
 - Keep visual translation for the evidence, disconnect, and action plan. Do
   not use phrases such as `relaxed silhouettes`, `warm expressive colour`, or
   `playful pattern` as Style Language terms unless they are genuinely the only
@@ -173,6 +208,13 @@ Language rules:
   using the report. Stop there: do not add `first_step`, homework, deadlines,
   photo assignments, tracking, or experiments unless the product explicitly
   becomes a guided programme.
+- Keep recommendations general enough to reuse across several outfits. Name
+  the principle and the decision it changes, then describe the result it should
+  create. Do not name a particular blouse, trouser, dress, shoe, bag, scarf,
+  pair of glasses, piece of jewellery, or other single item; do not tell the
+  client to repeat one photographed outfit. Broad levers such as colour,
+  proportion, silhouette, texture, detail, or a styling layer are acceptable
+  when they are tied to the diagnosis.
 - The three actions must solve three different problems. If the same
   recommendation appears in more than one item, distil the plan again. Keep
   colour, accessories, outfit formulas, and finishing layers separate unless
@@ -193,13 +235,19 @@ Language rules:
   formulas, garment construction, colour recipes, clean shapes, artistic
   elements, finishing details, or other styling instructions there; those
   belong in evidence, visual translation, or the action plan.
+- Give The Disconnect the same person-first movement as the opening: name what
+  the wardrobe already expresses, name the quality that is not fully expressed,
+  then explain that she often stops short of letting it lead. Prefer a clear
+  sentence such as "your wardrobe already reflects X, but it does not fully
+  express Y" over a systems metaphor. End with an evolution of the existing
+  identity, not a new style persona.
 - Apply a one-sentence human test after drafting `disconnect`: the client
   should be able to explain the problem to a friend in one plain sentence. If
   she would need to repeat fashion terminology, rewrite it.
 - Do not diagnose personality, psychology, body, identity, age, or lifestyle.
-- Do not invent facts or claim that an existing wardrobe contains an item.
-  Recommendations may suggest possible garment categories or styling choices,
-  but clearly present them as options.
+- Do not invent facts or claim that an existing wardrobe contains an item. Keep
+  recommendations at the level of reusable styling choices and principles,
+  not individual items or shopping suggestions.
 - Image URLs without local attachments are metadata only. When local image
   attachments are provided, inspect them and distinguish direct visual
   observations from questionnaire evidence.
@@ -219,10 +267,17 @@ Language rules:
   change one separate visible style lever (colour, proportion, silhouette,
   texture, or detail). The third should explain how to complete the outfit with
   a styling layer or other finishing principle, not merely add an accessory.
-  These are defaults, not fixed advice.
+  For every action, use the sequence principle -> reusable application ->
+  effect; never turn the application into a prescription for one item. These
+  are defaults, not fixed advice.
+- For every action, use: principle -> reusable application -> effect.
 - Keep each action focused on one principle. Explain why it matters and how to
   apply it in real life. Do not add a first step, deadline, homework task, or
   weekly exercise.
+- Avoid fashion-editorial filler such as `carry through the outfit`,
+  `finishing move`, `visual rhythm`, `reliable point of view`, or `focal point`
+  when a plain human sentence says the same thing. The insight should sound
+  natural when read aloud in a consultation.
 - Before returning JSON, inspect the three actions as a set. Remove any
   `this week`, `first step`, `try this`, `test`, `experiment`, `signature
   detail`, `finishing spark`, or similar coaching/fashion-editorial wording.
@@ -254,6 +309,23 @@ class StyleLanguageAnalysisOutput(BaseModel):
     your_action_plan: list[ActionPlanItem] = Field(min_length=3, max_length=3)
     evidence: list[str]
     limitations: list[str]
+
+    @field_validator("current_style_language", "desired_style_language")
+    @classmethod
+    def validate_style_language_terms(cls, values: list[str]) -> list[str]:
+        if any(not term.strip() for term in values):
+            raise ValueError("Style Language terms must not be empty")
+        if any(len(term.split()) > 2 for term in values):
+            raise ValueError("Style Language terms must contain at most two words")
+        return values
+
+    @model_validator(mode="after")
+    def validate_style_language_pair_lengths(self) -> StyleLanguageAnalysisOutput:
+        if len(self.current_style_language) != len(self.desired_style_language):
+            raise ValueError(
+                "Current and Desired Style Language must contain the same number of terms"
+            )
+        return self
 
 
 class AgentsSdkStyleReportRuntime(StyleReportRuntime):

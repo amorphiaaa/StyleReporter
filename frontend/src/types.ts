@@ -161,3 +161,17 @@ export type StyleReportResponse = {
   started_at: string | null;
   completed_at: string | null;
 };
+
+export type CanvaDesignCandidate = {
+  candidate_id: string;
+  job_id: string;
+  title: string;
+  design_url: string | null;
+  thumbnail_url: string | null;
+};
+
+export type CanvaCandidatesResponse = {
+  status: "completed" | "needs_input" | "failed";
+  candidates: CanvaDesignCandidate[];
+  note: string;
+};

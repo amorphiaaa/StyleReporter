@@ -21,6 +21,12 @@ to Codex as the prompt, and verified local image files are attached with
 `codex exec --image` when the submission manifest contains downloaded assets.
 Treat the worker as a local development service.
 
+The same worker exposes a separate `/v1/canva/design-candidates` endpoint.
+That path uses the locally installed Canva Codex plugin and asks Canva for
+presentation candidates after a completed style report exists. It deliberately
+stops before creating the final editable design; the operator selects a
+candidate first, and a later step can finalize it.
+
 ## Start locally
 
 In PowerShell, authenticate Codex once if needed:
@@ -84,6 +90,35 @@ Use the client detail screen's `Codex CLI (local)` runtime, or send:
 The result is persisted as `codex-cli-v1`. If the worker is stopped, the API
 persists a failed report run and returns `502`; no questionnaire data is lost.
 
+## Enable Canva MCP candidates
+
+The Canva plugin is a host-side Codex dependency, not a Docker dependency. The
+one-time local setup is:
+
+```powershell
+codex plugin add canva@openai-curated
+codex plugin list
+```
+
+Start a fresh worker process after installing or updating the plugin. Verify
+that the local Codex profile reports Canva as `installed, enabled`. Then set
+the backend flag in `.env`:
+
+```powershell
+$env:CANVA_MCP_ENABLED = "true"
+```
+
+or add `CANVA_MCP_ENABLED=true` to the project `.env` before restarting the
+backend container. The frontend exposes **Generate Canva candidates** on a
+completed report. This is a read/write Canva operation: it can create
+temporary design candidates in Canva, so it must not be called from unit tests
+or an unattended scheduler.
+
+If Canva cannot reach private Google Drive image URLs, the agent may return
+layout candidates without those images and will report the limitation. Public
+or otherwise reachable source URLs are required for automatic Canva asset
+uploads; local Docker asset URLs are not reachable by Canva.
+
 ## Boundaries
 
 - This path does not use `OPENAI_API_KEY`.
@@ -93,6 +128,10 @@ persists a failed report run and returns `502`; no questionnaire data is lost.
 - `ASSET_DOWNLOAD_ENABLED` is false by default; enable it before a sync when
   Google Drive files should be copied into the local workspace.
 - The worker is not a production queue, scheduler, or public API.
+- Canva MCP is only available to the host-side Codex CLI after the Canva plugin
+  is installed and authenticated in that same Codex profile.
+- Candidate generation and final editable-design creation are separate steps;
+  the current MVP implements candidate generation only.
 - Generated reports still require methodology review and human approval before
   being delivered to a client.
 - Unit tests use mocked HTTP transport; they never invoke Codex CLI.

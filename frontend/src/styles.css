@@ -893,6 +893,60 @@ textarea:focus {
   background: #fff9f7;
 }
 
+.canva-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e8dfd5;
+}
+
+.canva-candidates {
+  display: grid;
+  gap: 8px;
+}
+
+.canva-note {
+  margin: 0;
+  color: #62574f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.canva-candidate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.canva-candidate {
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  color: #28231f;
+  text-decoration: none;
+  border: 1px solid #d9cdbf;
+  border-radius: 10px;
+  background: #fffdf9;
+}
+
+.canva-candidate:hover {
+  border-color: #a7896e;
+}
+
+.canva-candidate img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #f1ebe4;
+}
+
+.canva-candidate span {
+  padding: 0 10px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .report-history {
   display: grid;
   gap: 12px;
@@ -960,6 +1014,50 @@ textarea:focus {
 
 .analysis-block .eyebrow {
   min-height: 28px;
+}
+
+.style-language-contrast {
+  grid-column: span 2;
+}
+
+.style-language-contrast-header {
+  display: grid;
+  gap: 10px;
+}
+
+.style-language-column-labels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 34px;
+  color: #9b8879;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.style-language-pairs {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.style-language-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 29px;
+  color: #62574f;
+  font-size: 14px;
+}
+
+.style-language-pair > span:first-child {
+  text-align: right;
+}
+
+.style-language-arrow {
+  color: #b99d83;
+  text-align: center;
 }
 
 .analysis-block p:last-child {
@@ -1263,6 +1361,10 @@ details summary {
 
   .analysis-grid {
     grid-template-columns: 1fr;
+  }
+
+  .style-language-contrast {
+    grid-column: auto;
   }
 
   .submission-card {

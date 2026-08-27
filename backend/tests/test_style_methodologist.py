@@ -1,6 +1,13 @@
+import json
+
 import httpx
 import pytest
+from pydantic import ValidationError
 
+from app.agents.canva_portfolio import (
+    CanvaPortfolioOutput,
+    CodexCliCanvaPortfolioRuntime,
+)
 from app.agents.runtime import (
     STYLE_FAMILY_CALIBRATION,
     STYLE_METHODOLOGIST_INSTRUCTIONS,
@@ -9,7 +16,7 @@ from app.agents.runtime import (
     StyleLanguageAnalysisOutput,
 )
 from app.agents.style_methodologist import StubStyleReportRuntime
-from app.domain.contracts import StyleReportRequest
+from app.domain.contracts import CanvaPortfolioRequest, StyleReportRequest
 
 
 def test_style_family_calibration_defines_dimensions_without_forcing_labels() -> None:
@@ -34,18 +41,22 @@ def test_style_family_calibration_defines_dimensions_without_forcing_labels() ->
 def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
     assert "what style identity is" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "already authentically present" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "identity already present, visual proof" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert (
+        "personal style identity already present, soft visual proof"
+        in STYLE_METHODOLOGIST_INSTRUCTIONS
+    )
     assert "evolution, clarification, or fuller" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert (
-        "before she feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
+    assert "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Do not use this sequence to infer psychology or identity"
         in STYLE_METHODOLOGIST_INSTRUCTIONS
     )
+    assert "naturally drawn to ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Your style already has ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "has learned" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "express an existing creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "or feminine quality carefully" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
@@ -59,6 +70,13 @@ def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
     assert "descriptive summary or moodboard" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "Safe -> Intentional" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "relaxed silhouettes" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same number of terms on both sides" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Practical -> Creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "unattached positive mood words" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "colour word such as `Colourful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Contained -> Expressive" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Prefer `Confident` or" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "`Expressive` over `Playful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
@@ -79,6 +97,12 @@ def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
     assert "Follow the outfit formulas" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "signature finishing spark" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "styling layer or other finishing principle" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Keep all advice item-agnostic" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "principle -> reusable application -> effect" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Do not name a particular blouse" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "fashion-editorial filler" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "carry through the outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same person-first movement as the opening" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert (
         "Before returning JSON, inspect the three actions as a set"
         in STYLE_METHODOLOGIST_INSTRUCTIONS
@@ -239,6 +263,62 @@ async def test_codex_cli_runtime_validates_worker_output_without_openai_api() ->
     }
 
 
+async def test_canva_runtime_validates_candidate_payload_without_provider_calls() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/v1/canva/design-candidates"
+        payload = json.loads(request.read())
+        assert "StyleReporter" in payload["prompt"]
+        return httpx.Response(
+            200,
+            json={
+                "result": {
+                    "status": "completed",
+                    "candidates": [
+                        {
+                            "candidate_id": "candidate-1",
+                            "job_id": "job-1",
+                            "title": "Editorial Style Report",
+                            "design_url": "https://canva.example/design-1",
+                            "thumbnail_url": "https://canva.example/thumb-1",
+                        }
+                    ],
+                    "note": "Synthetic candidate response.",
+                }
+            },
+            request=request,
+        )
+
+    runtime = CodexCliCanvaPortfolioRuntime(
+        runner_url="http://codex-worker:8787/",
+        transport=httpx.MockTransport(handler),
+    )
+    result = await runtime.generate_candidates(
+        CanvaPortfolioRequest(
+            client_id="client-1",
+            report_run_id="report-1",
+            client_name="Synthetic Client",
+            report={"title": "Synthetic Style Language"},
+            questionnaire_context={"normalized_answers": {}},
+            asset_paths=("clients/client-1/submission-1/01.jpg",),
+        )
+    )
+
+    assert result.status == "completed"
+    assert result.note == "Synthetic candidate response."
+    assert result.candidates[0].candidate_id == "candidate-1"
+    assert result.candidates[0].design_url == "https://canva.example/design-1"
+
+
+def test_canva_output_schema_is_strict() -> None:
+    schema = CanvaPortfolioOutput.model_json_schema()
+
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    candidate_schema = schema["$defs"]["CanvaDesignCandidateOutput"]
+    assert candidate_schema["additionalProperties"] is False
+    assert set(candidate_schema["required"]) == set(candidate_schema["properties"])
+
+
 def test_codex_output_schema_is_strict_for_every_object() -> None:
     schema = StyleLanguageAnalysisOutput.model_json_schema()
 
@@ -253,3 +333,58 @@ def test_codex_output_schema_is_strict_for_every_object() -> None:
     assert set(action_schema["required"]) == set(action_schema["properties"])
     assert set(action_schema["required"]) == {"priority", "focus", "action", "rationale"}
     assert "first_step" not in action_schema["properties"]
+
+
+def test_codex_output_rejects_unpaired_or_overlong_style_terms() -> None:
+    base = {
+        "title": "Synthetic Style",
+        "alignment_summary": "A useful summary.",
+        "current_style_language": ["Feminine", "Safe", "Soft", "Practical"],
+        "desired_style_language": [
+            "Feminine",
+            "Intentional",
+            "Confident",
+            "Creative",
+        ],
+        "disconnect": "A clear causal explanation.",
+        "style_language_summary": "A clear direction.",
+        "style_language_anchors": ["Ease", "Clarity", "Expression"],
+        "your_action_plan": [
+            {
+                "priority": 1,
+                "focus": "Use a repeatable principle",
+                "action": "Apply the report's decision rule.",
+                "rationale": "It reduces uncertainty.",
+            },
+            {
+                "priority": 2,
+                "focus": "Change one visual lever",
+                "action": "Change one visible quality.",
+                "rationale": "It makes the shift clearer.",
+            },
+            {
+                "priority": 3,
+                "focus": "Complete the look",
+                "action": "Use a finishing principle.",
+                "rationale": "It makes the result feel coherent.",
+            },
+        ],
+        "evidence": ["Synthetic evidence."],
+        "limitations": [],
+    }
+
+    unpaired = {**base, "desired_style_language": ["Feminine"] * 5}
+    with pytest.raises(ValidationError, match="same number of terms"):
+        StyleLanguageAnalysisOutput.model_validate(unpaired)
+
+    overlong = {
+        **base,
+        "current_style_language": [
+            "Too many words here",
+            "Safe",
+            "Soft",
+            "Practical",
+        ],
+    }
+    with pytest.raises(ValidationError, match="at most two words"):
+        StyleLanguageAnalysisOutput.model_validate(overlong)

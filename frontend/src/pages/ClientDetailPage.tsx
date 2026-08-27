@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   API_BASE_URL,
   createStyleReport,
+  generateCanvaCandidates,
   getClient,
   listStyleReports,
   updateClient,
@@ -11,6 +12,7 @@ import {
 import type {
   ClientAsset,
   ClientDetail,
+  CanvaCandidatesResponse,
   StyleLanguageAction,
   StyleLanguageAnalysis,
   StyleReportResponse,
@@ -30,8 +32,10 @@ export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
   const [reports, setReports] = useState<ReportsBySubmission>({});
+  const [canvaCandidates, setCanvaCandidates] = useState<Record<string, CanvaCandidatesResponse>>({});
   const [selectedRuntime, setSelectedRuntime] = useState<StyleReportRuntimeType>("codex_cli");
   const [generatingSubmissionId, setGeneratingSubmissionId] = useState<string | null>(null);
+  const [generatingCanvaReportId, setGeneratingCanvaReportId] = useState<string | null>(null);
   const [isSavingClient, setIsSavingClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +48,7 @@ export function ClientDetailPage() {
     }
 
     setReports({});
+    setCanvaCandidates({});
     let isCurrent = true;
     void Promise.all([getClient(clientId), listStyleReports(clientId)])
       .then(([item, reportRuns]) => {
@@ -79,8 +84,10 @@ export function ClientDetailPage() {
         <ClientProfile
           client={client}
           reports={reports}
+          canvaCandidates={canvaCandidates}
           selectedRuntime={selectedRuntime}
           generatingSubmissionId={generatingSubmissionId}
+          generatingCanvaReportId={generatingCanvaReportId}
           isSavingClient={isSavingClient}
           onRuntimeChange={setSelectedRuntime}
           onSaveDisplayName={async (displayName) => {
@@ -127,6 +134,22 @@ export function ClientDetailPage() {
               setGeneratingSubmissionId(null);
             }
           }}
+          onGenerateCanvaCandidates={async (reportRunId) => {
+            setError(null);
+            setGeneratingCanvaReportId(reportRunId);
+            try {
+              const result = await generateCanvaCandidates(client.id, reportRunId);
+              setCanvaCandidates((current) => ({ ...current, [reportRunId]: result }));
+            } catch (requestError: unknown) {
+              setError(
+                requestError instanceof Error
+                  ? requestError.message
+                  : "Canva candidate generation failed",
+              );
+            } finally {
+              setGeneratingCanvaReportId(null);
+            }
+          }}
         />
       ) : null}
     </section>
@@ -136,21 +159,27 @@ export function ClientDetailPage() {
 function ClientProfile({
   client,
   reports,
+  canvaCandidates,
   selectedRuntime,
   generatingSubmissionId,
+  generatingCanvaReportId,
   isSavingClient,
   onRuntimeChange,
   onSaveDisplayName,
   onGenerateReport,
+  onGenerateCanvaCandidates,
 }: {
   client: ClientDetail;
   reports: ReportsBySubmission;
+  canvaCandidates: Record<string, CanvaCandidatesResponse>;
   selectedRuntime: StyleReportRuntimeType;
   generatingSubmissionId: string | null;
+  generatingCanvaReportId: string | null;
   isSavingClient: boolean;
   onRuntimeChange: (runtime: StyleReportRuntimeType) => void;
   onSaveDisplayName: (displayName: string | null) => Promise<void>;
   onGenerateReport: (submissionId: string, runtime: StyleReportRuntimeType) => Promise<void>;
+  onGenerateCanvaCandidates: (reportRunId: string) => Promise<void>;
 }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [displayNameDraft, setDisplayNameDraft] = useState(client.display_name ?? "");
@@ -294,7 +323,13 @@ function ClientProfile({
             {reports[submission.id]?.length ? (
               <div className="report-history">
                 {reports[submission.id].map((report) => (
-                  <ReportPreview key={report.id} report={report} />
+                  <ReportPreview
+                    key={report.id}
+                    report={report}
+                    canvaCandidates={canvaCandidates[report.id]}
+                    isGeneratingCanva={generatingCanvaReportId === report.id}
+                    onGenerateCanvaCandidates={onGenerateCanvaCandidates}
+                  />
                 ))}
               </div>
             ) : null}
@@ -415,7 +450,17 @@ function photoFolderOrder(folderKey: string): number {
   return index === -1 ? PHOTO_FOLDER_ORDER.length : index;
 }
 
-function ReportPreview({ report }: { report: StyleReportResponse }) {
+function ReportPreview({
+  report,
+  canvaCandidates,
+  isGeneratingCanva,
+  onGenerateCanvaCandidates,
+}: {
+  report: StyleReportResponse;
+  canvaCandidates?: CanvaCandidatesResponse;
+  isGeneratingCanva: boolean;
+  onGenerateCanvaCandidates: (reportRunId: string) => Promise<void>;
+}) {
   const isFailed = report.status === "failed";
   const summary = report.report?.summary;
   const analysis = readStyleLanguageAnalysis(report.report);
@@ -446,12 +491,52 @@ function ReportPreview({ report }: { report: StyleReportResponse }) {
       <p className="report-meta">
         {report.status} · {formatDate(report.completed_at ?? report.created_at)}
       </p>
+      {!isFailed ? (
+        <div className="canva-actions">
+          <button
+            className="secondary-button"
+            type="button"
+            disabled={isGeneratingCanva}
+            onClick={() => void onGenerateCanvaCandidates(report.id)}
+          >
+            {isGeneratingCanva ? "Creating Canva candidates..." : "Generate Canva candidates"}
+          </button>
+          {canvaCandidates ? <CanvaCandidatesView result={canvaCandidates} /> : null}
+        </div>
+      ) : null}
       {analysis ? <StyleLanguageAnalysisView analysis={analysis} /> : null}
       {report.report ? (
         <details>
           <summary>View structured report output</summary>
           <pre className="raw-payload">{JSON.stringify(report.report, null, 2)}</pre>
         </details>
+      ) : null}
+    </div>
+  );
+}
+
+function CanvaCandidatesView({ result }: { result: CanvaCandidatesResponse }) {
+  return (
+    <div className="canva-candidates">
+      <p className="eyebrow">Canva design candidates</p>
+      <p className="canva-note">{result.note}</p>
+      {result.candidates.length > 0 ? (
+        <div className="canva-candidate-list">
+          {result.candidates.map((candidate) => (
+            <a
+              className="canva-candidate"
+              href={candidate.design_url ?? candidate.thumbnail_url ?? undefined}
+              target="_blank"
+              rel="noreferrer"
+              key={`${candidate.job_id}-${candidate.candidate_id}`}
+            >
+              {candidate.thumbnail_url ? (
+                <img src={candidate.thumbnail_url} alt="" loading="lazy" />
+              ) : null}
+              <span>{candidate.title}</span>
+            </a>
+          ))}
+        </div>
       ) : null}
     </div>
   );
@@ -464,8 +549,10 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
         <p className="alignment-summary">{analysis.alignment_summary}</p>
       ) : null}
       <div className="analysis-grid">
-        <AnalysisBlock label="Current Style Language" value={analysis.current_style_language} />
-        <AnalysisBlock label="Desired Style Language" value={analysis.desired_style_language} />
+        <StyleLanguageContrast
+          current={analysis.current_style_language}
+          desired={analysis.desired_style_language}
+        />
         <AnalysisBlock label="The Disconnect" value={analysis.disconnect} />
       </div>
       {analysis.style_language_summary ? (
@@ -514,6 +601,42 @@ function StyleLanguageAnalysisView({ analysis }: { analysis: StyleLanguageAnalys
         </details>
       ) : null}
     </div>
+  );
+}
+
+function StyleLanguageContrast({
+  current,
+  desired,
+}: {
+  current: string[];
+  desired: string[];
+}) {
+  const pairCount = Math.min(current.length, desired.length);
+
+  return (
+    <article className="analysis-block style-language-contrast">
+      <div className="style-language-contrast-header">
+        <p className="eyebrow">Style Language movement</p>
+        <div className="style-language-column-labels" aria-hidden="true">
+          <span>Current</span>
+          <span>Desired</span>
+        </div>
+      </div>
+      <div className="style-language-pairs">
+        {Array.from({ length: pairCount }, (_, index) => (
+          <div
+            className="style-language-pair"
+            key={`${current[index]}-${desired[index]}-${index}`}
+          >
+            <span>{current[index]}</span>
+            <span className="style-language-arrow" aria-hidden="true">
+              →
+            </span>
+            <span>{desired[index]}</span>
+          </div>
+        ))}
+      </div>
+    </article>
   );
 }
 

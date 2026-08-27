@@ -22,3 +22,17 @@ class StyleReportResponse(BaseModel):
     created_at: datetime | None
     started_at: datetime | None
     completed_at: datetime | None
+
+
+class CanvaDesignCandidateResponse(BaseModel):
+    candidate_id: str
+    job_id: str
+    title: str
+    design_url: str | None = None
+    thumbnail_url: str | None = None
+
+
+class CanvaCandidatesResponse(BaseModel):
+    status: Literal["completed", "needs_input", "failed"]
+    candidates: list[CanvaDesignCandidateResponse]
+    note: str

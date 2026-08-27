@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     codex_cli_model: str | None = None
     codex_cli_timeout_seconds: float = 600.0
 
+    canva_mcp_enabled: bool = False
+    canva_mcp_timeout_seconds: float = 900.0
+
     canva_connector_url: str | None = None
     canva_client_id: str | None = Field(default=None, repr=False)
     canva_client_secret: str | None = Field(default=None, repr=False)

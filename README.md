@@ -1,7 +1,8 @@
 # StyleReporter
 
 StyleReporter is a FastAPI + React application that imports client
-questionnaires and can generate a local style report through Codex CLI.
+questionnaires, generates a local style report through Codex CLI, and can
+request Canva presentation candidates from a completed report.
 
 ## Current stage: local report vertical slice
 
@@ -32,7 +33,7 @@ Not implemented:
 - user authentication
 - scheduled jobs or webhooks
 - unattended production scheduling and job retries for Codex CLI runs
-- Canva connector/OAuth/MCP calls
+- final Canva editable-design creation, selection persistence, and export
 - production methodology-driven style report generation
 - production deployment or CI/CD
 
@@ -70,6 +71,16 @@ The worker is intentionally host-side because the saved Codex CLI session is
 owned by Windows, not by the backend container. It binds a local development
 endpoint and should not be exposed as a public service. See
 `docs/codex-cli-runtime.md` for the token and troubleshooting options.
+
+To enable the Canva candidate stage, install the Canva plugin in the same
+local Codex profile as the worker and set `CANVA_MCP_ENABLED=true` in `.env`:
+
+    codex plugin add canva@openai-curated
+    codex plugin list
+
+Restart the worker after installing the plugin. A completed report then shows
+**Generate Canva candidates**. The MVP returns candidate links and previews;
+the final editable portfolio is deliberately a later approval step.
 
 To download questionnaire images into the shared client workspace, set
 `ASSET_DOWNLOAD_ENABLED=true` in `.env` and run a sync. The service account
