@@ -6,6 +6,7 @@ import httpx
 from agents import Agent, Runner
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.agents.few_shot_reference import STYLE_REPORT_FEW_SHOT_REFERENCE
 from app.agents.questionnaire_context import build_questionnaire_context
 from app.domain.contracts import (
     AgentRunRequest,
@@ -565,7 +566,8 @@ def _serialize_codex_request(request: StyleReportRequest) -> str:
         f"{STYLE_METHODOLOGIST_INSTRUCTIONS}\n\n"
         "Return only one JSON object that conforms exactly to the provided output schema. "
         "Do not include Markdown fences, commentary, or fields outside that schema.\n\n"
-        "Questionnaire evidence:\n"
+        f"{STYLE_REPORT_FEW_SHOT_REFERENCE}\n\n"
+        "TARGET CLIENT DATA (the only source of truth for this report):\n"
         f"{_serialize_request(request)}"
     )
 

@@ -21,6 +21,14 @@ to Codex as the prompt, and verified local image files are attached with
 `codex exec --image` when the submission manifest contains downloaded assets.
 Treat the worker as a local development service.
 
+The style-report prompt also includes a redacted few-shot reference adapted
+from the supplied Cindy portfolio. It teaches voice, reasoning order, and
+output shape; it is explicitly marked as an exemplar, not as client evidence.
+The target questionnaire and its attached images remain the only source of
+facts for the generated report. The reference is stored in
+`backend/app/agents/few_shot_reference.py` without names, contact details,
+image URLs, or client-specific wardrobe facts.
+
 The same worker exposes a separate `/v1/canva/design-candidates` endpoint.
 That path uses the locally installed Canva Codex plugin and asks Canva for
 presentation candidates after a completed style report exists. It deliberately

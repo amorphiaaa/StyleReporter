@@ -8,12 +8,14 @@ from app.agents.canva_portfolio import (
     CanvaPortfolioOutput,
     CodexCliCanvaPortfolioRuntime,
 )
+from app.agents.few_shot_reference import STYLE_REPORT_FEW_SHOT_REFERENCE
 from app.agents.runtime import (
     STYLE_FAMILY_CALIBRATION,
     STYLE_METHODOLOGIST_INSTRUCTIONS,
     AgentsSdkStyleReportRuntime,
     CodexCliStyleReportRuntime,
     StyleLanguageAnalysisOutput,
+    _serialize_codex_request,
 )
 from app.agents.style_methodologist import StubStyleReportRuntime
 from app.domain.contracts import CanvaPortfolioRequest, StyleReportRequest
@@ -36,6 +38,29 @@ def test_style_family_calibration_defines_dimensions_without_forcing_labels() ->
     assert "Do not force a label" in STYLE_FAMILY_CALIBRATION
     assert STYLE_FAMILY_CALIBRATION in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "post-draft calibration only as an optional internal" in STYLE_METHODOLOGIST_INSTRUCTIONS
+
+
+def test_few_shot_reference_is_redacted_and_preserves_target_data_boundary() -> None:
+    assert (
+        "FEW-SHOT REFERENCE REPORT (REDACTED STYLE EXEMPLAR ONLY)"
+        in STYLE_REPORT_FEW_SHOT_REFERENCE
+    )
+    assert "Do not copy its facts" in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "Cindy" not in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "@" not in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "http" not in STYLE_REPORT_FEW_SHOT_REFERENCE
+
+    prompt = _serialize_codex_request(
+        StyleReportRequest(
+            client_id="client-1",
+            submission_id="submission-1",
+            raw_payload={"Email": "client@example.test", "Style goal": "More ease"},
+        )
+    )
+
+    assert prompt.index("FEW-SHOT REFERENCE REPORT") < prompt.index("TARGET CLIENT DATA")
+    assert "client@example.test" not in prompt
+    assert '"Style goal": "More ease"' in prompt
 
 
 def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
