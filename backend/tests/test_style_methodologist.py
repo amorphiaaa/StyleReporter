@@ -22,33 +22,28 @@ from app.domain.contracts import CanvaPortfolioRequest, StyleReportRequest
 
 
 def test_style_family_calibration_defines_dimensions_without_forcing_labels() -> None:
-    assert "post-draft internal validation only" in STYLE_FAMILY_CALIBRATION
-    assert "Do not choose one of these families before analysing" in STYLE_FAMILY_CALIBRATION
-    assert "not personality types" in STYLE_FAMILY_CALIBRATION
-    assert "Effortless = how easy the result feels" in STYLE_FAMILY_CALIBRATION
-    assert "Creative = where visible personality or surprise comes from" in STYLE_FAMILY_CALIBRATION
-    assert (
-        "Intentional = how coherently the choices are composed and repeated"
-        in STYLE_FAMILY_CALIBRATION
-    )
-    assert (
-        "Polished/Refined = how finished and elevated the result appears"
-        in STYLE_FAMILY_CALIBRATION
-    )
-    assert "Do not force a label" in STYLE_FAMILY_CALIBRATION
+    assert "Optional post-draft check only" in STYLE_FAMILY_CALIBRATION
+    assert "Effortless describes ease" in STYLE_FAMILY_CALIBRATION
+    assert "Creative describes\nvisible individuality" in STYLE_FAMILY_CALIBRATION
+    assert "Intentional describes coherent deliberate choices" in STYLE_FAMILY_CALIBRATION
+    assert "Polished/Refined describes finish and elevation" in STYLE_FAMILY_CALIBRATION
+    assert "Do not choose a family before\nanalysing" in STYLE_FAMILY_CALIBRATION
+    assert "do not force a label" in STYLE_FAMILY_CALIBRATION
     assert STYLE_FAMILY_CALIBRATION in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "post-draft calibration only as an optional internal" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
-def test_few_shot_reference_is_redacted_and_preserves_target_data_boundary() -> None:
+def test_few_shot_reference_is_form_only_and_preserves_target_data_boundary() -> None:
+    assert "FEW-SHOT FORM REFERENCE" in STYLE_REPORT_FEW_SHOT_REFERENCE
     assert (
-        "FEW-SHOT REFERENCE REPORT (REDACTED STYLE EXEMPLAR ONLY)"
+        "bracketed text is placeholder text, not client evidence"
         in STYLE_REPORT_FEW_SHOT_REFERENCE
     )
-    assert "Do not copy its facts" in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "Never copy a quality" in STYLE_REPORT_FEW_SHOT_REFERENCE
     assert "Cindy" not in STYLE_REPORT_FEW_SHOT_REFERENCE
     assert "@" not in STYLE_REPORT_FEW_SHOT_REFERENCE
     assert "http" not in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "Feminine" not in STYLE_REPORT_FEW_SHOT_REFERENCE
+    assert "Creative" not in STYLE_REPORT_FEW_SHOT_REFERENCE
 
     prompt = _serialize_codex_request(
         StyleReportRequest(
@@ -58,81 +53,56 @@ def test_few_shot_reference_is_redacted_and_preserves_target_data_boundary() -> 
         )
     )
 
-    assert prompt.index("FEW-SHOT REFERENCE REPORT") < prompt.index("TARGET CLIENT DATA")
+    assert prompt.index("FEW-SHOT FORM REFERENCE") < prompt.index(
+        "TARGET CLIENT DATA (the only source"
+    )
+    assert "DATA FIREWALL" in prompt
+    assert "Every client-specific statement must be" in prompt
     assert "client@example.test" not in prompt
     assert '"Style goal": "More ease"' in prompt
+    assert len(prompt) < 8000
 
 
-def test_methodologist_prompt_preserves_continuity_of_style_identity() -> None:
-    assert "what style identity is" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "already authentically present" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "personal style identity already present, soft visual proof"
-        in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert "evolution, clarification, or fuller" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Make the client feel recognised" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "feels analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "Do not use this sequence to infer psychology or identity"
-        in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert "naturally drawn to ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Your style already has ..." in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "has learned" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "express an existing creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "or feminine quality carefully" in STYLE_METHODOLOGIST_INSTRUCTIONS
+def test_methodologist_prompt_is_person_first_and_evidence_bound() -> None:
+    assert "TARGET CLIENT DATA and attached images as evidence" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "authentic direction -> visual evidence" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "current translation or restraint" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "evidence-based evolution" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "natural\n  aesthetic pull" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "recognised before analysed" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Every client-specific statement must be" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Do not diagnose psychology" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
-def test_style_language_prompt_requires_diagnostic_contrasts() -> None:
-    assert "diagnostic Current / Desired Style" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "four or five concise terms" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "same positions as" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "diagnostic contrast, not a"
-        in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert "descriptive summary or moodboard" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Safe -> Intentional" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "relaxed silhouettes" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "same number of terms on both sides" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Practical -> Creative" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "unattached positive mood words" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "colour word such as `Colourful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Contained -> Expressive" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Prefer `Confident` or" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "`Expressive` over `Playful`" in STYLE_METHODOLOGIST_INSTRUCTIONS
+def test_style_language_prompt_requires_evidence_based_contrasts() -> None:
+    assert "diagnostic contrast" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "four or" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "five short terms" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "same count and paired positions" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "never more than two words per term" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Feminine" not in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Practical" not in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Safe" not in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_disconnect_prompt_requires_causal_human_diagnosis() -> None:
-    assert "causal diagnosis, not an aesthetic interpretation" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "what is already authentic" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "what part is not fully" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "identity-level shift" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "causal diagnosis, not styling advice" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "authentic" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "under-expressed" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "client's experience" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "item recipes" in STYLE_METHODOLOGIST_INSTRUCTIONS
     assert "direct human causality" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "reliable point of view" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Do not insert outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "one-sentence human test" in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 def test_action_plan_prompt_prioritises_principles_over_homework() -> None:
-    assert "navigation system, not a to-do list" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "three different problems" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "do not add `first_step`" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Follow the outfit formulas" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "signature finishing spark" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "styling layer or other finishing principle" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Keep all advice item-agnostic" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "principle -> reusable application -> effect" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "Do not name a particular blouse" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "fashion-editorial filler" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "carry through the outfit" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert "same person-first movement as the opening" in STYLE_METHODOLOGIST_INSTRUCTIONS
-    assert (
-        "Before returning JSON, inspect the three actions as a set"
-        in STYLE_METHODOLOGIST_INSTRUCTIONS
-    )
-    assert "give a first step that can be done this week" not in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "exactly three distinct actions" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "principle -> reusable" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "item-agnostic" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "No named single items" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "different problem" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "first\n  steps" in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "fashion-editorial" not in STYLE_METHODOLOGIST_INSTRUCTIONS
+    assert "Follow the outfit formulas" not in STYLE_METHODOLOGIST_INSTRUCTIONS
 
 
 async def test_stub_runtime_returns_deterministic_scaffold_report() -> None:
