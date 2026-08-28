@@ -14,6 +14,7 @@ from app.domain.contracts import (
     CanvaFieldType,
     CanvaPlacementAssignment,
     CanvaPlacementPlan,
+    CanvaSourceType,
     CanvaTemplateDefinition,
     CanvaTemplateField,
     CanvaTemplatePage,
@@ -23,6 +24,7 @@ from app.domain.contracts import (
 def template_definition_from_dataset(
     template_id: str,
     dataset: Mapping[str, CanvaFieldType],
+    source_type: CanvaSourceType = "brand_template",
 ) -> CanvaTemplateDefinition:
     """Create a provider-neutral definition from Canva's live dataset."""
 
@@ -31,6 +33,7 @@ def template_definition_from_dataset(
         version="live",
         brand_template_id=template_id,
         pages=(),
+        source_type=source_type,
         fields=tuple(
             CanvaTemplateField(
                 key=key,

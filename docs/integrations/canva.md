@@ -133,8 +133,10 @@ deliberately provider-neutral; a future placement agent can replace the plan
 builder without changing the Canva adapter or API contract.
 
 The integration is disabled unless `CANVA_ENABLED`, `CANVA_ACCESS_TOKEN`, and
-`CANVA_TEMPLATE_ID` are configured. Keep the token only in the local `.env` or
-secret manager. Canva's Autofill API requires the appropriate Connect scopes
-and a Canva Enterprise user or eligible trial.
+`CANVA_TEMPLATE_ID` are configured. The supplied Canva link is an existing
+design, so keep `CANVA_SOURCE_TYPE=design`; use `brand_template` only for a
+Brand Template ID. Keep the token only in the local `.env` or secret manager.
+Canva's Autofill API requires the appropriate Connect scopes and a Canva
+Enterprise user or eligible trial.
 
 No Canva credentials, template IDs, or client assets belong in the repository.

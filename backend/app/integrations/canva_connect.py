@@ -16,6 +16,7 @@ from app.domain.contracts import (
     CanvaDesignProvider,
     CanvaExportJob,
     CanvaFieldType,
+    CanvaSourceType,
     CanvaTemplateDefinition,
 )
 
@@ -33,6 +34,7 @@ class CanvaConnectProvider(CanvaDesignProvider):
         timeout_seconds: float = 60.0,
         poll_interval_seconds: float = 1.0,
         poll_attempts: int = 30,
+        source_type: CanvaSourceType = "design",
         client: httpx.AsyncClient | None = None,
     ) -> None:
         self._access_token = access_token
@@ -40,10 +42,16 @@ class CanvaConnectProvider(CanvaDesignProvider):
         self._timeout_seconds = timeout_seconds
         self._poll_interval_seconds = poll_interval_seconds
         self._poll_attempts = poll_attempts
+        self._source_type = source_type
         self._client = client
 
     async def get_template_dataset(self, template_id: str) -> Mapping[str, CanvaFieldType]:
-        payload = await self._request("GET", f"/brand-templates/{template_id}/dataset")
+        dataset_path = (
+            f"/designs/{template_id}/dataset"
+            if self._source_type == "design"
+            else f"/brand-templates/{template_id}/dataset"
+        )
+        payload = await self._request("GET", dataset_path)
         dataset = payload.get("dataset")
         if not isinstance(dataset, Mapping):
             raise CanvaConnectError("Canva returned an invalid template dataset.")
@@ -96,15 +104,18 @@ class CanvaConnectProvider(CanvaDesignProvider):
         data.update(
             {key: {"type": "image", "asset_id": asset_id} for key, asset_id in asset_ids.items()}
         )
-        payload = await self._request(
-            "POST",
-            "/autofills",
-            json={
+        request_body = {
+            "type": "create_from_design",
+            "design_id": template.brand_template_id,
+            "data": data,
+        }
+        if template.source_type == "brand_template":
+            request_body = {
                 "type": "create_from_brand_template",
                 "brand_template_id": template.brand_template_id,
                 "data": data,
-            },
-        )
+            }
+        payload = await self._request("POST", "/autofills", json=request_body)
         return _autofill_job(_mapping(payload.get("job")))
 
     async def get_autofill_job(self, *, job_id: str) -> CanvaAutofillJob:

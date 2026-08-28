@@ -74,7 +74,11 @@ async def create_canva_report(
 
     try:
         dataset = await provider.get_template_dataset(template_id)
-        template = template_definition_from_dataset(template_id, dataset)
+        template = template_definition_from_dataset(
+            template_id,
+            dataset,
+            source_type=settings.canva_source_type,
+        )
         plan = build_sequential_placement_plan(report.content, template, local_asset_paths)
         selected_assets = {
             assignment.field_key: Path(assignment.source_path)

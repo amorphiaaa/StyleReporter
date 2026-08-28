@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
             timeout_seconds=settings.canva_timeout_seconds,
             poll_interval_seconds=settings.canva_poll_interval_seconds,
             poll_attempts=settings.canva_poll_attempts,
+            source_type=settings.canva_source_type,
         )
         if settings.canva_enabled and settings.canva_access_token
         else None

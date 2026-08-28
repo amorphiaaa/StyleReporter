@@ -16,7 +16,7 @@ async def test_canva_connect_provider_runs_dataset_upload_autofill_and_export(
 
     def handler(request: httpx.Request) -> httpx.Response:
         path = request.url.path
-        if request.method == "GET" and path.endswith("/brand-templates/template-1/dataset"):
+        if request.method == "GET" and path.endswith("/designs/template-1/dataset"):
             return httpx.Response(
                 200,
                 json={
@@ -105,6 +105,7 @@ async def test_canva_connect_provider_runs_dataset_upload_autofill_and_export(
                 brand_template_id="template-1",
                 pages=(),
                 fields=(),
+                source_type="design",
             ),
             values={"field_001": "Report"},
             asset_ids={"image_001": asset_id},

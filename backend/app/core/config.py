@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
     canva_api_base_url: str = "https://api.canva.com/rest/v1"
     canva_access_token: str | None = Field(default=None, repr=False)
     canva_template_id: str | None = None
+    canva_source_type: Literal["design", "brand_template"] = "design"
     canva_timeout_seconds: float = 60.0
     canva_poll_interval_seconds: float = 1.0
     canva_poll_attempts: int = 30

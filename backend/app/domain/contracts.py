@@ -6,6 +6,7 @@ from typing import Any, Literal, Protocol
 
 JsonObject = Mapping[str, Any]
 CanvaFieldType = Literal["text", "image"]
+CanvaSourceType = Literal["design", "brand_template"]
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,7 @@ class CanvaTemplateDefinition:
     brand_template_id: str | None
     pages: Sequence[CanvaTemplatePage]
     fields: Sequence[CanvaTemplateField]
+    source_type: CanvaSourceType = "brand_template"
 
 
 @dataclass(frozen=True)

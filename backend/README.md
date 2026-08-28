@@ -5,7 +5,8 @@ Autofill endpoints.
 
 Canva is disabled by default. To enable report creation, set
 `CANVA_ENABLED=true`, provide `CANVA_ACCESS_TOKEN`, and set `CANVA_TEMPLATE_ID`
-to the Canva brand-template ID. The API fetches the live dataset, assigns
+to the Canva design ID. Set `CANVA_SOURCE_TYPE=brand_template` when using a
+Canva Brand Template ID. The API fetches the live dataset, assigns
 manual report values and downloaded client assets in stable order, uploads the
 selected assets, creates the design, and optionally exports a PDF. It never
 generates report text.
