@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { API_BASE_URL, getClient, updateClient } from "../api/client";
-import type { ClientAsset, ClientDetail } from "../types";
+import { API_BASE_URL, getClient, getManualStyleReport, updateClient } from "../api/client";
+import { ManualStyleReportForm } from "../components/ManualStyleReportForm";
+import type { ClientAsset, ClientDetail, ManualStyleReportContent } from "../types";
 
 const PHOTO_FOLDER_ORDER = ["questionnaire", "good_outfits", "bad_outfits", "inspiration"];
 
 export function ClientDetailPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const [client, setClient] = useState<ClientDetail | null>(null);
+  const [manualReports, setManualReports] = useState<Record<string, ManualStyleReportContent | null>>({});
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,10 +24,20 @@ export function ClientDetailPage() {
     let isCurrent = true;
     setIsLoading(true);
     setError(null);
+    setManualReports({});
     void getClient(clientId)
-      .then((item) => {
+      .then(async (item) => {
         if (isCurrent) {
           setClient(item);
+        }
+        const reportEntries = await Promise.all(
+          item.submissions.map(async (submission) => {
+            const report = await getManualStyleReport(clientId, submission.id);
+            return [submission.id, report?.content ?? null] as const;
+          }),
+        );
+        if (isCurrent) {
+          setManualReports(Object.fromEntries(reportEntries));
         }
       })
       .catch((requestError: unknown) => {
@@ -54,6 +66,10 @@ export function ClientDetailPage() {
       {client ? (
         <ClientProfile
           client={client}
+          manualReports={manualReports}
+          onManualReportSaved={(submissionId, content) => {
+            setManualReports((current) => ({ ...current, [submissionId]: content }));
+          }}
           onSaveDisplayName={async (displayName) => {
             setError(null);
             try {
@@ -73,9 +89,13 @@ export function ClientDetailPage() {
 
 function ClientProfile({
   client,
+  manualReports,
+  onManualReportSaved,
   onSaveDisplayName,
 }: {
   client: ClientDetail;
+  manualReports: Record<string, ManualStyleReportContent | null>;
+  onManualReportSaved: (submissionId: string, content: ManualStyleReportContent) => void;
   onSaveDisplayName: (displayName: string | null) => Promise<void>;
 }) {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -178,6 +198,15 @@ function ClientProfile({
             <details>
               <summary>View raw answers</summary>
               <pre className="raw-payload">{JSON.stringify(submission.raw_payload, null, 2)}</pre>
+            </details>
+            <details className="manual-report-editor">
+              <summary>Write Signature Style Report</summary>
+              <ManualStyleReportForm
+                clientId={client.id}
+                submissionId={submission.id}
+                initialContent={manualReports[submission.id] ?? null}
+                onSaved={(content) => onManualReportSaved(submission.id, content)}
+              />
             </details>
           </article>
         ))}

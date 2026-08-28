@@ -121,7 +121,7 @@ class ManualStyleReportContent(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    how_to_use: GuidanceSection = Field(default_factory=GuidanceSection)
+    how_to_use: ReportTextBlock = Field(default_factory=ReportTextBlock)
     title: str = ""
     alignment_summary: str = ""
     current_style_language: list[str] = Field(default_factory=list)
