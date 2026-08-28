@@ -2,9 +2,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 JsonObject = Mapping[str, Any]
+CanvaFieldType = Literal["text", "image"]
 
 
 @dataclass(frozen=True)
@@ -88,6 +89,56 @@ class ManualStyleReport:
     content: JsonObject
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class CanvaTemplateField:
+    """One named field that a Canva template exposes for autofill."""
+
+    key: str
+    field_type: CanvaFieldType
+    source_path: str
+    required: bool = False
+
+
+@dataclass(frozen=True)
+class CanvaTemplateDefinition:
+    """Versioned, provider-neutral description of a Canva template."""
+
+    key: str
+    version: str
+    brand_template_id: str | None
+    fields: Sequence[CanvaTemplateField]
+
+
+@dataclass(frozen=True)
+class CanvaAutofillPayload:
+    """Flattened report values ready for a Canva provider adapter."""
+
+    template_key: str
+    values: Mapping[str, str]
+    asset_paths: Mapping[str, Path]
+
+
+@dataclass(frozen=True)
+class CanvaAutofillJob:
+    """Status returned while Canva creates a design from a template."""
+
+    job_id: str
+    status: str
+    design_id: str | None = None
+    design_url: str | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class CanvaExportJob:
+    """Status returned while Canva exports a completed design."""
+
+    job_id: str
+    status: str
+    download_url: str | None = None
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -222,4 +273,32 @@ class AssetDownloader(Protocol):
         source_url: str,
         destination_stem: Path,
     ) -> AssetDownloadResult:
+        ...
+
+
+class CanvaDesignProvider(Protocol):
+    """Canva boundary; implementations may use Connect APIs or a test fake."""
+
+    async def get_template_dataset(self, template_id: str) -> Mapping[str, CanvaFieldType]:
+        ...
+
+    async def upload_asset(self, *, local_path: Path, name: str) -> str:
+        ...
+
+    async def create_autofill_job(
+        self,
+        *,
+        template: CanvaTemplateDefinition,
+        values: Mapping[str, str],
+        asset_ids: Mapping[str, str],
+    ) -> CanvaAutofillJob:
+        ...
+
+    async def get_autofill_job(self, *, job_id: str) -> CanvaAutofillJob:
+        ...
+
+    async def create_export_job(self, *, design_id: str, file_type: str = "pdf") -> CanvaExportJob:
+        ...
+
+    async def get_export_job(self, *, job_id: str) -> CanvaExportJob:
         ...
