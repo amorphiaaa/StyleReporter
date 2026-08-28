@@ -5,8 +5,10 @@ import {
   createManualImport,
   getClient,
   getImport,
+  getManualStyleReport,
   listImports,
   listClients,
+  saveManualStyleReport,
   updateClient,
 } from "./client";
 import type { ManualImportRequest } from "../types";
@@ -177,6 +179,59 @@ describe("API client", () => {
         method: "PATCH",
         body: JSON.stringify({ display_name: "Updated Client" }),
       }),
+    );
+  });
+
+  it("loads an empty manual report draft", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("null", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getManualStyleReport("client-1", "submission-1")).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/api/v1/clients/client-1/submissions/submission-1/manual-report`,
+    );
+  });
+
+  it("saves a manual report draft", async () => {
+    const content = {
+      how_to_use: { intro: "Use this as a guide.", items: [] },
+      title: "Feminine Creative",
+      alignment_summary: "A manual summary.",
+      current_style_language: [],
+      desired_style_language: [],
+      disconnect: "",
+      style_language_summary: "",
+      style_language_anchors: [],
+      color_palette: {},
+      prints_and_textures: { intro: "", what_works: [], how_to_use: [] },
+      silhouettes: { intro: "", outer_layers: [], bottoms: [], tops_and_knitwear: [], dresses: [] },
+      accessories: { intro: "", core_elements: [], use_principles: [], categories: [] },
+      outfit_formulas: [],
+      style_anchors: [],
+      what_can_distract: { intro: "", colors: [], prints: [], silhouettes: [] },
+      brands: [],
+      moodboard: [],
+      action_plan: [],
+    };
+    const saved = {
+      id: "manual-report-1",
+      client_id: "client-1",
+      submission_id: "submission-1",
+      content,
+      created_at: null,
+      updated_at: null,
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(saved), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(saveManualStyleReport("client-1", "submission-1", content)).resolves.toEqual(
+      saved,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/api/v1/clients/client-1/submissions/submission-1/manual-report`,
+      expect.objectContaining({ method: "PUT", body: JSON.stringify(content) }),
     );
   });
 

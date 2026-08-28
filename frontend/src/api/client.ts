@@ -6,6 +6,8 @@ import type {
   ImportResponse,
   ImportHistoryItem,
   ImportRunResponse,
+  ManualStyleReportContent,
+  ManualStyleReportResponse,
   ManualImportRequest,
   UpdateClientRequest,
 } from "../types";
@@ -89,6 +91,41 @@ export async function updateClient(
   }
 
   return response.json() as Promise<ClientUpdateResponse>;
+}
+
+export async function getManualStyleReport(
+  clientId: string,
+  submissionId: string,
+): Promise<ManualStyleReportResponse | null> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/manual-report`,
+  );
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Manual report lookup failed"));
+  }
+
+  return response.json() as Promise<ManualStyleReportResponse | null>;
+}
+
+export async function saveManualStyleReport(
+  clientId: string,
+  submissionId: string,
+  content: ManualStyleReportContent,
+): Promise<ManualStyleReportResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/manual-report`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(content),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Manual report save failed"));
+  }
+
+  return response.json() as Promise<ManualStyleReportResponse>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {
