@@ -6,7 +6,7 @@ counters and row errors. The Clients page lists persisted profiles, supports
 name/email search, and opens a detail view with submission metadata, raw
 answers, downloaded visual references, and a user-authored Signature Style
 Report editor. The editor stores drafts through the manual report API; it does
-not generate report text.
+not modify the imported source answers.
 
 ## Commands
 

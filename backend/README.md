@@ -1,9 +1,9 @@
 # Backend import and evidence workspace
 
-The backend exposes health, import, client, and asset endpoints. It persists
-already-read questionnaire rows and keeps the complete raw payload as the
-source of truth. Text/report generation is currently removed; a replacement
-workflow will be added in a separate product task.
+The backend exposes health, import, client, asset, and manual report endpoints.
+It persists already-read questionnaire rows and keeps the complete raw payload
+as the source of truth. Manual report content is saved per questionnaire
+submission.
 
 ## Commands
 
@@ -23,4 +23,4 @@ uv run ruff check .
 - Questionnaire mappings: `app/domain/questionnaire_definitions/`
 - Repositories: `app/repositories/`
 
-The import path must not call a text-generation provider or diagnose a client.
+The import path preserves source evidence and does not diagnose a client.
