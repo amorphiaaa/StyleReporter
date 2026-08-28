@@ -24,6 +24,18 @@ MAX_STYLE_ANCHORS = 4
 MAX_BRAND_CATEGORIES = 11
 MAX_MOODBOARD_ITEMS = 3
 MAX_ACTION_ITEMS = 3
+IMAGE_SLOTS = (
+    "CLIENT_PORTRAIT",
+    "CLIENT_BODY_PROPORTION",
+    "CLIENT_GOOD_OUTFIT_1",
+    "CLIENT_GOOD_OUTFIT_2",
+    "CLIENT_GOOD_OUTFIT_3",
+    "CLIENT_NOT_ME_1",
+    "CLIENT_NOT_ME_2",
+    "CLIENT_INSPIRATION_1",
+    "CLIENT_INSPIRATION_2",
+    "CLIENT_INSPIRATION_3",
+)
 
 PALETTE_KEYS = ("foundation", "accent", "portrait")
 SILHOUETTE_GROUPS = (
@@ -143,6 +155,9 @@ def signature_style_template_definition() -> CanvaTemplateDefinition:
         source = f"action_plan[{index}]"
         text(f"{base}_TITLE", f"{source}.title")
         text(f"{base}_BODY", f"{source}.body")
+
+    for image_key in IMAGE_SLOTS:
+        fields.append(CanvaTemplateField(image_key, "image", f"assets.{image_key.lower()}"))
 
     return CanvaTemplateDefinition(
         key=SIGNATURE_STYLE_TEMPLATE_KEY,

@@ -23,6 +23,7 @@ def test_signature_style_template_has_stable_unique_field_names() -> None:
     assert "SILHOUETTE_OUTER_LAYERS_1_DESCRIPTION" in keys
     assert "OUTFIT_FORMULA_4_STEP_5" in keys
     assert "ACTION_3_BODY" in keys
+    assert "CLIENT_PORTRAIT" in keys
 
 
 def test_flatten_manual_report_preserves_values_and_empty_slots() -> None:
@@ -39,6 +40,7 @@ def test_flatten_manual_report_preserves_values_and_empty_slots() -> None:
             "outfit_formulas": [{"occasions": ["Every day", "Lunch"]}],
         },
         template,
+        asset_paths={"CLIENT_PORTRAIT": Path("portrait.jpg")},
     )
 
     assert payload.values["REPORT_TITLE"] == "Relaxed creative"
@@ -48,6 +50,7 @@ def test_flatten_manual_report_preserves_values_and_empty_slots() -> None:
     assert payload.values["PALETTE_FOUNDATION_1_HEX"] == "#708238"
     assert payload.values["PALETTE_FOUNDATION_2_NAME"] == ""
     assert payload.values["OUTFIT_FORMULA_1_OCCASIONS"] == "Every day\nLunch"
+    assert payload.asset_paths == {"CLIENT_PORTRAIT": Path("portrait.jpg")}
 
 
 @pytest.mark.asyncio
