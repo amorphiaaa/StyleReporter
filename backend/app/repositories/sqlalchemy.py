@@ -3,17 +3,20 @@ from uuid import UUID
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Client, StyleReportRun
+from app.db.models import Client
+from app.db.models import ManualStyleReport as ManualStyleReportModel
 from app.db.models import QuestionnaireSubmission as QuestionnaireSubmissionModel
 from app.domain.contracts import (
     ClientRecord,
     ClientRepository,
     ClientSummary,
+    ManualStyleReportRepository,
     QuestionnaireSubmission,
-    StyleReportRunRepository,
     SubmissionRepository,
 )
-from app.domain.contracts import StyleReportRun as StyleReportRunRecord
+from app.domain.contracts import (
+    ManualStyleReport as ManualStyleReportRecord,
+)
 
 
 class SqlAlchemyClientRepository(ClientRepository):
@@ -139,51 +142,38 @@ class SqlAlchemySubmissionRepository(SubmissionRepository):
         return [_to_submission_record(model) for model in result.scalars().all()]
 
 
-class SqlAlchemyStyleReportRunRepository(StyleReportRunRepository):
+class SqlAlchemyManualStyleReportRepository(ManualStyleReportRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_by_id(self, report_run_id: str) -> StyleReportRunRecord | None:
-        model = await self._session.get(StyleReportRun, UUID(report_run_id))
-        return _to_style_report_run_record(model) if model else None
+    async def get_by_submission_id(
+        self, submission_id: str
+    ) -> ManualStyleReportRecord | None:
+        result = await self._session.execute(
+            select(ManualStyleReportModel).where(
+                ManualStyleReportModel.submission_id == UUID(submission_id)
+            )
+        )
+        model = result.scalar_one_or_none()
+        return _to_manual_style_report(model) if model else None
 
-    async def save(self, report_run: StyleReportRunRecord) -> StyleReportRunRecord:
-        model = await self._session.get(StyleReportRun, UUID(report_run.id))
+    async def save(self, report: ManualStyleReportRecord) -> ManualStyleReportRecord:
+        model = await self._session.get(ManualStyleReportModel, UUID(report.id))
         if model is None:
-            model = StyleReportRun(
-                id=UUID(report_run.id),
-                client_id=UUID(report_run.client_id),
-                submission_id=UUID(report_run.submission_id),
-                status=report_run.status,
-                runtime_type=report_run.runtime_type,
-                report_version=report_run.report_version,
-                report=dict(report_run.report) if report_run.report is not None else None,
-                error_message=report_run.error_message,
-                started_at=report_run.started_at,
-                completed_at=report_run.completed_at,
+            model = ManualStyleReportModel(
+                id=UUID(report.id),
+                client_id=UUID(report.client_id),
+                submission_id=UUID(report.submission_id),
+                content=dict(report.content),
             )
             self._session.add(model)
         else:
-            model.client_id = UUID(report_run.client_id)
-            model.submission_id = UUID(report_run.submission_id)
-            model.status = report_run.status
-            model.runtime_type = report_run.runtime_type
-            model.report_version = report_run.report_version
-            model.report = dict(report_run.report) if report_run.report is not None else None
-            model.error_message = report_run.error_message
-            model.started_at = report_run.started_at
-            model.completed_at = report_run.completed_at
+            model.client_id = UUID(report.client_id)
+            model.submission_id = UUID(report.submission_id)
+            model.content = dict(report.content)
 
         await self._session.flush()
-        return _to_style_report_run_record(model)
-
-    async def list_by_client_id(self, client_id: str) -> list[StyleReportRunRecord]:
-        result = await self._session.execute(
-            select(StyleReportRun)
-            .where(StyleReportRun.client_id == UUID(client_id))
-            .order_by(StyleReportRun.created_at.desc())
-        )
-        return [_to_style_report_run_record(model) for model in result.scalars().all()]
+        return _to_manual_style_report(model)
 
 
 def _to_client_record(model: Client) -> ClientRecord:
@@ -210,17 +200,12 @@ def _to_submission_record(model: QuestionnaireSubmissionModel) -> QuestionnaireS
     )
 
 
-def _to_style_report_run_record(model: StyleReportRun) -> StyleReportRunRecord:
-    return StyleReportRunRecord(
+def _to_manual_style_report(model: ManualStyleReportModel) -> ManualStyleReportRecord:
+    return ManualStyleReportRecord(
         id=str(model.id),
         client_id=str(model.client_id),
         submission_id=str(model.submission_id),
-        status=model.status,
-        runtime_type=model.runtime_type,
-        report_version=model.report_version,
-        report=model.report,
-        error_message=model.error_message,
+        content=model.content,
         created_at=model.created_at,
-        started_at=model.started_at,
-        completed_at=model.completed_at,
+        updated_at=model.updated_at,
     )

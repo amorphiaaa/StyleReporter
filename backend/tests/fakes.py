@@ -1,4 +1,14 @@
-from app.domain.contracts import ClientRecord, ClientSummary, QuestionnaireSubmission
+from pathlib import Path
+
+from app.domain.contracts import (
+    CanvaAutofillJob,
+    CanvaExportJob,
+    CanvaFieldType,
+    CanvaTemplateDefinition,
+    ClientRecord,
+    ClientSummary,
+    QuestionnaireSubmission,
+)
 
 
 class InMemoryClientRepository:
@@ -58,3 +68,56 @@ class InMemorySubmissionRepository:
             for submission in self.items.values()
             if submission.client_id == client_id
         ]
+
+
+class InMemoryCanvaDesignProvider:
+    """Deterministic Canva substitute for service and API tests."""
+
+    def __init__(self) -> None:
+        self.uploads: dict[str, Path] = {}
+        self.autofill_jobs: dict[str, CanvaAutofillJob] = {}
+        self.export_jobs: dict[str, CanvaExportJob] = {}
+        self.autofill_requests: list[tuple[str, dict[str, str], dict[str, str]]] = []
+
+    async def get_template_dataset(self, template_id: str) -> dict[str, CanvaFieldType]:
+        return {"REPORT_TITLE": "text", "PROFILE_IMAGE": "image"}
+
+    async def upload_asset(self, *, local_path: Path, name: str) -> str:
+        asset_id = f"asset-{len(self.uploads) + 1}"
+        self.uploads[asset_id] = local_path
+        return asset_id
+
+    async def create_autofill_job(
+        self,
+        *,
+        template: CanvaTemplateDefinition,
+        values: dict[str, str],
+        asset_ids: dict[str, str],
+    ) -> CanvaAutofillJob:
+        job_id = f"autofill-{len(self.autofill_jobs) + 1}"
+        design_id = f"design-{len(self.autofill_jobs) + 1}"
+        job = CanvaAutofillJob(
+            job_id=job_id,
+            status="succeeded",
+            design_id=design_id,
+            design_url=f"https://canva.example/designs/{design_id}",
+        )
+        self.autofill_jobs[job_id] = job
+        self.autofill_requests.append((template.key, dict(values), dict(asset_ids)))
+        return job
+
+    async def get_autofill_job(self, *, job_id: str) -> CanvaAutofillJob:
+        return self.autofill_jobs[job_id]
+
+    async def create_export_job(self, *, design_id: str, file_type: str = "pdf") -> CanvaExportJob:
+        job_id = f"export-{len(self.export_jobs) + 1}"
+        job = CanvaExportJob(
+            job_id=job_id,
+            status="succeeded",
+            download_url=f"https://canva.example/exports/{design_id}.{file_type}",
+        )
+        self.export_jobs[job_id] = job
+        return job
+
+    async def get_export_job(self, *, job_id: str) -> CanvaExportJob:
+        return self.export_jobs[job_id]

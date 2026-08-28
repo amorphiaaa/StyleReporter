@@ -21,7 +21,8 @@ Final Report
 The importer creates the client folder and all five children idempotently. It
 uses Drive `appProperties` keys based on client ID, submission ID, field key,
 and ordinal instead of using display names as identity. The local filesystem
-workspace remains the Codex CLI cache and the source for verified uploads.
+workspace remains the source for verified uploads and is independent of any
+downstream report or text workflow.
 
 ## Consequences
 
@@ -30,7 +31,7 @@ workspace remains the Codex CLI cache and the source for verified uploads.
   Drive storage quota. The feature is disabled by default.
 - `questionnaire.json` is uploaded immediately. Image files are uploaded only
   after the optional downloader has verified them locally.
-- The `Final Report` folder is reserved for the later report exporter; this
+- The `Final Report` folder is reserved for a later downstream workflow; this
   iteration does not upload reports.
 - A failed Drive call rolls back the database import transaction. Any folders
   already created remain safe to reuse because retries use stable keys.

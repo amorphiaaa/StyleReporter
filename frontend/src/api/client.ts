@@ -3,17 +3,21 @@ import type {
   ClientDetail,
   ClientListItem,
   ClientUpdateResponse,
-  CanvaCandidatesResponse,
-  GenerateStyleReportRequest,
   ImportResponse,
   ImportHistoryItem,
   ImportRunResponse,
+  ManualStyleReportContent,
+  ManualStyleReportResponse,
+  CanvaReportResponse,
   ManualImportRequest,
-  StyleReportResponse,
   UpdateClientRequest,
 } from "../types";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8001";
+
+export function getCanvaOAuthStartUrl(): string {
+  return `${API_BASE_URL}/api/v1/canva/oauth/start`;
+}
 
 export async function getHealth(): Promise<HealthResponse> {
   const response = await fetch(API_BASE_URL + "/health");
@@ -94,59 +98,59 @@ export async function updateClient(
   return response.json() as Promise<ClientUpdateResponse>;
 }
 
-export async function createStyleReport(
+export async function getManualStyleReport(
   clientId: string,
-  request: GenerateStyleReportRequest,
-): Promise<StyleReportResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}/reports`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Style report generation failed"));
-  }
-
-  return response.json() as Promise<StyleReportResponse>;
-}
-
-export async function getStyleReport(reportRunId: string): Promise<StyleReportResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/reports/${reportRunId}`);
-  if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Style report lookup failed"));
-  }
-
-  return response.json() as Promise<StyleReportResponse>;
-}
-
-export async function listStyleReports(clientId: string): Promise<StyleReportResponse[]> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/clients/${clientId}/reports`);
-  if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Style report history lookup failed"));
-  }
-
-  return response.json() as Promise<StyleReportResponse[]>;
-}
-
-export async function generateCanvaCandidates(
-  clientId: string,
-  reportRunId: string,
-): Promise<CanvaCandidatesResponse> {
+  submissionId: string,
+): Promise<ManualStyleReportResponse | null> {
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/clients/${clientId}/reports/${reportRunId}/canva/candidates`,
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/manual-report`,
+  );
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Manual report lookup failed"));
+  }
+
+  return response.json() as Promise<ManualStyleReportResponse | null>;
+}
+
+export async function saveManualStyleReport(
+  clientId: string,
+  submissionId: string,
+  content: ManualStyleReportContent,
+): Promise<ManualStyleReportResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/manual-report`,
     {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: "{}",
+      body: JSON.stringify(content),
     },
   );
 
   if (!response.ok) {
-    throw new Error(await getErrorMessage(response, "Canva candidate generation failed"));
+    throw new Error(await getErrorMessage(response, "Manual report save failed"));
   }
 
-  return response.json() as Promise<CanvaCandidatesResponse>;
+  return response.json() as Promise<ManualStyleReportResponse>;
+}
+
+export async function createCanvaReport(
+  clientId: string,
+  submissionId: string,
+): Promise<CanvaReportResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/canva-report`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ export_pdf: true }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Canva report creation failed"));
+  }
+
+  return response.json() as Promise<CanvaReportResponse>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {

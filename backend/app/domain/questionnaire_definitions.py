@@ -13,7 +13,7 @@ QUESTIONNAIRE_DEFINITIONS_DIR = Path(__file__).with_name("questionnaire_definiti
 class QuestionnaireFieldDefinition:
     key: str
     headers: tuple[str, ...]
-    report_required: bool = True
+    required: bool = True
     multiple: bool = False
     value_type: str = "text"
     asset_folder: str | None = None
@@ -116,7 +116,7 @@ def _load_field(payload: Any, path: Path) -> QuestionnaireFieldDefinition:
     return QuestionnaireFieldDefinition(
         key=_required_text(payload, "key", path),
         headers=_headers(payload.get("headers"), "headers", path),
-        report_required=bool(payload.get("report_required", True)),
+        required=bool(payload.get("required", True)),
         multiple=bool(payload.get("multiple", False)),
         value_type=str(payload.get("value_type", "text")),
         asset_folder=asset_folder.strip() if isinstance(asset_folder, str) else None,

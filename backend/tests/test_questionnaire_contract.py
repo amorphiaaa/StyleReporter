@@ -30,7 +30,7 @@ def test_fixture_questionnaire_normalizes_answers_and_image_links() -> None:
         "https://example.test/two.jpg",
     )
     assert normalized.not_me_image == "https://example.test/not-me.jpg"
-    assert normalized.missing_report_fields == ()
+    assert normalized.missing_required_fields == ()
 
 
 def test_fixture_questionnaire_reports_missing_fields_without_rejecting_raw_data() -> None:
@@ -43,8 +43,8 @@ def test_fixture_questionnaire_reports_missing_fields_without_rejecting_raw_data
     )
 
     assert normalized.email == "synthetic.client@example.test"
-    assert "current_style" in normalized.missing_report_fields
-    assert "visual_world" not in normalized.missing_report_fields
+    assert "current_style" in normalized.missing_required_fields
+    assert "visual_world" not in normalized.missing_required_fields
 
 
 def test_fixture_questionnaire_uses_configured_identity_aliases_and_extra_fields() -> None:
@@ -76,4 +76,4 @@ def test_unknown_questionnaire_version_falls_back_to_identity_fields() -> None:
     assert normalized.email == "synthetic.client@example.test"
     assert normalized.display_name == "Synthetic Client"
     assert normalized.visual_world is None
-    assert normalized.missing_report_fields == ()
+    assert normalized.missing_required_fields == ()

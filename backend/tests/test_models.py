@@ -8,8 +8,8 @@ def test_persistence_foundation_registers_expected_tables() -> None:
     assert set(Base.metadata.tables) == {
         "clients",
         "questionnaire_submissions",
+        "manual_style_reports",
         "import_runs",
-        "style_report_runs",
     }
 
 
@@ -46,9 +46,13 @@ def test_import_run_keeps_duplicate_counter() -> None:
     assert table.c.skipped_duplicates.nullable is False
 
 
-def test_style_report_run_keeps_report_json_and_relationship_keys() -> None:
-    table = Base.metadata.tables["style_report_runs"]
+def test_manual_style_report_keeps_structured_content_and_unique_submission() -> None:
+    table = Base.metadata.tables["manual_style_reports"]
 
-    assert isinstance(table.c.report.type, JSONB)
-    assert table.c.client_id.foreign_keys
-    assert table.c.submission_id.foreign_keys
+    assert isinstance(table.c.content.type, JSONB)
+    submission_constraint = next(
+        constraint
+        for constraint in table.constraints
+        if constraint.name == "uq_manual_style_reports_submission_id"
+    )
+    assert {column.name for column in submission_constraint.columns} == {"submission_id"}

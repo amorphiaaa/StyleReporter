@@ -18,8 +18,8 @@ class NormalizedQuestionnaire:
     """Typed questionnaire context derived from raw source answers.
 
     The importer keeps the original row as raw JSONB. This object is a stable
-    contract for later report and agent work, so adding a new source column does
-    not require changing the persistence model immediately.
+    contract for downstream workflows, so adding a new source column does not
+    require changing the persistence model immediately.
     """
 
     version: str | None
@@ -33,7 +33,7 @@ class NormalizedQuestionnaire:
     not_me_image: str | None
     inspiration_images: tuple[str, ...]
     visual_world: str | None
-    missing_report_fields: tuple[str, ...]
+    missing_required_fields: tuple[str, ...]
     answers: Mapping[str, str | tuple[str, ...] | None]
 
 
@@ -79,7 +79,7 @@ def normalize_questionnaire_payload(
             not_me_image=None,
             inspiration_images=(),
             visual_world=None,
-            missing_report_fields=(),
+            missing_required_fields=(),
             answers={},
         )
 
@@ -87,10 +87,10 @@ def normalize_questionnaire_payload(
         field.key: _field_value(raw_payload, field)
         for field in definition.fields
     }
-    missing_report_fields = tuple(
+    missing_required_fields = tuple(
         field.key
         for field in definition.fields
-        if field.report_required and not values[field.key]
+        if field.required and not values[field.key]
     )
 
     return NormalizedQuestionnaire(
@@ -105,7 +105,7 @@ def normalize_questionnaire_payload(
         not_me_image=_as_text_value(values.get("not_me_image")),
         inspiration_images=_as_image_values(values.get("inspiration_images")),
         visual_world=_as_text_value(values.get("visual_world")),
-        missing_report_fields=missing_report_fields,
+        missing_required_fields=missing_required_fields,
         answers=values,
     )
 

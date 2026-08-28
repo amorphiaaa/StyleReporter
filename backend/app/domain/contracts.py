@@ -2,9 +2,11 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 JsonObject = Mapping[str, Any]
+CanvaFieldType = Literal["text", "image"]
+CanvaSourceType = Literal["design", "brand_template"]
 
 
 @dataclass(frozen=True)
@@ -79,70 +81,94 @@ class AssetPublicationResult:
 
 
 @dataclass(frozen=True)
-class StyleReport:
-    report_version: str
-    runtime_type: str
-    content: JsonObject
+class ManualStyleReport:
+    """User-authored report content associated with one submission."""
 
-
-@dataclass(frozen=True)
-class StyleReportRun:
     id: str
     client_id: str
     submission_id: str
-    status: str
-    runtime_type: str
-    report_version: str
-    report: JsonObject | None = None
-    error_message: str | None = None
+    content: JsonObject
     created_at: datetime | None = None
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 @dataclass(frozen=True)
-class StyleReportRequest:
-    client_id: str
-    submission_id: str
-    raw_payload: JsonObject
-    questionnaire_version: str | None = None
-    asset_paths: Sequence[str] = ()
+class CanvaTemplateField:
+    """One technical field with human-readable placement guidance."""
 
-
-class StyleReportRuntime(Protocol):
-    async def generate(self, request: StyleReportRequest) -> StyleReport:
-        ...
-
-
-@dataclass(frozen=True)
-class CanvaPortfolioRequest:
-    client_id: str
-    report_run_id: str
-    client_name: str
-    report: JsonObject
-    questionnaire_context: JsonObject
-    asset_paths: Sequence[str] = ()
+    key: str
+    field_type: CanvaFieldType
+    page_number: int
+    description: str
+    required: bool = False
+    max_characters: int | None = None
 
 
 @dataclass(frozen=True)
-class CanvaDesignCandidate:
-    candidate_id: str
+class CanvaTemplatePage:
+    """A page-level description supplied by the template author."""
+
+    page_number: int
+    description: str
+
+
+@dataclass(frozen=True)
+class CanvaTemplateDefinition:
+    """Versioned, provider-neutral description of a Canva template."""
+
+    key: str
+    version: str
+    brand_template_id: str | None
+    pages: Sequence[CanvaTemplatePage]
+    fields: Sequence[CanvaTemplateField]
+    source_type: CanvaSourceType = "brand_template"
+
+
+@dataclass(frozen=True)
+class CanvaPlacementAssignment:
+    """One agent decision connecting report content to a template field."""
+
+    field_key: str
+    source_path: str
+    rationale: str = ""
+
+
+@dataclass(frozen=True)
+class CanvaPlacementPlan:
+    """Agent-produced plan for placing report content into a template."""
+
+    assignments: Sequence[CanvaPlacementAssignment]
+    unplaced_source_paths: Sequence[str] = ()
+
+
+@dataclass(frozen=True)
+class CanvaAutofillPayload:
+    """Flattened report values ready for a Canva provider adapter."""
+
+    template_key: str
+    values: Mapping[str, str]
+    asset_paths: Mapping[str, Path]
+
+
+@dataclass(frozen=True)
+class CanvaAutofillJob:
+    """Status returned while Canva creates a design from a template."""
+
     job_id: str
-    title: str
+    status: str
+    design_id: str | None = None
     design_url: str | None = None
-    thumbnail_url: str | None = None
+    error: str | None = None
 
 
 @dataclass(frozen=True)
-class CanvaPortfolioResult:
+class CanvaExportJob:
+    """Status returned while Canva exports a completed design."""
+
+    job_id: str
     status: str
-    candidates: Sequence[CanvaDesignCandidate]
-    note: str
-
-
-class CanvaPortfolioRuntime(Protocol):
-    async def generate_candidates(self, request: CanvaPortfolioRequest) -> CanvaPortfolioResult:
-        ...
+    download_url: str | None = None
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -189,25 +215,6 @@ class ImportResult:
     errors: Sequence[ImportRowError]
 
 
-@dataclass(frozen=True)
-class AgentRunRequest:
-    client_id: str
-    submission_id: str
-    context: JsonObject
-
-
-@dataclass(frozen=True)
-class AgentRunResult:
-    status: str
-    output: str | None = None
-
-
-@dataclass(frozen=True)
-class ConnectorStatus:
-    configured: bool
-    message: str
-
-
 class ClientRepository(Protocol):
     async def list_summaries(self, search: str | None = None) -> Sequence[ClientSummary]:
         ...
@@ -241,14 +248,11 @@ class SubmissionRepository(Protocol):
         ...
 
 
-class StyleReportRunRepository(Protocol):
-    async def get_by_id(self, report_run_id: str) -> StyleReportRun | None:
+class ManualStyleReportRepository(Protocol):
+    async def get_by_submission_id(self, submission_id: str) -> ManualStyleReport | None:
         ...
 
-    async def save(self, report_run: StyleReportRun) -> StyleReportRun:
-        ...
-
-    async def list_by_client_id(self, client_id: str) -> Sequence[StyleReportRun]:
+    async def save(self, report: ManualStyleReport) -> ManualStyleReport:
         ...
 
 
@@ -302,21 +306,29 @@ class AssetDownloader(Protocol):
         ...
 
 
-class AgentRuntime(Protocol):
-    async def run(self, request: AgentRunRequest) -> AgentRunResult:
+class CanvaDesignProvider(Protocol):
+    """Canva boundary; implementations may use Connect APIs or a test fake."""
+
+    async def get_template_dataset(self, template_id: str) -> Mapping[str, CanvaFieldType]:
         ...
 
-
-class CanvaConnector(Protocol):
-    async def healthcheck(self) -> ConnectorStatus:
+    async def upload_asset(self, *, local_path: Path, name: str) -> str:
         ...
 
-
-class CanvaSkill(Protocol):
-    @property
-    def name(self) -> str:
+    async def create_autofill_job(
+        self,
+        *,
+        template: CanvaTemplateDefinition,
+        values: Mapping[str, str],
+        asset_ids: Mapping[str, str],
+    ) -> CanvaAutofillJob:
         ...
 
-    @property
-    def description(self) -> str:
+    async def get_autofill_job(self, *, job_id: str) -> CanvaAutofillJob:
+        ...
+
+    async def create_export_job(self, *, design_id: str, file_type: str = "pdf") -> CanvaExportJob:
+        ...
+
+    async def get_export_job(self, *, job_id: str) -> CanvaExportJob:
         ...

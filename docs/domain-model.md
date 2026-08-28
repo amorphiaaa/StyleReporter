@@ -15,19 +15,18 @@ These are source fields, not yet a diagnosis schema.
 
 `fixture-v1` has a typed normalization boundary driven by
 `backend/app/domain/questionnaire_definitions/fixture-v1.json`. It maps source
-headers and aliases into stable keys for future report and agent work: current
-style, style goal, self-perception, style discomfort, image groups, and visual
-world. New questionnaire versions are added as configuration files rather than
-new hardcoded branches in the importer.
+headers and aliases into stable keys for downstream workflows: current style,
+style goal, self-perception, style discomfort, image groups, and visual world.
+New questionnaire versions are added as configuration files rather than new
+hardcoded branches in the importer.
 
 The importer still stores the complete original row as raw JSONB. Normalization
-is additive and non-diagnostic: missing report fields are reported on the typed
-object, but they do not discard otherwise valid source evidence. Unknown
+is additive and non-diagnostic: missing required fields are reported on the
+typed object, but they do not discard otherwise valid source evidence. Unknown
 questionnaire versions remain raw-only until an explicit mapping is added.
-Mapped optional fields are available dynamically in the agent's
-`normalized_answers` object without a database migration.
+Mapped fields are available dynamically without a database migration.
 
-## Future persistence model
+## Persistence model
 
 ### clients
 
@@ -98,30 +97,30 @@ published to the folder declared by the versioned questionnaire definition:
 the first `Feels Like Me` image (portrait) and body-proportion photo go to
 `Questionnaire`, remaining `Feels Like Me` images go to `Good Outfits`, and
 the `Not Me` and `Inspiration` groups go to their matching folders. The local
-workspace remains the Codex CLI cache. `Final Report` is created now but is
-reserved for a later report exporter.
+workspace is an evidence cache independent of any downstream workflow.
+`Final Report` is reserved for a later downstream workflow.
 
 ### import_runs
 
 Future manual syncs should create an auditable run record with status, counts,
 timestamps, and row-level errors.
 
-### style_report_runs
+### manual_style_reports
 
-Each report run links one client to one questionnaire submission and records
-runtime type, report version, status, timestamps, optional error text, and
-structured JSONB output. Multiple runs for the same submission are allowed so
-future runtimes can be retried or compared without overwriting questionnaire
-evidence.
+Each questionnaire submission can have one manual style report draft. The
+record stores the client ID, submission ID, and structured JSONB content that
+mirrors the Signature Style Report template: alignment, palette, prints and
+textures, silhouettes, accessories, outfit formulas, anchors, distractions,
+brands, moodboard references, and action plan. The content is intentionally
+user-authored; no diagnosis or generated copy is produced during import or
+save.
 
 ## Important boundary
 
 Raw answers are evidence. Style Language categories, competing identities,
-visual mistranslations, hypotheses, and final diagnoses belong to a later
-agent/report domain and must not be inferred during ingestion.
-
-The current `StubStyleReportRuntime` only exposes source field names and an
-explicit placeholder message. It is not a methodology diagnosis.
+visual mistranslations, hypotheses, and final diagnoses must not be inferred
+during ingestion. The manual report workflow consumes this evidence only after
+a user decides what to write. It does not infer or generate report content.
 
 ## Import prototype rules
 

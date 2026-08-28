@@ -121,21 +121,91 @@ export type ClientUpdateResponse = {
   display_name: string | null;
 };
 
-export type GenerateStyleReportRequest = {
-  submission_id: string;
-  runtime?: StyleReportRuntimeType;
+export type ReportTextBlock = {
+  intro: string;
+  items: string[];
 };
 
-export type StyleReportRuntimeType = "stub" | "agents_sdk_dry_run" | "codex_cli";
-
-export type StyleLanguageAction = {
-  priority: number;
-  focus: string;
-  action: string;
-  rationale: string;
+export type PaletteColor = {
+  name: string;
+  hex: string;
+  description: string;
+  works_with: string;
 };
 
-export type StyleLanguageAnalysis = {
+export type PaletteSection = {
+  intro: string;
+  colors: PaletteColor[];
+};
+
+export type GuidanceSection = {
+  intro: string;
+  what_works: string[];
+  how_to_use: string[];
+};
+
+export type SilhouetteItem = {
+  name: string;
+  description: string;
+};
+
+export type SilhouetteSection = {
+  intro: string;
+  outer_layers: SilhouetteItem[];
+  bottoms: SilhouetteItem[];
+  tops_and_knitwear: SilhouetteItem[];
+  dresses: SilhouetteItem[];
+};
+
+export type NamedListSection = {
+  name: string;
+  items: string[];
+};
+
+export type AccessoriesSection = {
+  intro: string;
+  core_elements: string[];
+  use_principles: string[];
+  categories: NamedListSection[];
+};
+
+export type OutfitFormula = {
+  name: string;
+  occasions: string[];
+  logic: string;
+  steps: string[];
+};
+
+export type StyleAnchor = {
+  name: string;
+  description: string;
+};
+
+export type DistractionSection = {
+  intro: string;
+  colors: string[];
+  prints: string[];
+  silhouettes: string[];
+};
+
+export type BrandCategory = {
+  category: string;
+  brands: string[];
+};
+
+export type MoodboardItem = {
+  label: string;
+  url: string;
+  note: string;
+};
+
+export type ActionPlanItem = {
+  title: string;
+  body: string;
+};
+
+export type ManualStyleReportContent = {
+  how_to_use: ReportTextBlock;
   title: string;
   alignment_summary: string;
   current_style_language: string[];
@@ -143,35 +213,34 @@ export type StyleLanguageAnalysis = {
   disconnect: string;
   style_language_summary: string;
   style_language_anchors: string[];
-  your_action_plan: StyleLanguageAction[];
-  evidence: string[];
-  limitations: string[];
+  color_palette: Record<string, PaletteSection>;
+  prints_and_textures: GuidanceSection;
+  silhouettes: SilhouetteSection;
+  accessories: AccessoriesSection;
+  outfit_formulas: OutfitFormula[];
+  style_anchors: StyleAnchor[];
+  what_can_distract: DistractionSection;
+  brands: BrandCategory[];
+  moodboard: MoodboardItem[];
+  action_plan: ActionPlanItem[];
 };
 
-export type StyleReportResponse = {
+export type ManualStyleReportResponse = {
   id: string;
   client_id: string;
   submission_id: string;
-  status: string;
-  runtime_type: string;
-  report_version: string;
-  report: Record<string, unknown> | null;
-  error_message: string | null;
+  content: ManualStyleReportContent;
   created_at: string | null;
-  started_at: string | null;
-  completed_at: string | null;
+  updated_at: string | null;
 };
 
-export type CanvaDesignCandidate = {
-  candidate_id: string;
-  job_id: string;
-  title: string;
+export type CanvaReportResponse = {
+  status: "success" | "failed";
+  autofill_job_id: string;
+  design_id: string | null;
   design_url: string | null;
-  thumbnail_url: string | null;
-};
-
-export type CanvaCandidatesResponse = {
-  status: "completed" | "needs_input" | "failed";
-  candidates: CanvaDesignCandidate[];
-  note: string;
+  export_job_id: string | null;
+  pdf_url: string | null;
+  text_fields_filled: number;
+  image_fields_filled: number;
 };
