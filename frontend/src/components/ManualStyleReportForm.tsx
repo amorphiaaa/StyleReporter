@@ -132,8 +132,8 @@ export function ManualStyleReportForm({
           <p className="eyebrow">User-authored content</p>
           <h4>Signature Style Report</h4>
           <p>
-            Write the report yourself using the sections from the reference portfolio. Nothing
-            here is generated automatically.
+            Write the report yourself using the sections from the reference portfolio. All
+            content stays under your control.
           </p>
         </div>
         <div className="manual-report-save-status" aria-live="polite">
