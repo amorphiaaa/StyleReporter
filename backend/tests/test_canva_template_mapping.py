@@ -2,81 +2,111 @@ from pathlib import Path
 
 import pytest
 
-from app.domain.contracts import CanvaTemplateDefinition, CanvaTemplateField
+from app.domain.contracts import CanvaPlacementAssignment, CanvaPlacementPlan
 from app.services.canva_template_mapping import (
-    flatten_manual_style_report,
-    signature_style_template_definition,
+    build_canva_payload,
+    template_definition_from_manifest,
 )
 from tests.fakes import InMemoryCanvaDesignProvider
 
-
-def test_signature_style_template_has_stable_unique_field_names() -> None:
-    template = signature_style_template_definition()
-    keys = [field.key for field in template.fields]
-
-    assert template.key == "signature-style-v1"
-    assert template.brand_template_id is None
-    assert len(keys) > 200
-    assert len(keys) == len(set(keys))
-    assert "REPORT_TITLE" in keys
-    assert "PALETTE_FOUNDATION_1_HEX" in keys
-    assert "SILHOUETTE_OUTER_LAYERS_1_DESCRIPTION" in keys
-    assert "OUTFIT_FORMULA_4_STEP_5" in keys
-    assert "ACTION_3_BODY" in keys
-    assert "CLIENT_PORTRAIT" in keys
-
-
-def test_flatten_manual_report_preserves_values_and_empty_slots() -> None:
-    template = signature_style_template_definition()
-    payload = flatten_manual_style_report(
+TEMPLATE_MANIFEST = {
+    "key": "signature-style-template",
+    "version": "1",
+    "brand_template_id": None,
+    "pages": [
         {
-            "title": "Relaxed creative",
-            "current_style_language": ["Casual", "Repetitive"],
-            "color_palette": {
-                "foundation": {
-                    "colors": [{"name": "Olive", "hex": "#708238"}],
+            "number": 1,
+            "description": "Cover and style positioning",
+            "fields": [
+                {
+                    "key": "field_001",
+                    "type": "text",
+                    "description": "The large title shown on the cover",
+                    "required": True,
+                    "max_characters": 80,
                 },
-            },
-            "outfit_formulas": [{"occasions": ["Every day", "Lunch"]}],
-        },
-        template,
-        asset_paths={"CLIENT_PORTRAIT": Path("portrait.jpg")},
+                {
+                    "key": "field_002",
+                    "type": "text",
+                    "description": "Short positioning statement below the title",
+                },
+                {
+                    "key": "image_001",
+                    "type": "image",
+                    "description": "Client portrait used on the cover",
+                },
+            ],
+        }
+    ],
+}
+
+
+def test_manifest_keeps_technical_keys_separate_from_semantic_descriptions() -> None:
+    template = template_definition_from_manifest(TEMPLATE_MANIFEST)
+
+    assert template.key == "signature-style-template"
+    assert template.pages[0].description == "Cover and style positioning"
+    assert template.fields[0].key == "field_001"
+    assert template.fields[0].description == "The large title shown on the cover"
+    assert template.fields[0].page_number == 1
+    assert template.fields[2].field_type == "image"
+
+
+def test_agent_plan_maps_existing_report_content_to_arbitrary_fields() -> None:
+    template = template_definition_from_manifest(TEMPLATE_MANIFEST)
+    plan = CanvaPlacementPlan(
+        assignments=(
+            CanvaPlacementAssignment("field_001", "title", "Best short title for the cover"),
+            CanvaPlacementAssignment(
+                "field_002",
+                "alignment_summary",
+                "The summary fits the descriptive field",
+            ),
+            CanvaPlacementAssignment("image_001", "assets.client_portrait", "Portrait slot"),
+        )
     )
 
-    assert payload.values["REPORT_TITLE"] == "Relaxed creative"
-    assert payload.values["CURRENT_STYLE_1"] == "Casual"
-    assert payload.values["CURRENT_STYLE_3"] == ""
-    assert payload.values["PALETTE_FOUNDATION_1_NAME"] == "Olive"
-    assert payload.values["PALETTE_FOUNDATION_1_HEX"] == "#708238"
-    assert payload.values["PALETTE_FOUNDATION_2_NAME"] == ""
-    assert payload.values["OUTFIT_FORMULA_1_OCCASIONS"] == "Every day\nLunch"
-    assert payload.asset_paths == {"CLIENT_PORTRAIT": Path("portrait.jpg")}
+    payload = build_canva_payload(
+        {"title": "Relaxed creative", "alignment_summary": "A calm, expressive wardrobe"},
+        template,
+        plan,
+        asset_paths={"image_001": Path("portrait.jpg")},
+    )
+
+    assert payload.template_key == "signature-style-template"
+    assert payload.values == {
+        "field_001": "Relaxed creative",
+        "field_002": "A calm, expressive wardrobe",
+    }
+    assert payload.asset_paths == {"image_001": Path("portrait.jpg")}
+
+
+def test_agent_plan_rejects_unknown_or_missing_required_fields() -> None:
+    template = template_definition_from_manifest(TEMPLATE_MANIFEST)
+
+    with pytest.raises(ValueError, match="Unknown template field.*Required template field"):
+        build_canva_payload(
+            {},
+            template,
+            CanvaPlacementPlan(
+                assignments=(CanvaPlacementAssignment("unknown", "title"),)
+            ),
+        )
 
 
 @pytest.mark.asyncio
 async def test_fake_canva_provider_runs_autofill_and_export_jobs() -> None:
     provider = InMemoryCanvaDesignProvider()
-    template = CanvaTemplateDefinition(
-        key="test-template",
-        version="1",
-        brand_template_id="brand-template-1",
-        fields=(
-            CanvaTemplateField("REPORT_TITLE", "text", "title"),
-            CanvaTemplateField("PROFILE_IMAGE", "image", "profile_image"),
-        ),
-    )
+    template = template_definition_from_manifest(TEMPLATE_MANIFEST)
 
     asset_id = await provider.upload_asset(local_path=Path("profile.jpg"), name="profile.jpg")
     job = await provider.create_autofill_job(
         template=template,
-        values={"REPORT_TITLE": "Test report"},
-        asset_ids={"PROFILE_IMAGE": asset_id},
+        values={"field_001": "Test report"},
+        asset_ids={"image_001": asset_id},
     )
     export = await provider.create_export_job(design_id=job.design_id or "")
 
     assert job.status == "succeeded"
     assert job.design_url == "https://canva.example/designs/design-1"
     assert export.status == "succeeded"
-    assert provider.autofill_requests == [
-        ("test-template", {"REPORT_TITLE": "Test report"}, {"PROFILE_IMAGE": "asset-1"})
-    ]

@@ -93,12 +93,22 @@ class ManualStyleReport:
 
 @dataclass(frozen=True)
 class CanvaTemplateField:
-    """One named field that a Canva template exposes for autofill."""
+    """One technical field with human-readable placement guidance."""
 
     key: str
     field_type: CanvaFieldType
-    source_path: str
+    page_number: int
+    description: str
     required: bool = False
+    max_characters: int | None = None
+
+
+@dataclass(frozen=True)
+class CanvaTemplatePage:
+    """A page-level description supplied by the template author."""
+
+    page_number: int
+    description: str
 
 
 @dataclass(frozen=True)
@@ -108,7 +118,25 @@ class CanvaTemplateDefinition:
     key: str
     version: str
     brand_template_id: str | None
+    pages: Sequence[CanvaTemplatePage]
     fields: Sequence[CanvaTemplateField]
+
+
+@dataclass(frozen=True)
+class CanvaPlacementAssignment:
+    """One agent decision connecting report content to a template field."""
+
+    field_key: str
+    source_path: str
+    rationale: str = ""
+
+
+@dataclass(frozen=True)
+class CanvaPlacementPlan:
+    """Agent-produced plan for placing report content into a template."""
+
+    assignments: Sequence[CanvaPlacementAssignment]
+    unplaced_source_paths: Sequence[str] = ()
 
 
 @dataclass(frozen=True)

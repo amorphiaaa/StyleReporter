@@ -1,0 +1,137 @@
+{
+  "key": "signature-style-template",
+  "version": "1",
+  "brand_template_id": null,
+  "pages": [
+    {
+      "number": 1,
+      "description": "Cover and personal style positioning",
+      "fields": [
+        {
+          "key": "field_001",
+          "type": "text",
+          "description": "Large title for the report cover",
+          "required": true,
+          "max_characters": 80
+        },
+        {
+          "key": "field_002",
+          "type": "text",
+          "description": "Short supporting statement below the cover title",
+          "max_characters": 240
+        },
+        {
+          "key": "image_001",
+          "type": "image",
+          "description": "Portrait image placed beside the title"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "description": "Style language and alignment overview",
+      "fields": [
+        {
+          "key": "field_003",
+          "type": "text",
+          "description": "Short list or compact callouts describing the client's current and desired style",
+          "max_characters": 700
+        },
+        {
+          "key": "field_004",
+          "type": "text",
+          "description": "Longer explanation of the alignment or disconnect",
+          "max_characters": 1400
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "description": "Palette, prints, and textures",
+      "fields": [
+        {
+          "key": "field_005",
+          "type": "text",
+          "description": "Colour names, codes, and practical combinations",
+          "max_characters": 1600
+        },
+        {
+          "key": "field_006",
+          "type": "text",
+          "description": "Guidance for prints and textures",
+          "max_characters": 900
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "description": "Silhouettes and accessories",
+      "fields": [
+        {
+          "key": "field_007",
+          "type": "text",
+          "description": "Recommended silhouettes with short explanations",
+          "max_characters": 1700
+        },
+        {
+          "key": "field_008",
+          "type": "text",
+          "description": "Accessory direction and category recommendations",
+          "max_characters": 1300
+        },
+        {
+          "key": "image_002",
+          "type": "image",
+          "description": "Full-body outfit image illustrating the recommendations"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "description": "Outfit formulas and style anchors",
+      "fields": [
+        {
+          "key": "field_009",
+          "type": "text",
+          "description": "Several outfit formulas with occasions and build steps",
+          "max_characters": 2200
+        },
+        {
+          "key": "field_010",
+          "type": "text",
+          "description": "Short memorable style anchors",
+          "max_characters": 800
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "description": "Distractions, brands, moodboard, and action plan",
+      "fields": [
+        {
+          "key": "field_011",
+          "type": "text",
+          "description": "What can distract from the intended style",
+          "max_characters": 1000
+        },
+        {
+          "key": "field_012",
+          "type": "text",
+          "description": "Recommended brands or shopping direction",
+          "max_characters": 1400
+        },
+        {
+          "key": "field_013",
+          "type": "text",
+          "description": "Practical next actions for the client",
+          "max_characters": 1100
+        },
+        {
+          "key": "image_003",
+          "type": "image",
+          "description": "Inspiration or moodboard image"
+        }
+      ]
+    }
+  ]
+}
