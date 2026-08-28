@@ -79,6 +79,18 @@ class AssetPublicationResult:
 
 
 @dataclass(frozen=True)
+class ManualStyleReport:
+    """User-authored report content associated with one submission."""
+
+    id: str
+    client_id: str
+    submission_id: str
+    content: JsonObject
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass(frozen=True)
 class SheetReadRequest:
     spreadsheet_id: str
     sheet_name: str
@@ -152,6 +164,14 @@ class SubmissionRepository(Protocol):
         ...
 
     async def list_by_client_id(self, client_id: str) -> Sequence[QuestionnaireSubmission]:
+        ...
+
+
+class ManualStyleReportRepository(Protocol):
+    async def get_by_submission_id(self, submission_id: str) -> ManualStyleReport | None:
+        ...
+
+    async def save(self, report: ManualStyleReport) -> ManualStyleReport:
         ...
 
 

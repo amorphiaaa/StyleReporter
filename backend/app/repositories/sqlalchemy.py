@@ -4,13 +4,18 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Client
+from app.db.models import ManualStyleReport as ManualStyleReportModel
 from app.db.models import QuestionnaireSubmission as QuestionnaireSubmissionModel
 from app.domain.contracts import (
     ClientRecord,
     ClientRepository,
     ClientSummary,
+    ManualStyleReportRepository,
     QuestionnaireSubmission,
     SubmissionRepository,
+)
+from app.domain.contracts import (
+    ManualStyleReport as ManualStyleReportRecord,
 )
 
 
@@ -137,6 +142,40 @@ class SqlAlchemySubmissionRepository(SubmissionRepository):
         return [_to_submission_record(model) for model in result.scalars().all()]
 
 
+class SqlAlchemyManualStyleReportRepository(ManualStyleReportRepository):
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+
+    async def get_by_submission_id(
+        self, submission_id: str
+    ) -> ManualStyleReportRecord | None:
+        result = await self._session.execute(
+            select(ManualStyleReportModel).where(
+                ManualStyleReportModel.submission_id == UUID(submission_id)
+            )
+        )
+        model = result.scalar_one_or_none()
+        return _to_manual_style_report(model) if model else None
+
+    async def save(self, report: ManualStyleReportRecord) -> ManualStyleReportRecord:
+        model = await self._session.get(ManualStyleReportModel, UUID(report.id))
+        if model is None:
+            model = ManualStyleReportModel(
+                id=UUID(report.id),
+                client_id=UUID(report.client_id),
+                submission_id=UUID(report.submission_id),
+                content=dict(report.content),
+            )
+            self._session.add(model)
+        else:
+            model.client_id = UUID(report.client_id)
+            model.submission_id = UUID(report.submission_id)
+            model.content = dict(report.content)
+
+        await self._session.flush()
+        return _to_manual_style_report(model)
+
+
 def _to_client_record(model: Client) -> ClientRecord:
     return ClientRecord(
         id=str(model.id),
@@ -158,4 +197,15 @@ def _to_submission_record(model: QuestionnaireSubmissionModel) -> QuestionnaireS
         questionnaire_version=model.questionnaire_version,
         submitted_at=model.submitted_at,
         imported_at=model.imported_at,
+    )
+
+
+def _to_manual_style_report(model: ManualStyleReportModel) -> ManualStyleReportRecord:
+    return ManualStyleReportRecord(
+        id=str(model.id),
+        client_id=str(model.client_id),
+        submission_id=str(model.submission_id),
+        content=model.content,
+        created_at=model.created_at,
+        updated_at=model.updated_at,
     )

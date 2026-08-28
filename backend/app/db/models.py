@@ -66,6 +66,33 @@ class QuestionnaireSubmission(Base):
     client: Mapped[Client] = relationship(back_populates="submissions")
 
 
+class ManualStyleReport(Base):
+    __tablename__ = "manual_style_reports"
+    __table_args__ = (
+        UniqueConstraint("submission_id", name="uq_manual_style_reports_submission_id"),
+        Index("ix_manual_style_reports_client_id", "client_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    client_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("clients.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    submission_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("questionnaire_submissions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    content: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
 class ImportRun(Base):
     __tablename__ = "import_runs"
 
