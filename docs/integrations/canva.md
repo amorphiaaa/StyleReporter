@@ -132,11 +132,26 @@ Canva design URL and a temporary PDF URL. This deterministic fallback is
 deliberately provider-neutral; a future placement agent can replace the plan
 builder without changing the Canva adapter or API contract.
 
-The integration is disabled unless `CANVA_ENABLED`, `CANVA_ACCESS_TOKEN`, and
-`CANVA_TEMPLATE_ID` are configured. The supplied Canva link is an existing
-design, so keep `CANVA_SOURCE_TYPE=design`; use `brand_template` only for a
-Brand Template ID. Keep the token only in the local `.env` or secret manager.
-Canva's Autofill API requires the appropriate Connect scopes and a Canva
-Enterprise user or eligible trial.
+The integration is disabled unless `CANVA_ENABLED=true` and
+`CANVA_TEMPLATE_ID` are configured. To connect a local Canva account, also set
+`CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`, and register this exact redirect URL
+in the Canva Developer Portal:
+
+```text
+http://127.0.0.1:8001/api/v1/canva/oauth/callback
+```
+
+Then open the **Connect Canva** button in a client profile, or visit
+`http://127.0.0.1:8001/api/v1/canva/oauth/start` directly. Canva uses OAuth 2.0
+with PKCE; the application exchanges the authorization code and keeps the
+short-lived access token in backend memory for the current process. After a
+backend restart, connect Canva again. A production deployment should persist
+an encrypted refresh token instead.
+
+The supplied Canva link is an existing design, so keep
+`CANVA_SOURCE_TYPE=design`; use `brand_template` only for a Brand Template ID.
+`CANVA_ACCESS_TOKEN` remains available for a pre-issued token, but it is not
+needed when OAuth is configured. Canva's Autofill API requires the appropriate
+Connect scopes and a Canva Enterprise user or eligible trial.
 
 No Canva credentials, template IDs, or client assets belong in the repository.

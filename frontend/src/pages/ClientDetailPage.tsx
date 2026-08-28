@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   API_BASE_URL,
   createCanvaReport,
+  getCanvaOAuthStartUrl,
   getClient,
   getManualStyleReport,
   updateClient,
@@ -235,25 +236,30 @@ function CanvaReportAction({ clientId, submissionId }: { clientId: string; submi
           Fill the connected Canva template with this manual report and its local images.
         </p>
       </div>
-      <button
-        className="primary-button"
-        type="button"
-        disabled={isCreating}
-        onClick={async () => {
-          setIsCreating(true);
-          setError(null);
-          setResult(null);
-          try {
-            setResult(await createCanvaReport(clientId, submissionId));
-          } catch (requestError: unknown) {
-            setError(requestError instanceof Error ? requestError.message : "Canva report creation failed");
-          } finally {
-            setIsCreating(false);
-          }
-        }}
-      >
-        {isCreating ? "Creating Canva report..." : "Create Canva report"}
-      </button>
+      <div className="canva-report-buttons">
+        <a className="secondary-button" href={getCanvaOAuthStartUrl()}>
+          Connect Canva
+        </a>
+        <button
+          className="primary-button"
+          type="button"
+          disabled={isCreating}
+          onClick={async () => {
+            setIsCreating(true);
+            setError(null);
+            setResult(null);
+            try {
+              setResult(await createCanvaReport(clientId, submissionId));
+            } catch (requestError: unknown) {
+              setError(requestError instanceof Error ? requestError.message : "Canva report creation failed");
+            } finally {
+              setIsCreating(false);
+            }
+          }}
+        >
+          {isCreating ? "Creating Canva report..." : "Create Canva report"}
+        </button>
+      </div>
       {error ? <p className="notice error-notice">{error}</p> : null}
       {result ? (
         <div className="canva-report-result">

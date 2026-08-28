@@ -35,6 +35,12 @@ class Settings(BaseSettings):
 
     canva_enabled: bool = False
     canva_api_base_url: str = "https://api.canva.com/rest/v1"
+    canva_client_id: str | None = None
+    canva_client_secret: str | None = Field(default=None, repr=False)
+    canva_redirect_uri: str = "http://127.0.0.1:8001/api/v1/canva/oauth/callback"
+    canva_scopes: str = (
+        "asset:read asset:write design:content:read design:content:write design:meta:read"
+    )
     canva_access_token: str | None = Field(default=None, repr=False)
     canva_template_id: str | None = None
     canva_source_type: Literal["design", "brand_template"] = "design"

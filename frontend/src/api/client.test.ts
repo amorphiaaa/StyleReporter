@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   API_BASE_URL,
   createManualImport,
+  getCanvaOAuthStartUrl,
   getClient,
   getImport,
   getManualStyleReport,
@@ -20,6 +21,10 @@ describe("API client", () => {
 
   it("has a local development fallback", () => {
     expect(API_BASE_URL).toContain("127.0.0.1");
+  });
+
+  it("builds the Canva OAuth start URL", () => {
+    expect(getCanvaOAuthStartUrl()).toBe(`${API_BASE_URL}/api/v1/canva/oauth/start`);
   });
 
   it("posts a manual import payload", async () => {

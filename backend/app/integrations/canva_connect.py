@@ -45,6 +45,47 @@ class CanvaConnectProvider(CanvaDesignProvider):
         self._source_type = source_type
         self._client = client
 
+    def set_access_token(self, access_token: str) -> None:
+        self._access_token = access_token
+
+    async def exchange_authorization_code(
+        self,
+        *,
+        code: str,
+        code_verifier: str,
+        redirect_uri: str,
+        client_id: str,
+        client_secret: str,
+    ) -> Mapping[str, Any]:
+        data = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "code_verifier": code_verifier,
+            "redirect_uri": redirect_uri,
+        }
+        client = self._client
+        if client is None:
+            async with httpx.AsyncClient(timeout=self._timeout_seconds) as client_http:
+                response = await client_http.post(
+                    self._base_url + "/oauth/token",
+                    data=data,
+                    auth=httpx.BasicAuth(client_id, client_secret),
+                )
+        else:
+            response = await client.post(
+                self._base_url + "/oauth/token",
+                data=data,
+                auth=httpx.BasicAuth(client_id, client_secret),
+            )
+        if response.is_error:
+            detail = _mapping(response.json()).get("message") if response.content else None
+            raise CanvaConnectError(detail or "Canva OAuth token exchange failed.")
+        body = response.json()
+        if not isinstance(body, dict) or not isinstance(body.get("access_token"), str):
+            raise CanvaConnectError("Canva OAuth response did not include an access token.")
+        self.set_access_token(body["access_token"])
+        return body
+
     async def get_template_dataset(self, template_id: str) -> Mapping[str, CanvaFieldType]:
         dataset_path = (
             f"/designs/{template_id}/dataset"

@@ -934,6 +934,12 @@ details summary {
   line-height: 1.5;
 }
 
+.canva-report-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .canva-report-result {
   display: flex;
   flex-wrap: wrap;

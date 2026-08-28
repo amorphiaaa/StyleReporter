@@ -118,3 +118,34 @@ async def test_canva_connect_provider_runs_dataset_upload_autofill_and_export(
     assert asset_id == "asset-1"
     assert job.design_url == "https://canva.example/design-1/edit"
     assert export.download_url == "https://canva.example/export.pdf"
+
+
+@pytest.mark.asyncio
+async def test_canva_connect_provider_exchanges_oauth_code() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path.endswith("/oauth/token")
+        assert request.headers["authorization"].startswith("Basic ")
+        return httpx.Response(
+            200,
+            json={"access_token": "access-token", "refresh_token": "refresh-token"},
+            request=request,
+        )
+
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        provider = CanvaConnectProvider(
+            access_token="",
+            base_url="https://api.canva.test/rest/v1",
+            client=client,
+        )
+        token = await provider.exchange_authorization_code(
+            code="authorization-code",
+            code_verifier="code-verifier",
+            redirect_uri="http://127.0.0.1:8001/api/v1/canva/oauth/callback",
+            client_id="client-id",
+            client_secret="client-secret",
+        )
+
+    assert token == {"access_token": "access-token", "refresh_token": "refresh-token"}
