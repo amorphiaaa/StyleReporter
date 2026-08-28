@@ -5,6 +5,8 @@ import pytest
 from app.domain.contracts import CanvaPlacementAssignment, CanvaPlacementPlan
 from app.services.canva_template_mapping import (
     build_canva_payload,
+    build_sequential_placement_plan,
+    template_definition_from_dataset,
     template_definition_from_manifest,
 )
 from tests.fakes import InMemoryCanvaDesignProvider
@@ -92,6 +94,25 @@ def test_agent_plan_rejects_unknown_or_missing_required_fields() -> None:
                 assignments=(CanvaPlacementAssignment("unknown", "title"),)
             ),
         )
+
+
+def test_sequential_plan_keeps_authored_values_and_assets_in_stable_order() -> None:
+    template = template_definition_from_dataset(
+        "template-1",
+        {"field_001": "text", "field_002": "text", "image_001": "image"},
+    )
+
+    plan = build_sequential_placement_plan(
+        {"title": "Report title", "summary": "Report summary"},
+        template,
+        [Path("first.jpg")],
+    )
+
+    assert [(item.field_key, item.source_path) for item in plan.assignments] == [
+        ("field_001", "title"),
+        ("field_002", "summary"),
+        ("image_001", "first.jpg"),
+    ]
 
 
 @pytest.mark.asyncio

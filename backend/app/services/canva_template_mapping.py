@@ -5,17 +5,86 @@ validates that plan and converts it into a provider-neutral payload; it never
 calls Canva or invents report copy.
 """
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
 from app.domain.contracts import (
     CanvaAutofillPayload,
+    CanvaFieldType,
+    CanvaPlacementAssignment,
     CanvaPlacementPlan,
     CanvaTemplateDefinition,
     CanvaTemplateField,
     CanvaTemplatePage,
 )
+
+
+def template_definition_from_dataset(
+    template_id: str,
+    dataset: Mapping[str, CanvaFieldType],
+) -> CanvaTemplateDefinition:
+    """Create a provider-neutral definition from Canva's live dataset."""
+
+    return CanvaTemplateDefinition(
+        key=template_id,
+        version="live",
+        brand_template_id=template_id,
+        pages=(),
+        fields=tuple(
+            CanvaTemplateField(
+                key=key,
+                field_type=field_type,
+                page_number=1,
+                description="Placement is chosen from the report content and field order.",
+            )
+            for key, field_type in dataset.items()
+        ),
+    )
+
+
+def build_sequential_placement_plan(
+    content: Mapping[str, Any],
+    template: CanvaTemplateDefinition,
+    asset_paths: Sequence[Path],
+) -> CanvaPlacementPlan:
+    """Place authored values and assets without generating or rewriting copy.
+
+    The template fields are intentionally opaque. Until a richer placement agent is
+    connected, this deterministic fallback keeps the workflow usable by pairing
+    report leaves and local images in their stable order.
+    """
+
+    text_values = list(_iter_text_values(content))
+    text_fields = [field for field in template.fields if field.field_type == "text"]
+    image_fields = [field for field in template.fields if field.field_type == "image"]
+    assignments: list[CanvaPlacementAssignment] = []
+    for field, (source_path, value) in zip(text_fields, text_values, strict=False):
+        if value.strip():
+            assignments.append(
+                CanvaPlacementAssignment(field.key, source_path, "Stable report order")
+            )
+    for field, asset_path in zip(image_fields, asset_paths, strict=False):
+        assignments.append(
+            CanvaPlacementAssignment(field.key, str(asset_path), "Stable asset order")
+        )
+    return CanvaPlacementPlan(assignments=tuple(assignments))
+
+
+def _iter_text_values(value: Any, path: str = "") -> Iterator[tuple[str, str]]:
+    if isinstance(value, str):
+        if value.strip():
+            yield path, value
+        return
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            child_path = f"{path}.{key}" if path else str(key)
+            yield from _iter_text_values(child, child_path)
+        return
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        for index, child in enumerate(value):
+            child_path = f"{path}[{index}]"
+            yield from _iter_text_values(child, child_path)
 
 
 def template_definition_from_manifest(

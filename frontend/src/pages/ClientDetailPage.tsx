@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { API_BASE_URL, getClient, getManualStyleReport, updateClient } from "../api/client";
+import {
+  API_BASE_URL,
+  createCanvaReport,
+  getClient,
+  getManualStyleReport,
+  updateClient,
+} from "../api/client";
 import { ManualStyleReportForm } from "../components/ManualStyleReportForm";
 import type { ClientAsset, ClientDetail, ManualStyleReportContent } from "../types";
 
@@ -208,10 +214,65 @@ function ClientProfile({
                 onSaved={(content) => onManualReportSaved(submission.id, content)}
               />
             </details>
+            <CanvaReportAction clientId={client.id} submissionId={submission.id} />
           </article>
         ))}
       </div>
     </>
+  );
+}
+
+function CanvaReportAction({ clientId, submissionId }: { clientId: string; submissionId: string }) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [result, setResult] = useState<Awaited<ReturnType<typeof createCanvaReport>> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <section className="canva-report-action" aria-label="Canva report creation">
+      <div>
+        <p className="eyebrow">Canva report</p>
+        <p className="canva-report-copy">
+          Fill the connected Canva template with this manual report and its local images.
+        </p>
+      </div>
+      <button
+        className="primary-button"
+        type="button"
+        disabled={isCreating}
+        onClick={async () => {
+          setIsCreating(true);
+          setError(null);
+          setResult(null);
+          try {
+            setResult(await createCanvaReport(clientId, submissionId));
+          } catch (requestError: unknown) {
+            setError(requestError instanceof Error ? requestError.message : "Canva report creation failed");
+          } finally {
+            setIsCreating(false);
+          }
+        }}
+      >
+        {isCreating ? "Creating Canva report..." : "Create Canva report"}
+      </button>
+      {error ? <p className="notice error-notice">{error}</p> : null}
+      {result ? (
+        <div className="canva-report-result">
+          {result.design_url ? (
+            <a className="text-link" href={result.design_url} target="_blank" rel="noreferrer">
+              Open design in Canva
+            </a>
+          ) : null}
+          {result.pdf_url ? (
+            <a className="text-link" href={result.pdf_url} target="_blank" rel="noreferrer">
+              Download PDF
+            </a>
+          ) : null}
+          <span className="muted-label">
+            {result.text_fields_filled} text fields · {result.image_fields_filled} images
+          </span>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

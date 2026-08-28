@@ -8,6 +8,7 @@ import type {
   ImportRunResponse,
   ManualStyleReportContent,
   ManualStyleReportResponse,
+  CanvaReportResponse,
   ManualImportRequest,
   UpdateClientRequest,
 } from "../types";
@@ -126,6 +127,26 @@ export async function saveManualStyleReport(
   }
 
   return response.json() as Promise<ManualStyleReportResponse>;
+}
+
+export async function createCanvaReport(
+  clientId: string,
+  submissionId: string,
+): Promise<CanvaReportResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/canva-report`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ export_pdf: true }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Canva report creation failed"));
+  }
+
+  return response.json() as Promise<CanvaReportResponse>;
 }
 
 async function getErrorMessage(response: Response, fallback: string): Promise<string> {

@@ -1,6 +1,14 @@
 # Backend import and evidence workspace
 
-The backend exposes health, import, client, asset, and manual report endpoints.
+The backend exposes health, import, client, asset, manual report, and Canva
+Autofill endpoints.
+
+Canva is disabled by default. To enable report creation, set
+`CANVA_ENABLED=true`, provide `CANVA_ACCESS_TOKEN`, and set `CANVA_TEMPLATE_ID`
+to the Canva brand-template ID. The API fetches the live dataset, assigns
+manual report values and downloaded client assets in stable order, uploads the
+selected assets, creates the design, and optionally exports a PDF. It never
+generates report text.
 It persists already-read questionnaire rows and keeps the complete raw payload
 as the source of truth. Manual report content is saved per questionnaire
 submission.

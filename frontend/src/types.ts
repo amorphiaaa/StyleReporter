@@ -233,3 +233,14 @@ export type ManualStyleReportResponse = {
   created_at: string | null;
   updated_at: string | null;
 };
+
+export type CanvaReportResponse = {
+  status: "success" | "failed";
+  autofill_job_id: string;
+  design_id: string | null;
+  design_url: string | null;
+  export_job_id: string | null;
+  pdf_url: string | null;
+  text_fields_filled: number;
+  image_fields_filled: number;
+};

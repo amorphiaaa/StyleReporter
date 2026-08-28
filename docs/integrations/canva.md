@@ -116,4 +116,25 @@ Canva Autofill job
 Design URL for final human review in Canva
 ```
 
+## Application endpoint
+
+The application exposes:
+
+```text
+POST /api/v1/clients/{client_id}/submissions/{submission_id}/canva-report
+```
+
+The request body is `{ "export_pdf": true }`. The manual report must already
+be saved and the submission must have downloaded local assets. The endpoint
+reads the live Canva dataset, pairs authored report leaves and local assets in
+stable order, uploads the assets, creates an Autofill design, and returns the
+Canva design URL and a temporary PDF URL. This deterministic fallback is
+deliberately provider-neutral; a future placement agent can replace the plan
+builder without changing the Canva adapter or API contract.
+
+The integration is disabled unless `CANVA_ENABLED`, `CANVA_ACCESS_TOKEN`, and
+`CANVA_TEMPLATE_ID` are configured. Keep the token only in the local `.env` or
+secret manager. Canva's Autofill API requires the appropriate Connect scopes
+and a Canva Enterprise user or eligible trial.
+
 No Canva credentials, template IDs, or client assets belong in the repository.

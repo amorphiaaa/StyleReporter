@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     google_drive_oauth_client_json: str | None = Field(default=None, repr=False)
     google_drive_oauth_refresh_token: str | None = Field(default=None, repr=False)
 
+    canva_enabled: bool = False
+    canva_api_base_url: str = "https://api.canva.com/rest/v1"
+    canva_access_token: str | None = Field(default=None, repr=False)
+    canva_template_id: str | None = None
+    canva_timeout_seconds: float = 60.0
+    canva_poll_interval_seconds: float = 1.0
+    canva_poll_attempts: int = 30
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
