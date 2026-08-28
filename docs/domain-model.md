@@ -26,7 +26,7 @@ typed object, but they do not discard otherwise valid source evidence. Unknown
 questionnaire versions remain raw-only until an explicit mapping is added.
 Mapped fields are available dynamically without a database migration.
 
-## Future persistence model
+## Persistence model
 
 ### clients
 
@@ -105,12 +105,22 @@ workspace is an evidence cache independent of any downstream workflow.
 Future manual syncs should create an auditable run record with status, counts,
 timestamps, and row-level errors.
 
+### manual_style_reports
+
+Each questionnaire submission can have one manual style report draft. The
+record stores the client ID, submission ID, and structured JSONB content that
+mirrors the Signature Style Report template: alignment, palette, prints and
+textures, silhouettes, accessories, outfit formulas, anchors, distractions,
+brands, moodboard references, and action plan. The content is intentionally
+user-authored; no diagnosis or generated copy is produced during import or
+save.
+
 ## Important boundary
 
 Raw answers are evidence. Style Language categories, competing identities,
 visual mistranslations, hypotheses, and final diagnoses must not be inferred
-during ingestion. The replacement downstream workflow is intentionally not
-implemented yet.
+during ingestion. The manual report workflow consumes this evidence only after
+a user decides what to write. It does not infer or generate report content.
 
 ## Import prototype rules
 

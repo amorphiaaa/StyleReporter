@@ -38,6 +38,8 @@ Expected behavior:
 - the manual import screen submits a synthetic payload and renders counters;
 - the Imports screen lists runs and opens persisted metadata and row errors;
 - the clients screen lists profiles and opens submission and asset details;
+- the client detail page opens a manual style report editor for each submission
+  and saves structured drafts through the manual report API;
 - the production bundle builds.
 
 ## Compose smoke check
@@ -50,6 +52,7 @@ Verify the API health URL and frontend URL from the root README. Stop with
 `docker compose down` after the check.
 
 For a persistence smoke test, POST synthetic rows to
-`/api/v1/imports/manual`, then retrieve the returned ID from
-`/api/v1/imports/{import_id}`. No text-generation endpoint is available in the
+`/api/v1/imports/manual`, retrieve the returned ID from
+`/api/v1/imports/{import_id}`, then use the client and submission IDs to GET and
+PUT a manual report draft. No text-generation endpoint is available in the
 current application.

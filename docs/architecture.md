@@ -2,10 +2,10 @@
 
 ## Intent
 
-This repository currently provides an import and client-evidence slice.
-Provider adapters remain separate, while internal endpoints persist source
-data through PostgreSQL repositories. Text/report generation is intentionally
-outside the application until the replacement workflow is defined.
+This repository currently provides import, client-evidence, and user-authored
+style report workflows. Provider adapters remain separate, while internal
+endpoints persist source data and manual report content through PostgreSQL
+repositories. Automatic text generation is outside the application.
 
 ## Components
 
@@ -25,6 +25,8 @@ outside the application until the replacement workflow is defined.
   populate verified local image files.
 - Google Drive workspace publisher: optional provider that creates a stable
   client folder and publishes questionnaire data and verified images.
+- Manual style report editor: React form for entering the supplied report
+  sections and saving structured content per questionnaire submission.
 
 ## Intended current flow
 
@@ -32,8 +34,9 @@ Google Forms -> linked response Sheet -> GoogleSheetsSource ->
 QuestionnaireImporter -> client/submission repositories + local asset workspace
 -> optional Google Drive workspace publisher.
 
-Importing a questionnaire stores evidence only. It does not call OpenAI,
-Codex CLI, Canva, or another text-generation provider.
+Importing a questionnaire stores evidence and makes a submission available for
+manual report authoring. The application does not call OpenAI, Codex CLI,
+Canva, or another text-generation provider.
 
 ## Current runtime behavior
 
@@ -50,6 +53,10 @@ Codex CLI, Canva, or another text-generation provider.
   downloaded assets.
 - `GET /api/v1/clients/{client_id}/assets/...` serves a verified local asset.
 - `PATCH /api/v1/clients/{client_id}` updates only the display name.
+- `GET /api/v1/clients/{client_id}/submissions/{submission_id}/manual-report`
+  loads the user's structured report draft.
+- `PUT /api/v1/clients/{client_id}/submissions/{submission_id}/manual-report`
+  creates or updates the user's structured report draft.
 
 The database engine is created at startup, but connections are opened only
 when an API request obtains a session. The default local stack makes no Google

@@ -3,7 +3,7 @@
 StyleReporter is a FastAPI + React application for importing client
 questionnaires, preserving source evidence, and organizing client assets.
 
-## Current stage: import and evidence workspace
+## Current stage: import, evidence, and manual report workspace
 
 The application currently supports Google Sheets/manual questionnaire import,
 client persistence, local asset workspaces, and optional Google Drive
@@ -11,15 +11,13 @@ publishing. Questionnaire rows are stored as raw JSONB, while versioned
 definitions provide a stable, provider-neutral mapping for identity and asset
 fields.
 
-Text/report generation is intentionally not part of the current application.
-The previous Codex CLI, OpenAI, few-shot, methodologist, and Canva candidate
-generation workflow has been removed while the replacement workflow is being
-designed.
+Style reports are written by the user in the client detail screen. The report
+editor follows the supplied Signature Style Report structure and saves drafts
+as structured data for each questionnaire submission. There is no automatic
+text generation in the current application.
 
 Not implemented:
 
-- text or style report generation
-- Canva candidate generation
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
@@ -96,6 +94,21 @@ Each imported client gets one stable folder:
 
 The workspace and Drive integrations only handle preserved questionnaire data
 and downloaded assets. They do not generate text or reports.
+
+## Manual style reports
+
+Open a client profile and expand `Write Signature Style Report` under a
+questionnaire submission. The editor includes fields for:
+
+- style alignment, current and desired style language, disconnect, and anchors;
+- colour palette, prints and textures, silhouettes, and accessories;
+- outfit formulas, style anchors, distractions, and recommended brands;
+- moodboard references and a practical action plan.
+
+Drafts are saved with
+`PUT /api/v1/clients/{client_id}/submissions/{submission_id}/manual-report`.
+Use the matching `GET` endpoint to load an existing draft. All report copy is
+entered and maintained by the user.
 
 ## Local development without Docker
 
