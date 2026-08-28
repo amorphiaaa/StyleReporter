@@ -79,73 +79,6 @@ class AssetPublicationResult:
 
 
 @dataclass(frozen=True)
-class StyleReport:
-    report_version: str
-    runtime_type: str
-    content: JsonObject
-
-
-@dataclass(frozen=True)
-class StyleReportRun:
-    id: str
-    client_id: str
-    submission_id: str
-    status: str
-    runtime_type: str
-    report_version: str
-    report: JsonObject | None = None
-    error_message: str | None = None
-    created_at: datetime | None = None
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-
-
-@dataclass(frozen=True)
-class StyleReportRequest:
-    client_id: str
-    submission_id: str
-    raw_payload: JsonObject
-    questionnaire_version: str | None = None
-    asset_paths: Sequence[str] = ()
-
-
-class StyleReportRuntime(Protocol):
-    async def generate(self, request: StyleReportRequest) -> StyleReport:
-        ...
-
-
-@dataclass(frozen=True)
-class CanvaPortfolioRequest:
-    client_id: str
-    report_run_id: str
-    client_name: str
-    report: JsonObject
-    questionnaire_context: JsonObject
-    asset_paths: Sequence[str] = ()
-
-
-@dataclass(frozen=True)
-class CanvaDesignCandidate:
-    candidate_id: str
-    job_id: str
-    title: str
-    design_url: str | None = None
-    thumbnail_url: str | None = None
-
-
-@dataclass(frozen=True)
-class CanvaPortfolioResult:
-    status: str
-    candidates: Sequence[CanvaDesignCandidate]
-    note: str
-
-
-class CanvaPortfolioRuntime(Protocol):
-    async def generate_candidates(self, request: CanvaPortfolioRequest) -> CanvaPortfolioResult:
-        ...
-
-
-@dataclass(frozen=True)
 class SheetReadRequest:
     spreadsheet_id: str
     sheet_name: str
@@ -189,25 +122,6 @@ class ImportResult:
     errors: Sequence[ImportRowError]
 
 
-@dataclass(frozen=True)
-class AgentRunRequest:
-    client_id: str
-    submission_id: str
-    context: JsonObject
-
-
-@dataclass(frozen=True)
-class AgentRunResult:
-    status: str
-    output: str | None = None
-
-
-@dataclass(frozen=True)
-class ConnectorStatus:
-    configured: bool
-    message: str
-
-
 class ClientRepository(Protocol):
     async def list_summaries(self, search: str | None = None) -> Sequence[ClientSummary]:
         ...
@@ -238,17 +152,6 @@ class SubmissionRepository(Protocol):
         ...
 
     async def list_by_client_id(self, client_id: str) -> Sequence[QuestionnaireSubmission]:
-        ...
-
-
-class StyleReportRunRepository(Protocol):
-    async def get_by_id(self, report_run_id: str) -> StyleReportRun | None:
-        ...
-
-    async def save(self, report_run: StyleReportRun) -> StyleReportRun:
-        ...
-
-    async def list_by_client_id(self, client_id: str) -> Sequence[StyleReportRun]:
         ...
 
 
@@ -299,24 +202,4 @@ class AssetDownloader(Protocol):
         source_url: str,
         destination_stem: Path,
     ) -> AssetDownloadResult:
-        ...
-
-
-class AgentRuntime(Protocol):
-    async def run(self, request: AgentRunRequest) -> AgentRunResult:
-        ...
-
-
-class CanvaConnector(Protocol):
-    async def healthcheck(self) -> ConnectorStatus:
-        ...
-
-
-class CanvaSkill(Protocol):
-    @property
-    def name(self) -> str:
-        ...
-
-    @property
-    def description(self) -> str:
         ...

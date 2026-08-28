@@ -40,17 +40,8 @@ services:
       GOOGLE_DRIVE_TIMEOUT_SECONDS: ${GOOGLE_DRIVE_TIMEOUT_SECONDS:-30}
       GOOGLE_DRIVE_OAUTH_CLIENT_JSON: ${GOOGLE_DRIVE_OAUTH_CLIENT_JSON:-}
       GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN: ${GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN:-}
-      CODEX_CLI_ENABLED: ${CODEX_CLI_ENABLED:-true}
-      CODEX_CLI_RUNNER_URL: ${CODEX_CLI_RUNNER_URL:-http://host.docker.internal:8787}
-      CODEX_CLI_RUNNER_TOKEN: ${CODEX_CLI_RUNNER_TOKEN:-}
-      CODEX_CLI_MODEL: ${CODEX_CLI_MODEL:-}
-      CODEX_CLI_TIMEOUT_SECONDS: ${CODEX_CLI_TIMEOUT_SECONDS:-600}
-      CANVA_MCP_ENABLED: ${CANVA_MCP_ENABLED:-false}
-      CANVA_MCP_TIMEOUT_SECONDS: ${CANVA_MCP_TIMEOUT_SECONDS:-900}
     ports:
       - "8001:8000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./backend/app:/app/app
       - ./backend/alembic:/app/alembic

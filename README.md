@@ -1,55 +1,45 @@
 # StyleReporter
 
-StyleReporter is a FastAPI + React application that imports client
-questionnaires, generates a local style report through Codex CLI, and can
-request Canva presentation candidates from a completed report.
+StyleReporter is a FastAPI + React application for importing client
+questionnaires, preserving source evidence, and organizing client assets.
 
-## Current stage: local report vertical slice
+## Current stage: import and evidence workspace
 
-This repository contains the handoff scaffold, a Google Sheets import slice,
-and a local report vertical slice. Already-read rows are persisted in
-PostgreSQL, and each successful submission creates a local client evidence
-workspace under `var/assets` (or `ASSET_STORAGE_ROOT`). The client detail screen
-can launch a deterministic preview or send one saved submission to a host-side
-Codex CLI worker. The worker uses the local Codex CLI session rather than
-`OPENAI_API_KEY`.
+The application currently supports Google Sheets/manual questionnaire import,
+client persistence, local asset workspaces, and optional Google Drive
+publishing. Questionnaire rows are stored as raw JSONB, while versioned
+definitions provide a stable, provider-neutral mapping for identity and asset
+fields.
 
-Questionnaires are normalized through versioned JSON definitions before identity
-fields are imported. Source header aliases and report-required fields live in
-`backend/app/domain/questionnaire_definitions/`, so a form label change does not
-require changing importer code. Full source rows remain preserved as raw JSONB,
-and unknown questionnaire versions stay raw-only until their mapping is
-explicitly defined.
-
-The current MVP report target is a single-questionnaire analysis with four
-sections: `CURRENT STYLE LANGUAGE`, `DESIRED STYLE LANGUAGE`, `THE DISCONNECT`,
-and `YOUR ACTION PLAN`. The Agents SDK dry-run remains as an offline contract
-preview; the real local runtime uses `codex exec --output-schema` through the
-companion worker.
+Text/report generation is intentionally not part of the current application.
+The previous Codex CLI, OpenAI, few-shot, methodologist, and Canva candidate
+generation workflow has been removed while the replacement workflow is being
+designed.
 
 Not implemented:
 
+- text or style report generation
+- Canva candidate generation
 - client deletion UI
 - user authentication
 - scheduled jobs or webhooks
-- unattended production scheduling and job retries for Codex CLI runs
-- final Canva editable-design creation, selection persistence, and export
-- production methodology-driven style report generation
 - production deployment or CI/CD
 
 ## Repository layout
 
-- backend/ - FastAPI application, domain contracts, migration skeleton, tests
-- frontend/ - Vite/React/TypeScript shell with import and client screens
-- infra/ - local Docker Compose support
-- docs/ - architecture, domain notes, ADRs, and handoff instructions
+- `backend/` - FastAPI application, domain contracts, migrations, and tests
+- `frontend/` - Vite/React/TypeScript client and import screens
+- `infra/` - local Docker Compose support
+- `docs/` - architecture, domain notes, ADRs, and handoff instructions
 
 ## Local startup
 
 Requirements: Docker Desktop with Compose.
 
-    Copy-Item .env.example .env
-    docker compose up --build
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
 
 Then open:
 
@@ -57,42 +47,43 @@ Then open:
 - API docs: http://127.0.0.1:8001/docs
 - Frontend: http://127.0.0.1:5174
 
-For the real report runtime, authenticate Codex CLI once and start the local
-worker in a second PowerShell window:
+To stop the stack:
 
-    codex login
-    .\tools\run-codex-cli-worker.ps1
+```powershell
+docker compose down
+```
 
-Check the worker before using the `Codex CLI (local)` option:
+## Import and asset workflows
 
-    Invoke-RestMethod http://localhost:8787/health
+The manual import endpoint is available at
+`POST http://127.0.0.1:8001/api/v1/imports/manual`. The read-only Google Sheets
+endpoint is available at
+`POST http://127.0.0.1:8001/api/v1/imports/google-sheets/sync`; it remains
+disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
+spreadsheet ID are supplied. Set `GOOGLE_QUESTIONNAIRE_VERSION` when a mapped
+questionnaire definition should be applied during sync.
 
-The worker is intentionally host-side because the saved Codex CLI session is
-owned by Windows, not by the backend container. It binds a local development
-endpoint and should not be exposed as a public service. See
-`docs/codex-cli-runtime.md` for the token and troubleshooting options.
+Recent import runs are available at
+`GET http://127.0.0.1:8001/api/v1/imports?limit=20`. Select a run in the
+Imports screen to load its source metadata and row-level errors from
+`GET http://127.0.0.1:8001/api/v1/imports/{import_id}`.
 
-To enable the Canva candidate stage, install the Canva plugin in the same
-local Codex profile as the worker and set `CANVA_MCP_ENABLED=true` in `.env`:
+When a mapping or source header changes after rows were imported, pass
+`{"refresh_existing": true}` to the Google Sheets sync request to backfill
+existing source rows without creating duplicate submissions.
 
-    codex plugin add canva@openai-curated
-    codex plugin list
+Successful imports create a local client asset workspace under `var/assets`
+(or `ASSET_STORAGE_ROOT`). Set `ASSET_DOWNLOAD_ENABLED=true` to download
+questionnaire images. Existing submissions can be reprocessed with
+`refresh_existing`.
 
-Restart the worker after installing the plugin. A completed report then shows
-**Generate Canva candidates**. The MVP returns candidate links and previews;
-the final editable portfolio is deliberately a later approval step.
+To make Google Drive the canonical client workspace, set
+`GOOGLE_DRIVE_STORAGE_ENABLED=true` and provide
+`GOOGLE_DRIVE_ROOT_FOLDER_ID`. For a personal Drive, configure
+`GOOGLE_DRIVE_OAUTH_CLIENT_JSON` and `GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN`.
+Publishing is disabled by default.
 
-To download questionnaire images into the shared client workspace, set
-`ASSET_DOWNLOAD_ENABLED=true` in `.env` and run a sync. The service account
-or OAuth user must have access to the uploaded Drive files. Existing submissions can be
-reprocessed with `{"refresh_existing": true}`. Only successfully downloaded
-images are attached to subsequent local Codex CLI report runs.
-
-To make Google Drive the canonical client workspace, also set
-`GOOGLE_DRIVE_STORAGE_ENABLED=true` and provide `GOOGLE_DRIVE_ROOT_FOLDER_ID`.
-For a personal Drive, configure OAuth with `GOOGLE_DRIVE_OAUTH_CLIENT_JSON` and
-`GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN`; the user who authorizes OAuth must have
-access to the root folder. Each imported client then gets one stable folder:
+Each imported client gets one stable folder:
 
 ```text
 <configured root>/<client name> [<client id>]/
@@ -103,75 +94,30 @@ access to the root folder. Each imported client then gets one stable folder:
   Final Report/
 ```
 
-The five folders are created idempotently on import. `questionnaire.json` is
-uploaded to `Questionnaire`; downloaded images are uploaded according to the
-versioned questionnaire mapping. The local workspace remains a shared cache
-for Codex CLI, and `Final Report` is reserved for the future report exporter.
-Drive publishing is disabled by default and has no effect until the flag is
-explicitly enabled.
-
-### One-time personal Drive OAuth setup
-
-1. In Google Cloud, create an OAuth consent screen and a Desktop OAuth client.
-2. Download the client JSON outside the repository.
-3. Run:
-
-       python tools/google_drive_oauth.py --client-json C:\path\client_secret.json
-
-   Complete the browser consent flow. The script prints a refresh token and a
-   compact client-JSON value for `.env`; keep both secret.
-4. Put those values in `.env`, set `GOOGLE_DRIVE_ROOT_FOLDER_ID`, and restart
-   the backend. The existing service account can continue to read Sheets.
-
-The internal manual import endpoint is available at
-`POST http://127.0.0.1:8001/api/v1/imports/manual`. It accepts synthetic or
-already-read rows. The read-only Google Sheets endpoint is available at
-`POST http://127.0.0.1:8001/api/v1/imports/google-sheets/sync`; it remains
-disabled until `GOOGLE_SHEETS_ENABLED=true`, service-account credentials, and a
-spreadsheet ID are supplied. Set `GOOGLE_QUESTIONNAIRE_VERSION` when a mapped
-questionnaire definition should be applied during sync. Its provider is covered
-by offline mock tests; no Google credentials are committed.
-
-Recent runs are available at `GET http://127.0.0.1:8001/api/v1/imports?limit=20`;
-the Imports screen displays their status and counters. Select a run there to
-load its persisted source metadata and row-level errors from
-`GET http://127.0.0.1:8001/api/v1/imports/{import_id}`.
-
-When a mapping or source header changes after rows were imported, pass
-`{"refresh_existing": true}` to the Google Sheets sync request to backfill the
-existing source rows without creating duplicate submissions.
-
-The local report endpoint is available at
-`POST http://127.0.0.1:8001/api/v1/clients/{client_id}/reports`. Pass a saved
-`submission_id` and `runtime: "codex_cli"` to generate a structured report
-through the host worker without configuring an OpenAI API key. The
-`agents_sdk_dry_run` runtime remains available for offline contract checks.
-Runtime exceptions are saved as failed report runs and return `502`, so the
-attempt remains visible in report history.
-Retrieve the run later with
-`GET http://127.0.0.1:8001/api/v1/reports/{report_run_id}`.
-
-To stop the stack:
-
-    docker compose down
+The workspace and Drive integrations only handle preserved questionnaire data
+and downloaded assets. They do not generate text or reports.
 
 ## Local development without Docker
 
 Backend:
 
-    cd backend
-    uv sync --dev
-    uv run uvicorn app.main:app --reload
+```powershell
+cd backend
+uv sync --dev
+uv run uvicorn app.main:app --reload
+```
 
 Frontend:
 
-    cd frontend
-    corepack enable
-    pnpm install
-    pnpm dev
+```powershell
+cd frontend
+corepack enable
+pnpm install
+pnpm dev
+```
 
 ## Handoff
 
-Read docs/handoff.md before implementing the first product slice. The
-scaffolding boundaries are intentional: new integrations should be added
-behind the contracts in backend/app/domain/contracts.py.
+Read `docs/handoff.md` before implementing the replacement workflow. New
+provider-specific code should remain behind the contracts in
+`backend/app/domain/contracts.py`.
