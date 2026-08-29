@@ -204,7 +204,16 @@ export type ActionPlanItem = {
   body: string;
 };
 
+export type ManualReportImageGroup = {
+  group_key: string;
+  label: string;
+  instructions: string;
+  asset_keys: string[];
+};
+
 export type ManualStyleReportContent = {
+  source_text: string;
+  image_groups: ManualReportImageGroup[];
   how_to_use: ReportTextBlock;
   title: string;
   alignment_summary: string;

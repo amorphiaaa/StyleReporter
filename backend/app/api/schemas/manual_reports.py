@@ -116,11 +116,22 @@ class ActionPlanItem(BaseModel):
     body: str = ""
 
 
+class ManualReportImageGroup(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    group_key: str = ""
+    label: str = ""
+    instructions: str = ""
+    asset_keys: list[str] = Field(default_factory=list)
+
+
 class ManualStyleReportContent(BaseModel):
     """Editable content blocks that mirror the supplied portfolio template."""
 
     model_config = ConfigDict(extra="forbid")
 
+    source_text: str = ""
+    image_groups: list[ManualReportImageGroup] = Field(default_factory=list)
     how_to_use: ReportTextBlock = Field(default_factory=ReportTextBlock)
     title: str = ""
     alignment_summary: str = ""

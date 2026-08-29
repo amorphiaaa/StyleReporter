@@ -212,6 +212,7 @@ function ClientProfile({
                 clientId={client.id}
                 submissionId={submission.id}
                 initialContent={manualReports[submission.id] ?? null}
+                assets={client.assets.filter((asset) => asset.submission_id === submission.id)}
                 onSaved={(content) => onManualReportSaved(submission.id, content)}
               />
             </details>
