@@ -5,6 +5,7 @@ from app.api.routes import canva_auth, canva_reports, clients, health, imports, 
 from app.core.config import get_settings
 from app.db.session import create_session_factory
 from app.integrations.canva_connect import CanvaConnectProvider
+from app.services.report_placement_agent import OpenAIReportPlacementAgent
 
 
 def create_app() -> FastAPI:
@@ -16,6 +17,16 @@ def create_app() -> FastAPI:
     )
     application.state.session_factory = create_session_factory()
     application.state.canva_oauth_pending = {}
+    application.state.report_placement_agent = (
+        OpenAIReportPlacementAgent(
+            api_key=settings.openai_api_key,
+            model=settings.openai_model,
+            base_url=settings.openai_base_url,
+            timeout_seconds=settings.openai_timeout_seconds,
+        )
+        if settings.openai_api_key
+        else None
+    )
     application.state.canva_provider = (
         CanvaConnectProvider(
             access_token=settings.canva_access_token or "",

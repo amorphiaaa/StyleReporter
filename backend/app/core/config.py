@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     google_drive_oauth_client_json: str | None = Field(default=None, repr=False)
     google_drive_oauth_refresh_token: str | None = Field(default=None, repr=False)
 
+    openai_api_key: str | None = Field(default=None, repr=False)
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-5"
+    openai_timeout_seconds: float = 60.0
+
     canva_enabled: bool = False
     canva_api_base_url: str = "https://api.canva.com/rest/v1"
     canva_client_id: str | None = None

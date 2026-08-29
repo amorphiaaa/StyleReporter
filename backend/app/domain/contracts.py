@@ -131,6 +131,7 @@ class CanvaPlacementAssignment:
     field_key: str
     source_path: str
     rationale: str = ""
+    value: str | None = None
 
 
 @dataclass(frozen=True)
@@ -139,6 +140,20 @@ class CanvaPlacementPlan:
 
     assignments: Sequence[CanvaPlacementAssignment]
     unplaced_source_paths: Sequence[str] = ()
+
+
+class ReportPlacementAgent(Protocol):
+    """AI boundary for placing user-authored text and image groups."""
+
+    async def create_plan(
+        self,
+        *,
+        source_text: str,
+        image_groups: Sequence[Mapping[str, Any]],
+        template: CanvaTemplateDefinition,
+        assets: Mapping[str, Path],
+    ) -> CanvaPlacementPlan:
+        ...
 
 
 @dataclass(frozen=True)

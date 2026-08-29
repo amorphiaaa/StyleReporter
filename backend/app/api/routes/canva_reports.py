@@ -5,10 +5,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_canva_provider, get_db_session
+from app.api.dependencies import get_canva_provider, get_db_session, get_report_placement_agent
 from app.api.schemas.canva import CanvaReportRequest, CanvaReportResponse
 from app.core.config import get_settings
-from app.domain.contracts import CanvaDesignProvider, CanvaTemplateDefinition
+from app.domain.contracts import CanvaDesignProvider, CanvaTemplateDefinition, ReportPlacementAgent
 from app.integrations.canva_connect import CanvaConnectError
 from app.repositories.sqlalchemy import (
     SqlAlchemyClientRepository,
@@ -21,10 +21,12 @@ from app.services.canva_template_mapping import (
     template_definition_from_dataset,
 )
 from app.services.client_assets import list_downloaded_assets
+from app.services.report_placement_agent import ReportPlacementError
 
 router = APIRouter(prefix="/clients", tags=["canva-reports"])
 db_session_dependency = Depends(get_db_session)
 canva_provider_dependency = Depends(get_canva_provider)
+placement_agent_dependency = Depends(get_report_placement_agent)
 
 
 @router.post(
@@ -37,6 +39,7 @@ async def create_canva_report(
     payload: CanvaReportRequest,
     session: AsyncSession = db_session_dependency,
     provider: CanvaDesignProvider = canva_provider_dependency,
+    placement_agent: ReportPlacementAgent | None = placement_agent_dependency,
 ) -> CanvaReportResponse:
     client = await SqlAlchemyClientRepository(session).get_by_id(str(client_id))
     submission = await SqlAlchemySubmissionRepository(session).get_by_id(str(submission_id))
@@ -79,7 +82,20 @@ async def create_canva_report(
             dataset,
             source_type=settings.canva_source_type,
         )
-        plan = build_sequential_placement_plan(report.content, template, local_asset_paths)
+        assets_by_key = {
+            f"{asset.field_key}:{asset.ordinal}": asset.path
+            for asset in local_assets
+            if asset.submission_id == str(submission_id)
+        }
+        if placement_agent is not None:
+            plan = await placement_agent.create_plan(
+                source_text=_string_value(report.content.get("source_text")),
+                image_groups=_mapping_list(report.content.get("image_groups")),
+                template=template,
+                assets=assets_by_key,
+            )
+        else:
+            plan = build_sequential_placement_plan(report.content, template, local_asset_paths)
         selected_assets = {
             assignment.field_key: Path(assignment.source_path)
             for assignment in plan.assignments
@@ -125,7 +141,7 @@ async def create_canva_report(
                 raise CanvaConnectError(export.error or "Canva could not export the PDF.")
             export_job_id = export.job_id
             pdf_url = export.download_url
-    except CanvaConnectError as exc:
+    except (CanvaConnectError, ReportPlacementError) as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
     return CanvaReportResponse(
@@ -168,3 +184,13 @@ async def _wait_for_export(provider: CanvaDesignProvider, job, attempts: int, in
 def template_field_type(template: CanvaTemplateDefinition, field_key: str) -> str | None:
     field = next((item for item in template.fields if item.key == field_key), None)
     return field.field_type if field else None
+
+
+def _string_value(value: object) -> str:
+    return value if isinstance(value, str) else ""
+
+
+def _mapping_list(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, dict)]
