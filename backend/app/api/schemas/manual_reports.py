@@ -116,12 +116,22 @@ class ActionPlanItem(BaseModel):
     body: str = ""
 
 
+class ManualReportImage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    asset_key: str = ""
+    filename: str = ""
+    url: str = ""
+
+
 class ManualReportImageGroup(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     group_key: str = ""
     label: str = ""
     instructions: str = ""
+    images: list[ManualReportImage] = Field(default_factory=list)
+    # Kept for compatibility with drafts created before group-local uploads.
     asset_keys: list[str] = Field(default_factory=list)
 
 

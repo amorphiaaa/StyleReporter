@@ -1,9 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
-import { API_BASE_URL, saveManualStyleReport } from "../api/client";
+import {
+  API_BASE_URL,
+  saveManualStyleReport,
+  uploadManualReportImage,
+} from "../api/client";
 import type {
-  ClientAsset,
+  ManualReportImage,
   ManualReportImageGroup,
   ManualStyleReportContent,
 } from "../types";
@@ -37,25 +41,23 @@ export function ManualStyleReportForm({
   clientId,
   submissionId,
   initialContent,
-  assets,
   onSaved,
 }: {
   clientId: string;
   submissionId: string;
   initialContent: ManualStyleReportContent | null;
-  assets: ClientAsset[];
   onSaved: (content: ManualStyleReportContent) => void;
 }) {
-  const [draft, setDraft] = useState(() => mergeWithEmptyContent(initialContent, assets));
+  const [draft, setDraft] = useState(() => mergeWithEmptyContent(initialContent));
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
   useEffect(() => {
-    setDraft(mergeWithEmptyContent(initialContent, assets));
+    setDraft(mergeWithEmptyContent(initialContent));
     setSaveError(null);
     setSavedAt(null);
-  }, [assets, initialContent]);
+  }, [initialContent]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,7 +114,8 @@ export function ManualStyleReportForm({
           </fieldset>
 
           <ImageGroupsEditor
-            assets={assets}
+            clientId={clientId}
+            submissionId={submissionId}
             groups={draft.image_groups}
             onChange={(image_groups) => setDraft((current) => ({ ...current, image_groups }))}
           />
@@ -125,42 +128,58 @@ export function ManualStyleReportForm({
           </div>
         </div>
 
-        <ManualReportPreview draft={draft} assets={assets} />
+        <ManualReportPreview draft={draft} />
       </div>
     </form>
   );
 }
 
 function ImageGroupsEditor({
-  assets,
+  clientId,
+  submissionId,
   groups,
   onChange,
 }: {
-  assets: ClientAsset[];
+  clientId: string;
+  submissionId: string;
   groups: ManualReportImageGroup[];
   onChange: (groups: ManualReportImageGroup[]) => void;
 }) {
-  const assetsByKey = useMemo(
-    () => new Map(assets.map((asset) => [getAssetKey(asset), asset])),
-    [assets],
-  );
+  const [uploadingGroupKey, setUploadingGroupKey] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   function updateGroup(index: number, patch: Partial<ManualReportImageGroup>) {
     onChange(groups.map((group, groupIndex) => (groupIndex === index ? { ...group, ...patch } : group)));
   }
 
-  function toggleAsset(group: ManualReportImageGroup, asset: ClientAsset) {
-    const key = getAssetKey(asset);
-    const asset_keys = group.asset_keys.includes(key)
-      ? group.asset_keys.filter((item) => item !== key)
-      : [...group.asset_keys, key];
-    return { ...group, asset_keys };
+  async function uploadImages(index: number, files: File[]) {
+    if (files.length === 0) return;
+    const group = groups[index];
+    if (!group) return;
+    setUploadingGroupKey(group.group_key);
+    setUploadError(null);
+    try {
+      const uploaded = await Promise.all(
+        files.map((file) => uploadManualReportImage(clientId, submissionId, file)),
+      );
+      updateGroup(index, {
+        images: [...group.images, ...uploaded],
+        asset_keys: [...group.asset_keys, ...uploaded.map((image) => image.asset_key)],
+      });
+    } catch (requestError: unknown) {
+      setUploadError(requestError instanceof Error ? requestError.message : "Image upload failed");
+    } finally {
+      setUploadingGroupKey(null);
+    }
   }
 
   return (
     <fieldset className="manual-report-section">
       <div className="manual-list-heading">
-        <legend>Image groups</legend>
+        <div>
+          <p className="eyebrow">Optional visual references</p>
+          <h4>Image groups</h4>
+        </div>
         <button
           className="inline-add-button"
           type="button"
@@ -168,9 +187,10 @@ function ImageGroupsEditor({
             onChange([
               ...groups,
               {
-                group_key: `custom-${groups.length + 1}`,
+                group_key: `group-${Date.now()}`,
                 label: "New image group",
                 instructions: "",
+                images: [],
                 asset_keys: [],
               },
             ])
@@ -180,9 +200,10 @@ function ImageGroupsEditor({
         </button>
       </div>
       <p className="field-help">
-        Group images by purpose, for example client portraits, outfit references, or inspiration.
-        The agent will use these descriptions when choosing image slots.
+        Groups are empty by default. Add your own photos to each group, then select which ones the
+        agent may use. Questionnaire photos are not added automatically.
       </p>
+      {uploadError ? <p className="error-text">{uploadError}</p> : null}
       {groups.length === 0 ? <p className="gallery-empty">No image groups yet.</p> : null}
       <div className="manual-report-image-groups">
         {groups.map((group, index) => (
@@ -193,7 +214,7 @@ function ImageGroupsEditor({
                 <input
                   value={group.label}
                   onChange={(event) => updateGroup(index, { label: event.target.value })}
-                  placeholder="e.g. Client portraits"
+                  placeholder="e.g. Two outfit references"
                 />
               </label>
               <button
@@ -212,28 +233,37 @@ function ImageGroupsEditor({
                 placeholder="Describe the role of this group in the report..."
               />
             </label>
+            <label className="manual-report-add-images">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                disabled={uploadingGroupKey === group.group_key}
+                onChange={(event) => {
+                  void uploadImages(index, [...(event.target.files ?? [])]);
+                  event.target.value = "";
+                }}
+              />
+              {uploadingGroupKey === group.group_key ? "Uploading..." : "Add photos"}
+            </label>
             <div className="manual-report-asset-picker">
-              <span className="manual-field-label">Images in this group</span>
-              {assets.length === 0 ? <p className="gallery-empty">No downloaded images available.</p> : null}
-              {assets.map((asset) => {
-                const key = getAssetKey(asset);
-                return (
-                  <label className="manual-report-asset-option" key={key}>
-                    <input
-                      type="checkbox"
-                      checked={group.asset_keys.includes(key)}
-                      onChange={() => updateGroup(index, toggleAsset(group, asset))}
-                    />
-                    <img src={`${API_BASE_URL}${asset.url}`} alt="" loading="lazy" />
-                    <span>
-                      {asset.folder_label} · {asset.filename}
-                    </span>
-                  </label>
-                );
-              })}
-              {group.asset_keys.some((key) => !assetsByKey.has(key)) ? (
-                <p className="field-help">Some previously selected images are no longer available.</p>
+              <span className="manual-field-label">Choose images for this group</span>
+              {group.images.length === 0 ? (
+                <p className="gallery-empty">No photos added to this group.</p>
               ) : null}
+              {group.images.map((image) => (
+                <ImageChoice
+                  key={image.asset_key}
+                  image={image}
+                  selected={group.asset_keys.includes(image.asset_key)}
+                  onToggle={() => {
+                    const asset_keys = group.asset_keys.includes(image.asset_key)
+                      ? group.asset_keys.filter((key) => key !== image.asset_key)
+                      : [...group.asset_keys, image.asset_key];
+                    updateGroup(index, { asset_keys });
+                  }}
+                />
+              ))}
             </div>
           </article>
         ))}
@@ -242,14 +272,25 @@ function ImageGroupsEditor({
   );
 }
 
-function ManualReportPreview({
-  draft,
-  assets,
+function ImageChoice({
+  image,
+  selected,
+  onToggle,
 }: {
-  draft: ManualStyleReportContent;
-  assets: ClientAsset[];
+  image: ManualReportImage;
+  selected: boolean;
+  onToggle: () => void;
 }) {
-  const assetsByKey = new Map(assets.map((asset) => [getAssetKey(asset), asset]));
+  return (
+    <label className={`manual-report-asset-option${selected ? " is-selected" : ""}`}>
+      <input type="checkbox" checked={selected} onChange={onToggle} />
+      <img src={`${API_BASE_URL}${image.url}`} alt="" loading="lazy" />
+      <span>{image.filename}</span>
+    </label>
+  );
+}
+
+function ManualReportPreview({ draft }: { draft: ManualStyleReportContent }) {
   const firstLine = draft.source_text.split(/\r?\n/, 1)[0]?.trim() || "Signature Style Report";
   const paragraphs = draft.source_text
     .split(/\r?\n\s*\r?\n/)
@@ -275,64 +316,44 @@ function ManualReportPreview({
       </div>
       <div className="manual-report-preview-groups">
         {draft.image_groups.map((group) => {
-          const groupAssets = group.asset_keys
-            .map((key) => assetsByKey.get(key))
-            .filter((asset): asset is ClientAsset => Boolean(asset));
+          const selectedImages = group.images.filter((image) => group.asset_keys.includes(image.asset_key));
           return (
             <section className="manual-report-preview-group" key={group.group_key}>
               <h5>{group.label || "Untitled image group"}</h5>
               {group.instructions ? <p>{group.instructions}</p> : null}
               <div className="manual-report-preview-images">
-                {groupAssets.map((asset) => (
+                {selectedImages.map((image) => (
                   <img
-                    key={getAssetKey(asset)}
-                    src={`${API_BASE_URL}${asset.url}`}
-                    alt={`${group.label || "Image group"}: ${asset.filename}`}
+                    key={image.asset_key}
+                    src={`${API_BASE_URL}${image.url}`}
+                    alt={`${group.label || "Image group"}: ${image.filename}`}
                   />
                 ))}
-                {groupAssets.length === 0 ? <span>No images selected</span> : null}
+                {selectedImages.length === 0 ? <span>No images selected</span> : null}
               </div>
             </section>
           );
         })}
       </div>
       <p className="field-help">
-        This is an editor preview. The final Canva layout is created after the placement agent
-        maps the text and image groups to the template.
+        This is an editor preview. The final Canva layout is created after the placement agent maps
+        the text and selected images to the template.
       </p>
     </aside>
   );
 }
 
-function mergeWithEmptyContent(
-  content: ManualStyleReportContent | null,
-  assets: ClientAsset[],
-): ManualStyleReportContent {
+function mergeWithEmptyContent(content: ManualStyleReportContent | null): ManualStyleReportContent {
   const empty = createEmptyManualStyleReport();
-  const savedGroups = content?.image_groups ?? [];
+  const image_groups = (content?.image_groups ?? []).map((group) => ({
+    ...group,
+    images: group.images ?? [],
+    asset_keys: group.images?.length ? group.asset_keys ?? [] : [],
+  }));
   return {
     ...empty,
     ...content,
     source_text: content?.source_text ?? "",
-    image_groups: savedGroups.length > 0 ? savedGroups : createDefaultImageGroups(assets),
+    image_groups,
   };
-}
-
-function createDefaultImageGroups(assets: ClientAsset[]): ManualReportImageGroup[] {
-  const groups = new Map<string, ManualReportImageGroup>();
-  for (const asset of assets) {
-    const group = groups.get(asset.folder_key) ?? {
-      group_key: asset.folder_key,
-      label: asset.folder_label,
-      instructions: "",
-      asset_keys: [],
-    };
-    group.asset_keys.push(getAssetKey(asset));
-    groups.set(asset.folder_key, group);
-  }
-  return [...groups.values()];
-}
-
-function getAssetKey(asset: ClientAsset): string {
-  return `${asset.field_key}:${asset.ordinal}`;
 }

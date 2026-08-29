@@ -21,6 +21,7 @@ from app.services.canva_template_mapping import (
     template_definition_from_dataset,
 )
 from app.services.client_assets import list_downloaded_assets
+from app.services.manual_report_assets import find_manual_report_image
 from app.services.report_placement_agent import ReportPlacementError
 
 router = APIRouter(prefix="/clients", tags=["canva-reports"])
@@ -82,11 +83,31 @@ async def create_canva_report(
             dataset,
             source_type=settings.canva_source_type,
         )
-        assets_by_key = {
-            f"{asset.field_key}:{asset.ordinal}": asset.path
-            for asset in local_assets
-            if asset.submission_id == str(submission_id)
-        }
+        assets_by_key = (
+            {
+                f"{asset.field_key}:{asset.ordinal}": asset.path
+                for asset in local_assets
+                if asset.submission_id == str(submission_id)
+            }
+            if placement_agent is None
+            else {}
+        )
+        for group in _mapping_list(report.content.get("image_groups")):
+            selected_keys = group.get("asset_keys", [])
+            if not isinstance(selected_keys, list):
+                continue
+            for asset_key in selected_keys:
+                if not isinstance(asset_key, str):
+                    continue
+                path = await asyncio.to_thread(
+                    find_manual_report_image,
+                    settings.asset_storage_root,
+                    client_id=str(client_id),
+                    submission_id=str(submission_id),
+                    asset_key=asset_key,
+                )
+                if path is not None:
+                    assets_by_key[asset_key] = path
         if placement_agent is not None:
             plan = await placement_agent.create_plan(
                 source_text=_string_value(report.content.get("source_text")),

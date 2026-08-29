@@ -208,7 +208,14 @@ export type ManualReportImageGroup = {
   group_key: string;
   label: string;
   instructions: string;
+  images: ManualReportImage[];
   asset_keys: string[];
+};
+
+export type ManualReportImage = {
+  asset_key: string;
+  filename: string;
+  url: string;
 };
 
 export type ManualStyleReportContent = {
