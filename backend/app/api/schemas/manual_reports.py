@@ -116,11 +116,41 @@ class ActionPlanItem(BaseModel):
     body: str = ""
 
 
+class ManualReportImage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    asset_key: str = ""
+    filename: str = ""
+    url: str = ""
+
+
+class ManualReportTextBlock(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    block_key: str = ""
+    title: str = ""
+    text: str = ""
+
+
+class ManualReportImageGroup(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    group_key: str = ""
+    label: str = ""
+    instructions: str = ""
+    images: list[ManualReportImage] = Field(default_factory=list)
+    # Kept for compatibility with drafts created before group-local uploads.
+    asset_keys: list[str] = Field(default_factory=list)
+
+
 class ManualStyleReportContent(BaseModel):
     """Editable content blocks that mirror the supplied portfolio template."""
 
     model_config = ConfigDict(extra="forbid")
 
+    source_text: str = ""
+    content_blocks: list[ManualReportTextBlock] = Field(default_factory=list)
+    image_groups: list[ManualReportImageGroup] = Field(default_factory=list)
     how_to_use: ReportTextBlock = Field(default_factory=ReportTextBlock)
     title: str = ""
     alignment_summary: str = ""

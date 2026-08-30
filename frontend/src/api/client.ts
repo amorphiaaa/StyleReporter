@@ -8,6 +8,7 @@ import type {
   ImportRunResponse,
   ManualStyleReportContent,
   ManualStyleReportResponse,
+  ManualReportImage,
   CanvaReportResponse,
   ManualImportRequest,
   UpdateClientRequest,
@@ -131,6 +132,28 @@ export async function saveManualStyleReport(
   }
 
   return response.json() as Promise<ManualStyleReportResponse>;
+}
+
+export async function uploadManualReportImage(
+  clientId: string,
+  submissionId: string,
+  file: File,
+): Promise<ManualReportImage> {
+  const query = new URLSearchParams({ filename: file.name });
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/clients/${clientId}/submissions/${submissionId}/manual-report/images?${query}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Image upload failed"));
+  }
+
+  return response.json() as Promise<ManualReportImage>;
 }
 
 export async function createCanvaReport(

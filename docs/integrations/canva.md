@@ -126,11 +126,23 @@ POST /api/v1/clients/{client_id}/submissions/{submission_id}/canva-report
 
 The request body is `{ "export_pdf": true }`. The manual report must already
 be saved and the submission must have downloaded local assets. The endpoint
-reads the live Canva dataset, pairs authored report leaves and local assets in
-stable order, uploads the assets, creates an Autofill design, and returns the
-Canva design URL and a temporary PDF URL. This deterministic fallback is
-deliberately provider-neutral; a future placement agent can replace the plan
-builder without changing the Canva adapter or API contract.
+reads the live Canva dataset, sends the user-authored text and image groups to
+the optional placement agent, validates the returned plan, uploads the selected
+assets, creates an Autofill design, and returns the Canva design URL and a
+temporary PDF URL. Without `OPENAI_API_KEY`, it uses a deterministic
+stable-order fallback so local development remains bootable.
+
+Set these variables to enable the placement agent:
+
+```text
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5
+```
+
+The API request uses structured JSON output and `store=false`; the key stays
+on the backend and is never exposed to the frontend. The source text is sent
+to the configured AI provider for placement, so enable this only when that
+data-sharing choice is acceptable.
 
 The integration is disabled unless `CANVA_ENABLED=true` and
 `CANVA_TEMPLATE_ID` are configured. To connect a local Canva account, also set

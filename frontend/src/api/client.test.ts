@@ -199,6 +199,9 @@ describe("API client", () => {
 
   it("saves a manual report draft", async () => {
     const content = {
+      source_text: "A complete manually authored report.",
+      content_blocks: [],
+      image_groups: [],
       how_to_use: { intro: "Use this as a guide.", items: [] },
       title: "Feminine Creative",
       alignment_summary: "A manual summary.",

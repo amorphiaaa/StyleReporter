@@ -164,7 +164,9 @@ def build_canva_payload(
                 errors.append(f"Missing local asset for image field: {assignment.field_key}")
             continue
 
-        value = _stringify(_read_path(content, assignment.source_path))
+        value = assignment.value
+        if value is None:
+            value = _stringify(_read_path(content, assignment.source_path))
         if not value:
             errors.append(f"Missing report content for field: {assignment.field_key}")
             continue

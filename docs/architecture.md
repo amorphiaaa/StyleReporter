@@ -5,7 +5,9 @@
 This repository currently provides import, client-evidence, and user-authored
 style report workflows. Provider adapters remain separate, while internal
 endpoints persist source data and manual report content through PostgreSQL
-repositories. Automatic text generation is outside the application.
+repositories. Automatic report copy generation is outside the application. A
+separately configured placement agent may classify user-authored text and
+images for a Canva template, but it must not invent or rewrite report content.
 
 ## Components
 
@@ -25,8 +27,11 @@ repositories. Automatic text generation is outside the application.
   populate verified local image files.
 - Google Drive workspace publisher: optional provider that creates a stable
   client folder and publishes questionnaire data and verified images.
-- Manual style report editor: React form for entering the supplied report
-  sections and saving structured content per questionnaire submission.
+- Manual style report editor: React form for pasting the complete supplied
+  report, organizing image groups, previewing the draft, and saving content per
+  questionnaire submission.
+- Canva placement agent: optional provider boundary that maps the user's
+  existing text and image groups to opaque Canva fields.
 
 ## Intended current flow
 
@@ -35,8 +40,9 @@ QuestionnaireImporter -> client/submission repositories + local asset workspace
 -> optional Google Drive workspace publisher.
 
 Importing a questionnaire stores evidence and makes a submission available for
-manual report authoring. The application does not call OpenAI, Codex CLI,
-Canva, or another text-generation provider.
+manual report authoring. The default local stack makes no Google, AI, or Canva
+provider calls. AI placement is opt-in through `OPENAI_API_KEY` and only runs
+when a Canva report is created.
 
 ## Current runtime behavior
 
