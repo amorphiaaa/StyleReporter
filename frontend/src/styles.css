@@ -1028,6 +1028,34 @@ details summary {
   line-height: 1.6;
 }
 
+.manual-report-content-blocks {
+  display: grid;
+  gap: 14px;
+}
+
+.manual-report-content-block {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e5ddd4;
+  border-radius: 10px;
+  background: #fbfaf7;
+}
+
+.manual-report-content-block-heading {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+}
+
+.manual-report-content-block-heading .manual-field {
+  flex: 1;
+}
+
+.manual-report-content-block .manual-field textarea {
+  min-height: 130px;
+}
+
 .field-help {
   margin: 0;
   color: #766d66;
@@ -1163,6 +1191,19 @@ details summary {
 .manual-report-preview-copy p,
 .manual-report-preview-group p {
   margin: 0;
+}
+
+.manual-report-preview-copy section {
+  display: grid;
+  gap: 6px;
+}
+
+.manual-report-preview-copy h5 {
+  margin: 0;
+  color: #62574f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .preview-placeholder,

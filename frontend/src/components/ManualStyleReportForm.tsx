@@ -9,12 +9,29 @@ import {
 import type {
   ManualReportImage,
   ManualReportImageGroup,
+  ManualReportTextBlock,
   ManualStyleReportContent,
 } from "../types";
+
+const DEFAULT_CONTENT_BLOCKS: ManualReportTextBlock[] = [
+  { block_key: "style-direction", title: "Style direction and personal positioning", text: "" },
+  { block_key: "report-guide", title: "How to use this report", text: "" },
+  { block_key: "style-language", title: "Style language", text: "" },
+  { block_key: "colour-palette", title: "Colour palette", text: "" },
+  { block_key: "prints-textures", title: "Prints and textures", text: "" },
+  { block_key: "silhouettes", title: "Silhouettes and shapes", text: "" },
+  { block_key: "accessories", title: "Accessories and styling", text: "" },
+  { block_key: "outfit-formulas", title: "Outfit formulas", text: "" },
+  { block_key: "style-anchors", title: "Style anchors", text: "" },
+  { block_key: "what-to-avoid", title: "What can distract from the style", text: "" },
+  { block_key: "brands-inspiration", title: "Brands and inspiration", text: "" },
+  { block_key: "action-plan", title: "Action plan", text: "" },
+];
 
 export function createEmptyManualStyleReport(): ManualStyleReportContent {
   return {
     source_text: "",
+    content_blocks: DEFAULT_CONTENT_BLOCKS.map((block) => ({ ...block })),
     image_groups: [],
     how_to_use: { intro: "", items: [] },
     title: "",
@@ -64,7 +81,11 @@ export function ManualStyleReportForm({
     setIsSaving(true);
     setSaveError(null);
     try {
-      const saved = await saveManualStyleReport(clientId, submissionId, draft);
+      const source_text = draft.content_blocks
+        .filter((block) => block.text.trim())
+        .map((block) => `${block.title}\n${block.text}`)
+        .join("\n\n");
+      const saved = await saveManualStyleReport(clientId, submissionId, { ...draft, source_text });
       setDraft(saved.content);
       onSaved(saved.content);
       setSavedAt(new Date().toLocaleTimeString());
@@ -94,24 +115,10 @@ export function ManualStyleReportForm({
 
       <div className="manual-report-workspace">
         <div className="manual-report-editor-pane">
-          <fieldset className="manual-report-section">
-            <legend>Full report text</legend>
-            <label className="manual-field">
-              <span>Paste the whole report here</span>
-              <textarea
-                className="manual-report-source-text"
-                value={draft.source_text}
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, source_text: event.target.value }))
-                }
-                placeholder="Paste the complete Signature Style Report..."
-              />
-            </label>
-            <p className="field-help">
-              Keep headings and paragraphs in the text when possible. They help the agent place
-              content accurately, but no special field names are required.
-            </p>
-          </fieldset>
+          <ContentBlocksEditor
+            blocks={draft.content_blocks}
+            onChange={(content_blocks) => setDraft((current) => ({ ...current, content_blocks }))}
+          />
 
           <ImageGroupsEditor
             clientId={clientId}
@@ -131,6 +138,79 @@ export function ManualStyleReportForm({
         <ManualReportPreview draft={draft} />
       </div>
     </form>
+  );
+}
+
+function ContentBlocksEditor({
+  blocks,
+  onChange,
+}: {
+  blocks: ManualReportTextBlock[];
+  onChange: (blocks: ManualReportTextBlock[]) => void;
+}) {
+  function updateBlock(index: number, patch: Partial<ManualReportTextBlock>) {
+    onChange(blocks.map((block, blockIndex) => (blockIndex === index ? { ...block, ...patch } : block)));
+  }
+
+  return (
+    <fieldset className="manual-report-section">
+      <div className="manual-list-heading">
+        <div>
+          <p className="eyebrow">Report content</p>
+          <h4>Meaningful sections</h4>
+        </div>
+        <button
+          className="inline-add-button"
+          type="button"
+          onClick={() =>
+            onChange([
+              ...blocks,
+              {
+                block_key: `custom-${Date.now()}`,
+                title: "New section",
+                text: "",
+              },
+            ])
+          }
+        >
+          Add section
+        </button>
+      </div>
+      <p className="field-help">
+        The sections are intentionally broad. Paste complete paragraphs or lists into the section
+        where they make the most sense; the agent will place the content into the Canva template.
+      </p>
+      <div className="manual-report-content-blocks">
+        {blocks.map((block, index) => (
+          <article className="manual-report-content-block" key={block.block_key || index}>
+            <div className="manual-report-content-block-heading">
+              <label className="manual-field">
+                <span>Section name</span>
+                <input
+                  value={block.title}
+                  onChange={(event) => updateBlock(index, { title: event.target.value })}
+                />
+              </label>
+              <button
+                className="inline-remove-button"
+                type="button"
+                onClick={() => onChange(blocks.filter((_, blockIndex) => blockIndex !== index))}
+              >
+                Remove
+              </button>
+            </div>
+            <label className="manual-field">
+              <span>Content</span>
+              <textarea
+                value={block.text}
+                onChange={(event) => updateBlock(index, { text: event.target.value })}
+                placeholder={`Paste the ${block.title.toLowerCase()} content here...`}
+              />
+            </label>
+          </article>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -291,12 +371,8 @@ function ImageChoice({
 }
 
 function ManualReportPreview({ draft }: { draft: ManualStyleReportContent }) {
-  const firstLine = draft.source_text.split(/\r?\n/, 1)[0]?.trim() || "Signature Style Report";
-  const paragraphs = draft.source_text
-    .split(/\r?\n\s*\r?\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
-    .slice(0, 6);
+  const firstLine = draft.content_blocks.find((block) => block.text.trim())?.title || "Signature Style Report";
+  const filledBlocks = draft.content_blocks.filter((block) => block.text.trim()).slice(0, 6);
 
   return (
     <aside className="manual-report-preview" aria-label="Report preview">
@@ -308,8 +384,13 @@ function ManualReportPreview({ draft }: { draft: ManualStyleReportContent }) {
         <span className="muted-label">Draft</span>
       </div>
       <div className="manual-report-preview-copy">
-        {paragraphs.length > 0 ? (
-          paragraphs.map((paragraph, index) => <p key={`${paragraph.slice(0, 20)}-${index}`}>{paragraph}</p>)
+        {filledBlocks.length > 0 ? (
+          filledBlocks.map((block) => (
+            <section key={block.block_key}>
+              <h5>{block.title}</h5>
+              <p>{block.text}</p>
+            </section>
+          ))
         ) : (
           <p className="preview-placeholder">Your report preview will appear here as you type.</p>
         )}
@@ -345,6 +426,11 @@ function ManualReportPreview({ draft }: { draft: ManualStyleReportContent }) {
 
 function mergeWithEmptyContent(content: ManualStyleReportContent | null): ManualStyleReportContent {
   const empty = createEmptyManualStyleReport();
+  const content_blocks = content?.content_blocks?.length
+    ? content.content_blocks
+    : content?.source_text?.trim()
+      ? [{ ...empty.content_blocks[0], text: content.source_text }]
+      : empty.content_blocks;
   const image_groups = (content?.image_groups ?? []).map((group) => ({
     ...group,
     images: group.images ?? [],
@@ -354,6 +440,7 @@ function mergeWithEmptyContent(content: ManualStyleReportContent | null): Manual
     ...empty,
     ...content,
     source_text: content?.source_text ?? "",
+    content_blocks,
     image_groups,
   };
 }

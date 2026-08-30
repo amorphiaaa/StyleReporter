@@ -124,6 +124,14 @@ class ManualReportImage(BaseModel):
     url: str = ""
 
 
+class ManualReportTextBlock(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    block_key: str = ""
+    title: str = ""
+    text: str = ""
+
+
 class ManualReportImageGroup(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -141,6 +149,7 @@ class ManualStyleReportContent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     source_text: str = ""
+    content_blocks: list[ManualReportTextBlock] = Field(default_factory=list)
     image_groups: list[ManualReportImageGroup] = Field(default_factory=list)
     how_to_use: ReportTextBlock = Field(default_factory=ReportTextBlock)
     title: str = ""

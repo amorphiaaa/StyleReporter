@@ -218,8 +218,15 @@ export type ManualReportImage = {
   url: string;
 };
 
+export type ManualReportTextBlock = {
+  block_key: string;
+  title: string;
+  text: string;
+};
+
 export type ManualStyleReportContent = {
   source_text: string;
+  content_blocks: ManualReportTextBlock[];
   image_groups: ManualReportImageGroup[];
   how_to_use: ReportTextBlock;
   title: string;

@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Mapping
 from pathlib import Path
 from uuid import UUID
 
@@ -110,7 +111,7 @@ async def create_canva_report(
                     assets_by_key[asset_key] = path
         if placement_agent is not None:
             plan = await placement_agent.create_plan(
-                source_text=_string_value(report.content.get("source_text")),
+                source_text=_report_source_text(report.content),
                 image_groups=_mapping_list(report.content.get("image_groups")),
                 template=template,
                 assets=assets_by_key,
@@ -209,6 +210,16 @@ def template_field_type(template: CanvaTemplateDefinition, field_key: str) -> st
 
 def _string_value(value: object) -> str:
     return value if isinstance(value, str) else ""
+
+
+def _report_source_text(content: Mapping[str, object]) -> str:
+    blocks = _mapping_list(content.get("content_blocks"))
+    block_text = "\n\n".join(
+        f"{_string_value(block.get('title'))}\n{_string_value(block.get('text'))}".strip()
+        for block in blocks
+        if _string_value(block.get("text")).strip()
+    )
+    return block_text or _string_value(content.get("source_text"))
 
 
 def _mapping_list(value: object) -> list[dict[str, object]]:
